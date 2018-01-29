@@ -8,11 +8,17 @@
 
 官方说明见[官方中文说明](./README.zh-CN.md)
 
+接口使用 http://api.haomo-studio.com/org/swagger-ui.html
+
 ## 使用
 
 ### 安装
 
+    npm install
+
 ### 打包
+
+
 
 ### 部署
 
