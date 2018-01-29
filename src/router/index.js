@@ -66,6 +66,7 @@ export const asyncRouterMap = [
   {
     path: '/haomo',
     component: Layout,
+    redirect: '/haomo/components/table',
     name: 'haomo',
     meta: {
       title: '毫末定制',
