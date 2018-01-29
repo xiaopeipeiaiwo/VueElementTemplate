@@ -10,6 +10,14 @@
 
 接口使用 http://api.haomo-studio.com/org/swagger-ui.html
 
+毫末科技所有定制的模块，全部放到以下目录里：
+
+    src/views/haomo
+
+除了vue-element-admin，还引入了其他重要的模块：
+
+* [Vue-Awesome](https://github.com/Justineo/vue-awesome)
+
 ## 使用
 
 ### 安装

@@ -64,6 +64,86 @@ export default new Router({
 
 export const asyncRouterMap = [
   {
+    path: '/haomo',
+    component: Layout,
+    name: 'haomo',
+    meta: {
+      title: '毫末定制',
+      icon: 'component'
+    },
+    children: [
+      {
+        path: '/haomo/components',
+        component: _import('haomo/components/index'),
+        redirect: '/haomo/components/table',
+        name: 'haomo-components',
+        meta: {
+          title: '组件',
+          icon: 'component'
+        },
+        children: [
+          {
+            path: 'table',
+            component: _import('haomo/components/tables/index'),
+            name: 'haomo-table',
+            meta: {
+              title: '表格',
+              icon: 'table'
+            }
+          },
+          {
+            path: 'form',
+            component: _import('haomo/components/tables/index'),
+            name: 'haomo-form',
+            meta: {
+              title: '表单',
+              icon: 'form'
+            }
+          },
+          {
+            path: 'detail',
+            component: _import('haomo/components/details/index'),
+            name: 'haomo-detail',
+            meta: {
+              title: '详情',
+              icon: 'table'
+            }
+          }
+        ]
+      },
+      {
+        path: '/haomo/pages',
+        redirect: '/haomo/pages/login',
+        name: 'haomo-pages',
+        meta: {
+          title: '页面',
+          icon: 'fa fa-pagelines'
+        },
+        children: [
+          {
+            path: 'login',
+            component: _import('haomo/pages/login'),
+            name: 'haomo-login',
+            meta: {
+              title: '登录',
+              icon: 'password'
+            }
+          },
+          {
+            path: 'personal',
+            component: _import('haomo/pages/personal'),
+            name: 'haomo-personal',
+            meta: {
+              title: '个人中心',
+              icon: 'people'
+            }
+          }
+        ]
+      }
+    ]
+  },
+
+  {
     path: '/permission',
     component: Layout,
     redirect: '/permission/index',

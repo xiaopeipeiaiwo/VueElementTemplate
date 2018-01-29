@@ -19,6 +19,10 @@ import './mock' // simulation data
 
 import * as filters from './filters' // global filters
 
+import Icon from 'vue-awesome/components/Icon'
+
+Vue.component('icon', Icon)
+
 Vue.use(Element, {
   size: 'medium', // set element-ui default size
   i18n: (key, value) => i18n.t(key, value)
