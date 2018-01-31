@@ -94,7 +94,7 @@ export const asyncRouterMap = [
           },
           {
             path: 'form',
-            component: _import('haomo/components/tables/index'),
+            component: _import('haomo/components/forms/index'),
             name: 'haomo-form',
             meta: {
               title: '表单',

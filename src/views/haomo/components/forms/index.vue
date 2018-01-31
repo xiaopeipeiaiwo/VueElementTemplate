@@ -1,18 +1,102 @@
 <template>
-  <transition name="fade" mode="out-in">
-    <keep-alive :include='cachedViews'>
-      <router-view></router-view>
-    </keep-alive>
-  </transition>
+  <el-form :model="form" ref="form" :rules="rules" label-width="80px" status-icon style="width:50%;margin:20px auto 0">
+    <el-form-item label="姓名" prop="name">
+      <el-input style="width:200px" v-model="form.name" autofocus></el-input>
+    </el-form-item>
+    <el-form-item label="性别" prop="gender">
+      <el-radio-group v-model="form.gender">
+        <el-radio label="男"></el-radio>
+        <el-radio label="女"></el-radio>
+      </el-radio-group>
+    </el-form-item>
+    <el-form-item label="年龄" prop="age">
+      <el-input type="age" style="width:200px" v-model.number="form.age"></el-input>
+    </el-form-item>
+    <el-form-item label="学历" prop="education">
+      <el-select v-model="form.education" placeholder="请选择学历">
+        <el-option label="博士" value="doctor"></el-option>
+        <el-option label="硕士" value="master"></el-option>
+        <el-option label="本科" value="bachelor"></el-option>
+        <el-option label="专科" value="professional"></el-option>
+        <el-option label="其他" value="others"></el-option>
+      </el-select>
+    </el-form-item>
+    <el-form-item label="密码" prop="password">
+      <el-input type="password" style="width:200px" v-model="form.password"></el-input>
+    </el-form-item>
+    <el-form-item label="手机号" prop="phone">
+      <el-input style="width:200px" v-model.number="form.phone"></el-input>
+    </el-form-item>
+    <el-form-item label="邮箱" prop="email">
+      <el-input style="width:200px" v-model="form.email"></el-input>
+    </el-form-item>
+    <el-form-item label="住址" prop="address">
+      <el-input type="textarea" style="width:300px" :autosize="{ minRows: 2, maxRows: 4}" resize="none" v-model="form.address"></el-input>
+    </el-form-item>
+    <el-form-item>
+      <el-button type="primary" @click="onSubmit('form')">确定</el-button>
+      <el-button @click="resetForm('form')">重置</el-button>
+    </el-form-item>
+
+  </el-form>
 </template>
 
 <script>
   export default {
-    name: 'ComponentsMain',
-    computed: {
-      cachedViews() {
-        return this.$store.state.tagsView.cachedViews
+    name: 'formComponent',
+    data() {
+      return {
+        form: {
+          name: '',
+          gender: '男',
+          age: '',
+          password: '',
+          education: '',
+          phone: '',
+          email: '',
+          address: ''
+        },
+        rules: {
+          name: [
+            { required: true, message: '请输入姓名', trigger: 'blur' },
+            { min: 2, max: 5, message: '长度在 2 到 5 个字符', trigger: 'blur' }
+          ],
+          age: [
+            { required: true, message: '请输入年龄', trigger: 'blur' },
+            { type: 'number', message: '年龄必须为数字', trigger: 'change' }
+          ],
+          password: [
+            { required: true, message: '请输入密码', trigger: 'blur' },
+            { pattern: /^(?![0-9]+$)(?![a-zA-Z]+$)[0-9A-Za-z]{6,20}$/, message: '密码必须同时包含数字和字母 6-20位', trigger: 'change' }
+          ],
+          phone: [
+            { type: 'number', required: true, message: '请输入手机号', trigger: 'blur' },
+            { pattern: /^1[34578]\d{9}$/, message: '请输入正确的手机号', trigger: 'change' }
+          ],
+          email: [
+            { required: true, message: '请输入邮箱地址', trigger: 'blur' },
+            { type: 'email', message: '请输入正确的邮箱地址', trigger: 'blur,change' }
+          ]
+        }
+      }
+    },
+    methods: {
+      onSubmit(form) {
+        this.$refs[form].validate((valid) => {
+          if (valid) {
+            console.log('提交成功!')
+          } else {
+            console.log('提交失败!!')
+            return false
+          }
+        })
+      },
+      resetForm(form) {
+        this.$refs[form].resetFields()
       }
     }
+
   }
 </script>
+<style scoped>
+</style>
