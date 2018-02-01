@@ -1,44 +1,47 @@
 <template>
-  <el-form :model="form" ref="form" :rules="rules" label-width="80px" status-icon style="width:50%;margin:20px auto 0">
-    <el-form-item label="姓名" prop="name">
-      <el-input style="width:200px" v-model="form.name" autofocus></el-input>
-    </el-form-item>
-    <el-form-item label="性别" prop="gender">
-      <el-radio-group v-model="form.gender">
-        <el-radio label="男"></el-radio>
-        <el-radio label="女"></el-radio>
-      </el-radio-group>
-    </el-form-item>
-    <el-form-item label="年龄" prop="age">
-      <el-input type="age" style="width:200px" v-model.number="form.age"></el-input>
-    </el-form-item>
-    <el-form-item label="学历" prop="education">
-      <el-select v-model="form.education" placeholder="请选择学历">
-        <el-option label="博士" value="doctor"></el-option>
-        <el-option label="硕士" value="master"></el-option>
-        <el-option label="本科" value="bachelor"></el-option>
-        <el-option label="专科" value="professional"></el-option>
-        <el-option label="其他" value="others"></el-option>
-      </el-select>
-    </el-form-item>
-    <el-form-item label="密码" prop="password">
-      <el-input type="password" style="width:200px" v-model="form.password"></el-input>
-    </el-form-item>
-    <el-form-item label="手机号" prop="phone">
-      <el-input style="width:200px" v-model.number="form.phone"></el-input>
-    </el-form-item>
-    <el-form-item label="邮箱" prop="email">
-      <el-input style="width:200px" v-model="form.email"></el-input>
-    </el-form-item>
-    <el-form-item label="住址" prop="address">
-      <el-input type="textarea" style="width:300px" :autosize="{ minRows: 2, maxRows: 4}" resize="none" v-model="form.address"></el-input>
-    </el-form-item>
-    <el-form-item>
-      <el-button type="primary" @click="onSubmit('form')">确定</el-button>
-      <el-button @click="resetForm('form')">重置</el-button>
-    </el-form-item>
+  <div class="form-wrapper">
+    <h2 class="title">表单页面</h2>
+    <el-form :model="form" ref="form" :rules="rules"  label-width="80px" status-icon style="width:80%;margin:0 auto">
+      <el-form-item label="姓名" prop="name">
+        <el-input v-model="form.name" autofocus></el-input>
+      </el-form-item>
+      <el-form-item label="性别" prop="gender">
+        <el-radio-group v-model="form.gender">
+          <el-radio label="男"></el-radio>
+          <el-radio label="女"></el-radio>
+        </el-radio-group>
+      </el-form-item>
+      <el-form-item label="年龄" prop="age">
+        <el-input type="age" v-model.number="form.age"></el-input>
+      </el-form-item>
+      <el-form-item label="学历" prop="education">
+        <el-select v-model="form.education" placeholder="请选择学历">
+          <el-option label="博士" value="doctor"></el-option>
+          <el-option label="硕士" value="master"></el-option>
+          <el-option label="本科" value="bachelor"></el-option>
+          <el-option label="专科" value="professional"></el-option>
+          <el-option label="其他" value="others"></el-option>
+        </el-select>
+      </el-form-item>
+      <el-form-item label="密码" prop="password">
+        <el-input type="password" v-model="form.password"></el-input>
+      </el-form-item>
+      <el-form-item label="手机号" prop="phone">
+        <el-input v-model.number="form.phone"></el-input>
+      </el-form-item>
+      <el-form-item label="邮箱" prop="email">
+        <el-input v-model="form.email"></el-input>
+      </el-form-item>
+      <el-form-item label="住址" prop="address">
+        <el-input type="textarea" :autosize="{ minRows: 2, maxRows: 4}" resize="none" v-model="form.address"></el-input>
+      </el-form-item>
+      <el-form-item>
+        <el-button type="primary" @click="onSubmit()">确定</el-button>
+        <el-button @click="resetForm()">重置</el-button>
+      </el-form-item>
 
-  </el-form>
+    </el-form>
+  </div>
 </template>
 
 <script>
@@ -81,8 +84,8 @@
       }
     },
     methods: {
-      onSubmit(form) {
-        this.$refs[form].validate((valid) => {
+      onSubmit() {
+        this.$refs.form.validate((valid) => {
           if (valid) {
             console.log('提交成功!')
           } else {
@@ -91,12 +94,27 @@
           }
         })
       },
-      resetForm(form) {
-        this.$refs[form].resetFields()
+      resetForm() {
+        this.$refs.form.resetFields()
       }
     }
 
   }
 </script>
 <style scoped>
+  .form-wrapper{
+    width:50%;
+    margin:0 auto;
+    border:1px solid orange;
+  }
+  .title{
+    line-height: 40px;
+    background:orange;
+    color:#fff;
+    text-align:center;
+    margin-top:0;
+  }
+  .el-input{
+    width: 300px
+  }
 </style>
