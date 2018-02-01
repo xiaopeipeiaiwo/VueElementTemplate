@@ -1,9 +1,9 @@
 <template>
   <div class="form-wrapper">
     <h2 class="title">表单页面</h2>
-    <el-form :model="form" ref="form" :rules="rules"  label-width="80px" status-icon style="width:80%;margin:0 auto">
+    <el-form :model="form" ref="form" :rules="rules"  label-width="110px" status-icon style="width:80%;margin:0 auto">
       <el-form-item label="姓名" prop="name">
-        <el-input v-model="form.name" autofocus></el-input>
+        <el-input type="text" v-model="form.name" autofocus placeholder="请输入姓名"></el-input>
       </el-form-item>
       <el-form-item label="性别" prop="gender">
         <el-radio-group v-model="form.gender">
@@ -12,7 +12,13 @@
         </el-radio-group>
       </el-form-item>
       <el-form-item label="年龄" prop="age">
-        <el-input type="age" v-model.number="form.age"></el-input>
+        <el-input type="age" v-model.number="form.age" placeholder="请输入年龄"></el-input>
+      </el-form-item>
+      <el-form-item label="出生日期" prop="date">
+        <el-date-picker v-model="form.date" type="date" placeholder="选择日期"></el-date-picker>
+      </el-form-item>
+      <el-form-item label="照片" prop="img">
+        <input type="file">
       </el-form-item>
       <el-form-item label="学历" prop="education">
         <el-select v-model="form.education" placeholder="请选择学历">
@@ -24,16 +30,22 @@
         </el-select>
       </el-form-item>
       <el-form-item label="密码" prop="password">
-        <el-input type="password" v-model="form.password"></el-input>
+        <el-input type="password" v-model="form.password" placeholder="请输入密码"></el-input>
+      </el-form-item>
+      <el-form-item label="最常用的网站" prop="website">
+        <el-input type="url" v-model="form.url" placeholder="请输入网址"></el-input>
+      </el-form-item>
+      <el-form-item label="最喜欢的颜色" prop="color" class="color">
+        <input type="color" v-model="form.color" style="width:200px;height:36px;border:none;outline:0"/>
       </el-form-item>
       <el-form-item label="手机号" prop="phone">
-        <el-input v-model.number="form.phone"></el-input>
+        <el-input v-model.number="form.phone" placeholder="请输入手机号"></el-input>
       </el-form-item>
       <el-form-item label="邮箱" prop="email">
-        <el-input v-model="form.email"></el-input>
+        <el-input v-model="form.email" placeholder="请输入邮箱"></el-input>
       </el-form-item>
       <el-form-item label="住址" prop="address">
-        <el-input type="textarea" :autosize="{ minRows: 2, maxRows: 4}" resize="none" v-model="form.address"></el-input>
+        <el-input type="textarea" placeholder="请填写地址" :autosize="{ minRows: 2, maxRows: 4}" resize="none" v-model="form.address"></el-input>
       </el-form-item>
       <el-form-item>
         <el-col :span="12">
@@ -57,7 +69,11 @@
           gender: '男',
           age: '',
           password: '',
+          website: '',
+          img: '',
+          date: '',
           education: '',
+          color: '#ff0000',
           phone: '',
           email: '',
           address: ''
@@ -70,6 +86,10 @@
           age: [
             { required: true, message: '请输入年龄', trigger: 'blur' },
             { type: 'number', message: '年龄必须为数字', trigger: 'change' }
+          ],
+          website: [
+            { required: true, message: '请输入网址', trigger: 'blur' },
+            { pattern: /[a-zA-z]+:\/\/[^\s]*/, message: '请输入正确的网址', trigger: 'change' }
           ],
           password: [
             { required: true, message: '请输入密码', trigger: 'blur' },
@@ -117,7 +137,5 @@
     text-align:center;
     margin-top:0;
   }
-  .el-input{
-    width: 300px
-  }
+
 </style>
