@@ -1,11 +1,13 @@
 <template>
   <div class="app-container calendar-list-container">
-    <hm-complex-table></hm-complex-table>
+    <hm-complex-table :schema="schema">
+    </hm-complex-table>
   </div>
 </template>
 
 <script>
   import HmComplexTable from './HmComplexTable.vue'
+  import schema from '../../schema'
 
   export default {
     name: 'HmComplexTable',
@@ -20,7 +22,9 @@
     },
     filters: {
     },
-    created() {},
+    created() {
+      this.schema = schema['HmUser']
+    },
     methods: {}
   }
 </script>

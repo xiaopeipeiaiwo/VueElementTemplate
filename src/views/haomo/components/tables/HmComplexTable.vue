@@ -168,7 +168,50 @@
     // 混入公共对象
     mixins: [],
     props: {
+      /**
+       * 组件所使用的表定义schema。表定义schema，请使用 model2codejs 从pdm文件生成schema
+       */
       schema: {
+        type: Object,
+        required: true
+      },
+      /**
+       * 搜索过滤选项。默认没有过滤功能
+       */
+      filters: {
+        type: Array,
+        required: false
+      },
+      /**
+       * 指定要显示的列。默认为根据schema得到的所有列。完整示例为：
+       *  [
+       *    {
+       *      "name": "姓名",
+       *      "code": "username",
+       *      "render": function(value){
+       *        return "<a href='value'></a>"
+       *      }
+       *    }
+       *  ]
+       */
+      columns: {
+        type: Array,
+        required: false
+      },
+      /**
+       * 修改行数据的Hook函数。参数为行数据 rowData
+       */
+      rowHook: {
+        type: Function,
+        required: false
+      },
+      /**
+       * 表格的选项，包括：page_size。完整的示例为：
+       *  {
+       *    "page_size": 10, // 默认为10条数据/页
+       *  }
+       */
+      options: {
         type: Object,
         required: false
       }
