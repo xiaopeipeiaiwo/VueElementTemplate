@@ -142,7 +142,7 @@
 </template>
 
 <script>
-  import { fetchList, fetchPv, createArticle, updateArticle } from '@/api/article'
+  import request from '@/utils/request'
   import waves from '@/directive/waves' // 水波纹指令
   import { parseTime } from '@/utils'
 
@@ -209,6 +209,7 @@
        * 表格的选项，包括：page_size。完整的示例为：
        *  {
        *    "page_size": 10, // 默认为10条数据/页
+       *    "showExport": false,  // 默认为不显示导出按钮
        *  }
        */
       options: {
@@ -281,11 +282,12 @@
     },
     methods: {
       getList() {
-        this.listLoading = true
-        fetchList(this.listQuery).then(response => {
-          this.list = response.data.items
-          this.total = response.data.total
-          this.listLoading = false
+        const self = this
+        self.listLoading = true
+        request(self.schema).then(resp => {
+          self.list = resp.data.data
+          self.total = resp.data.total
+          self.listLoading = false
         })
       },
       handleFilter() {
@@ -353,30 +355,6 @@
           this.$refs['dataForm'].clearValidate()
         })
       },
-      updateData() {
-        this.$refs['dataForm'].validate((valid) => {
-          if (valid) {
-            const tempData = Object.assign({}, this.temp)
-            tempData.timestamp = +new Date(tempData.timestamp) // change Thu Nov 30 2017 16:41:05 GMT+0800 (CST) to 1512031311464
-            updateArticle(tempData).then(() => {
-              for (const v of this.list) {
-                if (v.id === this.temp.id) {
-                  const index = this.list.indexOf(v)
-                  this.list.splice(index, 1, this.temp)
-                  break
-                }
-              }
-              this.dialogFormVisible = false
-              this.$notify({
-                title: '成功',
-                message: '更新成功',
-                type: 'success',
-                duration: 2000
-              })
-            })
-          }
-        })
-      },
       handleDelete(row) {
         this.$notify({
           title: '成功',
@@ -387,12 +365,6 @@
         const index = this.list.indexOf(row)
         this.list.splice(index, 1)
       },
-      handleFetchPv(pv) {
-        fetchPv(pv).then(response => {
-          this.pvData = response.data.pvData
-          this.dialogPvVisible = true
-        })
-      },
       handleDownload() {
         this.downloadLoading = true
         import('@/vendor/Export2Excel').then(excel => {
@@ -402,15 +374,6 @@
           excel.export_json_to_excel(tHeader, data, 'table-list')
           this.downloadLoading = false
         })
-      },
-      formatJson(filterVal, jsonData) {
-        return jsonData.map(v => filterVal.map(j => {
-          if (j === 'timestamp') {
-            return parseTime(v[j])
-          } else {
-            return v[j]
-          }
-        }))
       }
     }
   }
