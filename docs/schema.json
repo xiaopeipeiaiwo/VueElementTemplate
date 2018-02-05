@@ -1,0 +1,43 @@
+{
+  "model": "Role",
+  "modelCamel": "Role",
+  "modelCamelPlural": "role",
+  "modelUnderscore": "role",
+  "modelUnderscorePlural": "roles",
+  "columns": [
+    {
+      "id": "o108",
+      "objectId": "9056FAE4-3EB0-4369-BEC5-CE2B04E60A3F",
+      "name": "ID",
+      "code": "ID",
+      "dataType": "string",
+      "length": "128",
+      "codeCamelPlural": "ids",
+      "codeUnderscore": "id",
+      "codeUnderscorePlural": "ids"
+    },
+    {
+      "id": "o109",
+      "objectId": "D6ED7B85-1958-4024-ADA6-8521242CE045",
+      "name": "名称",
+      "code": "name",
+      "dataType": "string",
+      "length": "11",
+      "codeCamel": "name",
+      "codeCamelPlural": "names",
+      "codeUnderscore": "name",
+      "codeUnderscorePlural": "names"
+    },
+    {
+      "id": "o110",
+      "objectId": "2CEAEAAB-BF05-4332-8D8B-A03D05C42C41",
+      "name": "创建时间",
+      "code": "CREATE_TIME",
+      "dataType": "datetime",
+      "codeCamel": "createTime",
+      "codeCamelPlural": "createTimes",
+      "codeUnderscore": "create_time",
+      "codeUnderscorePlural": "create_times"
+    }
+  ]
+}
