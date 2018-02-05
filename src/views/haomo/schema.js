@@ -14,24 +14,24 @@ const ModelSchema = {
     'modelUnderscorePlural': 'hm_users',
     'columns': [
       {
-        'id': 'o51',
+        'id': 'o50',
         'objectId': '170A4473-36CC-47E1-96C3-F238F8132AA4',
         'name': '用户名字',
-        'code': 'USERBANE',
+        'code': 'USERNAME',
         'creationDate': '1498990741',
         'creator': 'hm20160509',
-        'modificationDate': '1498995491',
-        'modifier': 'xjq',
+        'modificationDate': '1517859502',
+        'modifier': 'hm20160509',
         'dataType': 'VARCHAR2(256CHAR)',
         'length': '256',
-        'codeCamel': 'userbane',
-        'codeCamelPlural': 'userbanes',
-        'codeUnderscore': 'userbane',
-        'codeUnderscorePlural': 'userbanes',
+        'codeCamel': 'username',
+        'codeCamelPlural': 'usernames',
+        'codeUnderscore': 'username',
+        'codeUnderscorePlural': 'usernames',
         'type': 'string'
       },
       {
-        'id': 'o52',
+        'id': 'o51',
         'objectId': '70EC38C6-4AE4-4E79-BA72-29DA2FE50782',
         'name': '登录ID',
         'code': 'LOGINID',
@@ -49,7 +49,7 @@ const ModelSchema = {
         'type': 'string'
       },
       {
-        'id': 'o53',
+        'id': 'o52',
         'objectId': '4FCE7185-D489-4DED-AA5F-093A4DBC1112',
         'name': '密码',
         'code': 'PASSWORD',
@@ -66,7 +66,7 @@ const ModelSchema = {
         'type': 'string'
       },
       {
-        'id': 'o54',
+        'id': 'o53',
         'objectId': '3A897125-CB02-40F5-9BB1-62A9B06553E0',
         'name': '联系电话',
         'code': 'MOBILE',
@@ -83,7 +83,7 @@ const ModelSchema = {
         'type': 'string'
       },
       {
-        'id': 'o55',
+        'id': 'o54',
         'objectId': '48B9C079-3CCA-4886-9543-3AE764998E9A',
         'name': '邮箱',
         'code': 'EMAIL',
@@ -100,7 +100,7 @@ const ModelSchema = {
         'type': 'string'
       },
       {
-        'id': 'o56',
+        'id': 'o55',
         'objectId': '533AB6E8-A3D0-473D-9DE6-0D0CABA6731C',
         'name': '头像',
         'code': 'AVATAR',
@@ -117,7 +117,7 @@ const ModelSchema = {
         'type': 'string'
       },
       {
-        'id': 'o57',
+        'id': 'o56',
         'objectId': 'EF44AF1F-F6B9-412F-9FF7-AAECD6B5521A',
         'name': '创建时间',
         'code': 'CREATE_TIME',
@@ -130,10 +130,10 @@ const ModelSchema = {
         'codeCamelPlural': 'createTimes',
         'codeUnderscore': 'create_time',
         'codeUnderscorePlural': 'create_times',
-        'type': 'string'
+        'type': 'datetime'
       },
       {
-        'id': 'o58',
+        'id': 'o57',
         'objectId': 'CD1BC772-356B-4D14-A40E-28F115F95EEC',
         'name': '更新时间',
         'code': 'LAST_UPDATE_TIME',
@@ -146,10 +146,10 @@ const ModelSchema = {
         'codeCamelPlural': 'lastUpdateTimes',
         'codeUnderscore': 'last_update_time',
         'codeUnderscorePlural': 'last_update_times',
-        'type': 'string'
+        'type': 'datetime'
       },
       {
-        'id': 'o59',
+        'id': 'o58',
         'objectId': '297D03AE-459D-4991-A459-3449FE893EEB',
         'name': '最后登录时间',
         'code': 'LAST_LOGIN_TIME',
@@ -162,10 +162,10 @@ const ModelSchema = {
         'codeCamelPlural': 'lastLoginTimes',
         'codeUnderscore': 'last_login_time',
         'codeUnderscorePlural': 'last_login_times',
-        'type': 'string'
+        'type': 'datetime'
       },
       {
-        'id': 'o60',
+        'id': 'o59',
         'objectId': '6767F0FE-6C49-46F3-919E-D854C21FCA52',
         'name': '安全级别',
         'code': 'SECURITY_LEVEL',
@@ -179,10 +179,10 @@ const ModelSchema = {
         'codeCamelPlural': 'securityLevels',
         'codeUnderscore': 'security_level',
         'codeUnderscorePlural': 'security_levels',
-        'type': 'string'
+        'type': 'number'
       },
       {
-        'id': 'o61',
+        'id': 'o60',
         'objectId': 'C4BF570D-C8FC-4B72-919C-78DB3D790171',
         'name': '类型',
         'code': 'TYPE',
@@ -197,7 +197,7 @@ const ModelSchema = {
         'codeCamelPlural': 'types',
         'codeUnderscore': 'type',
         'codeUnderscorePlural': 'types',
-        'type': 'string'
+        'type': 'number'
       }
     ]
   },
@@ -210,7 +210,7 @@ const ModelSchema = {
     'modelUnderscorePlural': 'auth_tokens',
     'columns': [
       {
-        'id': 'o65',
+        'id': 'o64',
         'objectId': 'D199FEE0-F7B9-438D-BF2B-6D098DFCBE36',
         'name': '用户ID',
         'code': 'USER_ID',
@@ -227,7 +227,7 @@ const ModelSchema = {
         'type': 'string'
       },
       {
-        'id': 'o66',
+        'id': 'o65',
         'objectId': '3643827C-19B0-42F1-A8A6-D492166CFF0B',
         'name': '令牌',
         'code': 'TOKEN',
@@ -244,7 +244,7 @@ const ModelSchema = {
         'type': 'string'
       },
       {
-        'id': 'o67',
+        'id': 'o66',
         'objectId': 'BD3D63C8-3964-44F3-8DFD-0D8CA0723078',
         'name': '创建时间',
         'code': 'CREATE_TIME',
@@ -257,10 +257,10 @@ const ModelSchema = {
         'codeCamelPlural': 'createTimes',
         'codeUnderscore': 'create_time',
         'codeUnderscorePlural': 'create_times',
-        'type': 'string'
+        'type': 'datetime'
       },
       {
-        'id': 'o68',
+        'id': 'o67',
         'objectId': '8618AF1F-B14F-4D7F-9730-15863F5312FB',
         'name': '有效时间',
         'code': 'VALID_TIME',
@@ -273,7 +273,7 @@ const ModelSchema = {
         'codeCamelPlural': 'validTimes',
         'codeUnderscore': 'valid_time',
         'codeUnderscorePlural': 'valid_times',
-        'type': 'string'
+        'type': 'datetime'
       }
     ]
   },
@@ -286,7 +286,7 @@ const ModelSchema = {
     'modelUnderscorePlural': 'data_authorities',
     'columns': [
       {
-        'id': 'o71',
+        'id': 'o70',
         'objectId': 'FCC70779-9B7A-4916-A1B7-0F504FFCF0D5',
         'name': '角色ID',
         'code': 'ROLE_ID',
@@ -303,7 +303,7 @@ const ModelSchema = {
         'type': 'string'
       },
       {
-        'id': 'o72',
+        'id': 'o71',
         'objectId': '9609F993-E5EB-4360-B61F-5C532FCB94B9',
         'name': '部门范围',
         'code': 'DEPARTMENT_RANGE',
@@ -316,10 +316,10 @@ const ModelSchema = {
         'codeCamelPlural': 'departmentRanges',
         'codeUnderscore': 'department_range',
         'codeUnderscorePlural': 'department_ranges',
-        'type': 'string'
+        'type': 'number'
       },
       {
-        'id': 'o73',
+        'id': 'o72',
         'objectId': '340A2AC1-E88B-4F35-A486-A724ABA91450',
         'name': '业务场景定义ID',
         'code': 'BUSINESS_SCENE_DEFINITION_ID',
@@ -336,7 +336,7 @@ const ModelSchema = {
         'type': 'string'
       },
       {
-        'id': 'o74',
+        'id': 'o73',
         'objectId': 'DDB3D979-F6D6-497D-BC87-8FB31523DB97',
         'name': '操作',
         'code': 'OPERATION',
@@ -353,7 +353,7 @@ const ModelSchema = {
         'type': 'string'
       },
       {
-        'id': 'o75',
+        'id': 'o74',
         'objectId': '416078B1-0911-40BC-BF7C-4D2E04508D66',
         'name': '创建时间',
         'code': 'CREATE_TIME',
@@ -366,7 +366,7 @@ const ModelSchema = {
         'codeCamelPlural': 'createTimes',
         'codeUnderscore': 'create_time',
         'codeUnderscorePlural': 'create_times',
-        'type': 'string'
+        'type': 'datetime'
       }
     ]
   },
@@ -379,7 +379,7 @@ const ModelSchema = {
     'modelUnderscorePlural': 'department_types',
     'columns': [
       {
-        'id': 'o78',
+        'id': 'o77',
         'objectId': '41CEC811-EF38-4896-879B-DD7158D7895E',
         'name': '姓名',
         'code': 'NAME',
@@ -396,7 +396,7 @@ const ModelSchema = {
         'type': 'string'
       },
       {
-        'id': 'o79',
+        'id': 'o78',
         'objectId': '0AA415F1-EAF4-4510-A934-1DC6AE681FE1',
         'name': '创建时间',
         'code': 'CREATE_TIME',
@@ -409,10 +409,10 @@ const ModelSchema = {
         'codeCamelPlural': 'createTimes',
         'codeUnderscore': 'create_time',
         'codeUnderscorePlural': 'create_times',
-        'type': 'string'
+        'type': 'datetime'
       },
       {
-        'id': 'o80',
+        'id': 'o79',
         'objectId': '03E5C45E-1E68-4954-AF54-59D88BF26868',
         'name': '描述',
         'code': 'DESCRIPTION',
@@ -439,7 +439,7 @@ const ModelSchema = {
     'modelUnderscorePlural': 'departments',
     'columns': [
       {
-        'id': 'o84',
+        'id': 'o83',
         'objectId': 'C6C2B2B5-0C34-42D0-A3B4-CCFCD50A51A7',
         'name': '父部门ID',
         'code': 'PARENT_DEPARTMENT_ID',
@@ -456,7 +456,7 @@ const ModelSchema = {
         'type': 'string'
       },
       {
-        'id': 'o85',
+        'id': 'o84',
         'objectId': 'C4D0454A-7630-4B1F-99F5-3E04438C57F7',
         'name': '编码',
         'code': 'CODE',
@@ -473,7 +473,7 @@ const ModelSchema = {
         'type': 'string'
       },
       {
-        'id': 'o86',
+        'id': 'o85',
         'objectId': 'B94E2986-8E2F-4ECB-9674-AB4A7398F0AA',
         'name': '名字',
         'code': 'NAME',
@@ -490,7 +490,7 @@ const ModelSchema = {
         'type': 'string'
       },
       {
-        'id': 'o87',
+        'id': 'o86',
         'objectId': 'AE5B2A0F-32FC-441F-8583-767097C693BC',
         'name': '描述',
         'code': 'DESCRIPTION',
@@ -507,7 +507,7 @@ const ModelSchema = {
         'type': 'string'
       },
       {
-        'id': 'o88',
+        'id': 'o87',
         'objectId': '1FBB3116-4DF4-4B1A-B280-391CF2A55716',
         'name': '可看订单',
         'code': 'VIEW_ORDER',
@@ -521,10 +521,10 @@ const ModelSchema = {
         'codeCamelPlural': 'viewOrders',
         'codeUnderscore': 'view_order',
         'codeUnderscorePlural': 'view_orders',
-        'type': 'string'
+        'type': 'number'
       },
       {
-        'id': 'o89',
+        'id': 'o88',
         'objectId': '7EEC0FFD-B81A-478D-B86A-57DB2E89E3E7',
         'name': '部门类型ID',
         'code': 'DEPARTMENT_TYPE_ID',
@@ -541,7 +541,7 @@ const ModelSchema = {
         'type': 'string'
       },
       {
-        'id': 'o90',
+        'id': 'o89',
         'objectId': '8D40CFC6-4A51-45D8-AF8F-6D6950509AEB',
         'name': '创建时间',
         'code': 'CREATE_TIME',
@@ -554,10 +554,10 @@ const ModelSchema = {
         'codeCamelPlural': 'createTimes',
         'codeUnderscore': 'create_time',
         'codeUnderscorePlural': 'create_times',
-        'type': 'string'
+        'type': 'datetime'
       },
       {
-        'id': 'o91',
+        'id': 'o90',
         'objectId': '358DA528-B5CE-41DA-9DAF-894C05CBE361',
         'name': '最后更新时间',
         'code': 'LAST_UPDATE_TIME',
@@ -570,10 +570,10 @@ const ModelSchema = {
         'codeCamelPlural': 'lastUpdateTimes',
         'codeUnderscore': 'last_update_time',
         'codeUnderscorePlural': 'last_update_times',
-        'type': 'string'
+        'type': 'datetime'
       },
       {
-        'id': 'o92',
+        'id': 'o91',
         'objectId': '52ACC6E1-AAE1-48E9-A16C-C654271A223D',
         'name': '安全等级',
         'code': 'SECURITY_LEVEL',
@@ -587,10 +587,10 @@ const ModelSchema = {
         'codeCamelPlural': 'securityLevels',
         'codeUnderscore': 'security_level',
         'codeUnderscorePlural': 'security_levels',
-        'type': 'string'
+        'type': 'number'
       },
       {
-        'id': 'o93',
+        'id': 'o92',
         'objectId': '002BEE34-6D30-4916-A3F1-C59C93E1C09A',
         'name': '简称',
         'code': 'SIMPLE_NAME',
@@ -617,7 +617,7 @@ const ModelSchema = {
     'modelUnderscorePlural': 'file_authorities',
     'columns': [
       {
-        'id': 'o96',
+        'id': 'o95',
         'objectId': '8C310FDB-6CF6-4ABA-9550-B1090E6AC4D2',
         'name': '角色ID',
         'code': 'ROLE_ID',
@@ -634,7 +634,7 @@ const ModelSchema = {
         'type': 'string'
       },
       {
-        'id': 'o97',
+        'id': 'o96',
         'objectId': 'C8E550B4-F0AC-4CE5-A5B1-87DFF751F70F',
         'name': '操作',
         'code': 'OPERATION',
@@ -651,7 +651,7 @@ const ModelSchema = {
         'type': 'string'
       },
       {
-        'id': 'o98',
+        'id': 'o97',
         'objectId': '17F9082B-8544-4543-8F2C-3FE827849B0A',
         'name': '创建时间',
         'code': 'CREATE_TIME',
@@ -664,7 +664,7 @@ const ModelSchema = {
         'codeCamelPlural': 'createTimes',
         'codeUnderscore': 'create_time',
         'codeUnderscorePlural': 'create_times',
-        'type': 'string'
+        'type': 'datetime'
       }
     ]
   },
@@ -677,7 +677,7 @@ const ModelSchema = {
     'modelUnderscorePlural': 'func_authorities',
     'columns': [
       {
-        'id': 'o101',
+        'id': 'o100',
         'objectId': '4D473E6F-2974-4023-93C0-66D08C5F07BC',
         'name': '角色ID',
         'code': 'ROLE_ID',
@@ -694,7 +694,7 @@ const ModelSchema = {
         'type': 'string'
       },
       {
-        'id': 'o102',
+        'id': 'o101',
         'objectId': '36EB578C-A723-49DB-B8B9-A0ACB4FCDEB6',
         'name': '业务场景定义ID',
         'code': 'BUSINESS_SCENE_DEFINITION_ID',
@@ -711,7 +711,7 @@ const ModelSchema = {
         'type': 'string'
       },
       {
-        'id': 'o103',
+        'id': 'o102',
         'objectId': '832E27BC-F450-4E1E-9CC9-53F148D55F04',
         'name': '操作',
         'code': 'OPERATION',
@@ -728,7 +728,7 @@ const ModelSchema = {
         'type': 'string'
       },
       {
-        'id': 'o104',
+        'id': 'o103',
         'objectId': '97BA43A1-D054-433F-A10E-6B4EF8D6A27E',
         'name': '创建时间',
         'code': 'CREATE_TIME',
@@ -741,7 +741,7 @@ const ModelSchema = {
         'codeCamelPlural': 'createTimes',
         'codeUnderscore': 'create_time',
         'codeUnderscorePlural': 'create_times',
-        'type': 'string'
+        'type': 'datetime'
       }
     ]
   },
@@ -754,7 +754,7 @@ const ModelSchema = {
     'modelUnderscorePlural': 'menus',
     'columns': [
       {
-        'id': 'o107',
+        'id': 'o106',
         'objectId': '89FFCF79-C3B4-4E92-B9DA-12FD253E30DC',
         'name': '名字',
         'code': 'NAME',
@@ -771,7 +771,7 @@ const ModelSchema = {
         'type': 'string'
       },
       {
-        'id': 'o108',
+        'id': 'o107',
         'objectId': '97D1AC79-772A-4BA8-A7F0-F9FE28E3EFCF',
         'name': '菜单图标',
         'code': 'MENU_LOGO',
@@ -788,7 +788,7 @@ const ModelSchema = {
         'type': 'string'
       },
       {
-        'id': 'o109',
+        'id': 'o108',
         'objectId': 'CFE7E98D-0924-481C-A240-41543E00AE71',
         'name': '上级菜单ID',
         'code': 'SUPERIOR_MENU_ID',
@@ -805,7 +805,7 @@ const ModelSchema = {
         'type': 'string'
       },
       {
-        'id': 'o110',
+        'id': 'o109',
         'objectId': '693766A6-08EE-4E62-9409-A50A37A9CA36',
         'name': '等级',
         'code': 'RANK',
@@ -819,10 +819,10 @@ const ModelSchema = {
         'codeCamelPlural': 'ranks',
         'codeUnderscore': 'rank',
         'codeUnderscorePlural': 'ranks',
-        'type': 'string'
+        'type': 'number'
       },
       {
-        'id': 'o111',
+        'id': 'o110',
         'objectId': 'C9634430-1566-44AE-A6CD-EB7B7F23AF59',
         'name': '创建时间',
         'code': 'CREATE_TIME',
@@ -835,10 +835,10 @@ const ModelSchema = {
         'codeCamelPlural': 'createTimes',
         'codeUnderscore': 'create_time',
         'codeUnderscorePlural': 'create_times',
-        'type': 'string'
+        'type': 'datetime'
       },
       {
-        'id': 'o112',
+        'id': 'o111',
         'objectId': 'DDF6CF13-AF8F-47D7-A500-80CADA6CC38E',
         'name': '展示位置',
         'code': 'DISPLAY_POSITION',
@@ -852,10 +852,10 @@ const ModelSchema = {
         'codeCamelPlural': 'displayPositions',
         'codeUnderscore': 'display_position',
         'codeUnderscorePlural': 'display_positions',
-        'type': 'string'
+        'type': 'number'
       },
       {
-        'id': 'o113',
+        'id': 'o112',
         'objectId': '0DBEC3D2-6328-4E57-95E8-59A296F67F0D',
         'name': '链接',
         'code': 'LINK',
@@ -872,7 +872,7 @@ const ModelSchema = {
         'type': 'string'
       },
       {
-        'id': 'o114',
+        'id': 'o113',
         'objectId': 'FB047FD9-385E-4BEC-B77B-A7B7727CD076',
         'name': '类型',
         'code': 'TYPE',
@@ -886,10 +886,10 @@ const ModelSchema = {
         'codeCamelPlural': 'types',
         'codeUnderscore': 'type',
         'codeUnderscorePlural': 'types',
-        'type': 'string'
+        'type': 'number'
       },
       {
-        'id': 'o115',
+        'id': 'o114',
         'objectId': '469DE55A-0EA7-4DEA-93BE-A17C092D6286',
         'name': '目标ID',
         'code': 'TARGET_ID',
@@ -906,7 +906,7 @@ const ModelSchema = {
         'type': 'string'
       },
       {
-        'id': 'o116',
+        'id': 'o115',
         'objectId': 'B4DD2873-4B44-41C0-AC19-DBCF9D516BC4',
         'name': 'APP_URL',
         'code': 'APP_URL',
@@ -933,7 +933,7 @@ const ModelSchema = {
     'modelUnderscorePlural': 'role_menus',
     'columns': [
       {
-        'id': 'o119',
+        'id': 'o118',
         'objectId': '4884CB5B-6822-48A2-BBCD-C82BBE471E3E',
         'name': '角色ID',
         'code': 'ROLE_ID',
@@ -950,7 +950,7 @@ const ModelSchema = {
         'type': 'string'
       },
       {
-        'id': 'o120',
+        'id': 'o119',
         'objectId': 'CF06209D-971F-4C92-A8EC-404739931940',
         'name': '菜单ID',
         'code': 'MENU_ID',
@@ -977,7 +977,7 @@ const ModelSchema = {
     'modelUnderscorePlural': 'roles',
     'columns': [
       {
-        'id': 'o122',
+        'id': 'o121',
         'objectId': 'E9AC3A9C-D43B-4384-A7EE-05E60BF711A7',
         'name': '姓名',
         'code': 'NAME',
@@ -994,7 +994,7 @@ const ModelSchema = {
         'type': 'string'
       },
       {
-        'id': 'o123',
+        'id': 'o122',
         'objectId': 'A99D5EAB-FE49-4D56-94EE-0CAB2FEC3788',
         'name': '描述',
         'code': 'DESCRIPTION',
@@ -1010,7 +1010,7 @@ const ModelSchema = {
         'type': 'string'
       },
       {
-        'id': 'o124',
+        'id': 'o123',
         'objectId': '4B3D418C-C2C3-4785-A68A-C54918DE9160',
         'name': '创建时间',
         'code': 'CREATE_TIME',
@@ -1023,10 +1023,10 @@ const ModelSchema = {
         'codeCamelPlural': 'createTimes',
         'codeUnderscore': 'create_time',
         'codeUnderscorePlural': 'create_times',
-        'type': 'string'
+        'type': 'datetime'
       },
       {
-        'id': 'o125',
+        'id': 'o124',
         'objectId': '06523D0E-DAF6-4172-AF06-B3B6240EB8CB',
         'name': '等级',
         'code': 'RANK',
@@ -1039,7 +1039,7 @@ const ModelSchema = {
         'codeCamelPlural': 'ranks',
         'codeUnderscore': 'rank',
         'codeUnderscorePlural': 'ranks',
-        'type': 'string'
+        'type': 'number'
       }
     ]
   },
@@ -1052,7 +1052,7 @@ const ModelSchema = {
     'modelUnderscorePlural': 'user_roles',
     'columns': [
       {
-        'id': 'o128',
+        'id': 'o127',
         'objectId': '41CDBCDD-8B5A-4718-BAF3-D1D4C06E08A3',
         'name': '角色ID',
         'code': 'ROLE_ID',
@@ -1070,7 +1070,7 @@ const ModelSchema = {
         'type': 'string'
       },
       {
-        'id': 'o129',
+        'id': 'o128',
         'objectId': 'FC441BA0-581A-4BE7-AB70-B5E27F21070E',
         'name': '用户ID',
         'code': 'USER_ID',
@@ -1088,7 +1088,7 @@ const ModelSchema = {
         'type': 'string'
       },
       {
-        'id': 'o130',
+        'id': 'o129',
         'objectId': '1AFC311D-F23B-43BE-846D-6E651F734FF2',
         'name': '等级',
         'code': 'RANK',
@@ -1102,7 +1102,7 @@ const ModelSchema = {
         'codeCamelPlural': 'ranks',
         'codeUnderscore': 'rank',
         'codeUnderscorePlural': 'ranks',
-        'type': 'string'
+        'type': 'number'
       }
     ]
   },
@@ -1115,7 +1115,7 @@ const ModelSchema = {
     'modelUnderscorePlural': 'companies',
     'columns': [
       {
-        'id': 'o132',
+        'id': 'o131',
         'objectId': '38CEACFE-14A7-4E3F-A1FE-30FB4318B0AB',
         'name': '公司名称',
         'code': 'NAME',
@@ -1142,7 +1142,7 @@ const ModelSchema = {
     'modelUnderscorePlural': 'simple_data_authorities',
     'columns': [
       {
-        'id': 'o135',
+        'id': 'o134',
         'objectId': 'EB4FF879-EFE8-4A1E-BA52-0D242638D20A',
         'name': '角色ID',
         'code': 'ROLE_ID',
@@ -1159,7 +1159,7 @@ const ModelSchema = {
         'type': 'string'
       },
       {
-        'id': 'o136',
+        'id': 'o135',
         'objectId': '6AE6100C-E4B7-4E65-BC44-F8CBFC9F66A4',
         'name': '部门范围',
         'code': 'DEPARTMENT_RANGE',
@@ -1173,10 +1173,10 @@ const ModelSchema = {
         'codeCamelPlural': 'departmentRanges',
         'codeUnderscore': 'department_range',
         'codeUnderscorePlural': 'department_ranges',
-        'type': 'string'
+        'type': 'number'
       },
       {
-        'id': 'o137',
+        'id': 'o136',
         'objectId': '5B5B9235-DF70-48ED-A19E-9A93CC195FF8',
         'name': '创建时间',
         'code': 'CREATE_TIME',
@@ -1189,7 +1189,7 @@ const ModelSchema = {
         'codeCamelPlural': 'createTimes',
         'codeUnderscore': 'create_time',
         'codeUnderscorePlural': 'create_times',
-        'type': 'string'
+        'type': 'datetime'
       }
     ]
   }
