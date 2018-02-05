@@ -144,20 +144,6 @@
 <script>
   import request from '@/utils/request'
   import waves from '@/directive/waves' // 水波纹指令
-  import { parseTime } from '@/utils'
-
-  const calendarTypeOptions = [
-    { key: 'CN', display_name: 'China' },
-    { key: 'US', display_name: 'USA' },
-    { key: 'JP', display_name: 'Japan' },
-    { key: 'EU', display_name: 'Eurozone' }
-  ]
-
-  // arr to obj ,such as { CN : "China", US : "USA" }
-  const calendarTypeKeyValue = calendarTypeOptions.reduce((acc, cur) => {
-    acc[cur.key] = cur.display_name
-    return acc
-  }, {})
 
   export default {
     name: 'HmComplexTable',
@@ -169,7 +155,8 @@
     mixins: [],
     props: {
       /**
-       * 组件所使用的表定义schema。表定义schema，请使用 model2codejs 从pdm文件生成schema
+       * 组件所使用的表定义schema。表定义schema，请使用 model2codejs 从pdm文件生成schema。
+       * 对于所有毫末科技的组件，必须传schema，已完成数据的交互
        */
       schema: {
         type: Object,
@@ -210,6 +197,8 @@
        *  {
        *    "page_size": 10, // 默认为10条数据/页
        *    "showExport": false,  // 默认为不显示导出按钮
+       *    "sort_item": "create_time", // 默认为create_time字段的desc排序
+            "sort_order": "desc"
        *  }
        */
       options: {
@@ -222,59 +211,16 @@
     },
     data() {
       return {
-        tableKey: 0,
         list: null,
         total: null,
         listLoading: true,
         listQuery: {
-          page: 1,
-          limit: 20,
-          importance: undefined,
-          title: undefined,
-          type: undefined,
-          sort: '+id'
-        },
-        importanceOptions: [1, 2, 3],
-        calendarTypeOptions,
-        sortOptions: [{ label: 'ID Ascending', key: '+id' }, { label: 'ID Descending', key: '-id' }],
-        statusOptions: ['published', 'draft', 'deleted'],
-        showReviewer: false,
-        temp: {
-          id: undefined,
-          importance: 1,
-          remark: '',
-          timestamp: new Date(),
-          title: '',
-          type: '',
-          status: 'published'
-        },
-        dialogFormVisible: false,
-        dialogStatus: '',
-        textMap: {
-          update: 'Edit',
-          create: 'Create'
-        },
-        dialogPvVisible: false,
-        pvData: [],
-        rules: {
-          type: [{ required: true, message: 'type is required', trigger: 'change' }],
-          timestamp: [{ type: 'date', required: true, message: 'timestamp is required', trigger: 'change' }],
-          title: [{ required: true, message: 'title is required', trigger: 'blur' }]
+          page_no: 1,
+          page_size: 20,
+          sort_item: 'create_time',
+          sort_order: 'desc'
         },
         downloadLoading: false
-      }
-    },
-    filters: {
-      statusFilter(status) {
-        const statusMap = {
-          published: 'success',
-          draft: 'info',
-          deleted: 'danger'
-        }
-        return statusMap[status]
-      },
-      typeFilter(type) {
-        return calendarTypeKeyValue[type]
       }
     },
     created() {
@@ -295,65 +241,12 @@
         this.getList()
       },
       handleSizeChange(val) {
-        this.listQuery.limit = val
+        this.listQuery.page_size = val
         this.getList()
       },
       handleCurrentChange(val) {
         this.listQuery.page = val
         this.getList()
-      },
-      handleModifyStatus(row, status) {
-        this.$message({
-          message: '操作成功',
-          type: 'success'
-        })
-        row.status = status
-      },
-      resetTemp() {
-        this.temp = {
-          id: undefined,
-          importance: 1,
-          remark: '',
-          timestamp: new Date(),
-          title: '',
-          status: 'published',
-          type: ''
-        }
-      },
-      handleCreate() {
-        this.resetTemp()
-        this.dialogStatus = 'create'
-        this.dialogFormVisible = true
-        this.$nextTick(() => {
-          this.$refs['dataForm'].clearValidate()
-        })
-      },
-      createData() {
-        this.$refs['dataForm'].validate((valid) => {
-          if (valid) {
-            this.temp.id = parseInt(Math.random() * 100) + 1024 // mock a id
-            this.temp.author = 'vue-element-admin'
-            createArticle(this.temp).then(() => {
-              this.list.unshift(this.temp)
-              this.dialogFormVisible = false
-              this.$notify({
-                title: '成功',
-                message: '创建成功',
-                type: 'success',
-                duration: 2000
-              })
-            })
-          }
-        })
-      },
-      handleUpdate(row) {
-        this.temp = Object.assign({}, row) // copy obj
-        this.temp.timestamp = new Date(this.temp.timestamp)
-        this.dialogStatus = 'update'
-        this.dialogFormVisible = true
-        this.$nextTick(() => {
-          this.$refs['dataForm'].clearValidate()
-        })
       },
       handleDelete(row) {
         this.$notify({
