@@ -745,13 +745,13 @@ const ModelSchema = {
       }
     ]
   },
-  '菜单': {
-    'model': '菜单',
-    'modelPlural': '菜单',
-    'modelCamel': '菜单',
-    'modelCamelPlural': '菜单',
-    'modelUnderscore': '菜单',
-    'modelUnderscorePlural': '菜单',
+  'Menu': {
+    'model': 'Menu',
+    'modelPlural': 'Menus',
+    'modelCamel': 'menu',
+    'modelCamelPlural': 'menus',
+    'modelUnderscore': 'menu',
+    'modelUnderscorePlural': 'menus',
     'columns': [
       {
         'id': 'o107',
