@@ -1,5 +1,5 @@
 module.exports = {
 	NODE_ENV: '"development"',
 	ENV_CONFIG: '"dev"',
-	BASE_API: '"https://api.haomo-studio.com"'
+	BASE_API: '"http://zjk.haomo-studio.com/zhangjiakouOA"'
 }
