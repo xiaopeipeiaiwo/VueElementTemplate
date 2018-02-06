@@ -2,8 +2,8 @@
   <div class="app-container calendar-list-container">
     <!-- 过滤 -->
     <div class="filter-container">
-      <el-button class="filter-item" type="primary" v-waves icon="el-icon-search" @click="handleFilter">{{$t('table.search')}}</el-button>
-      <el-button class="filter-item" type="primary" :loading="downloadLoading" v-waves icon="el-icon-download" @click="handleDownload">{{$t('table.export')}}</el-button>
+      <el-button class="filter-item" type="primary" v-waves icon="el-icon-search" @click="handleFilter">搜索</el-button>
+      <el-button class="filter-item" type="primary" :loading="downloadLoading" v-waves icon="el-icon-download" @click="handleDownload">导出</el-button>
     </div>
     <!-- end 过滤 -->
 
@@ -37,6 +37,7 @@
   import _ from 'lodash'
   import request from '@/utils/request'
   import waves from '@/directive/waves' // 水波纹指令
+  import { parseTime } from '@/utils'
 
   export default {
     name: 'HmComplexTable',
@@ -171,12 +172,22 @@
       handleDownload() {
         this.downloadLoading = true
         import('@/vendor/Export2Excel').then(excel => {
+          // @TODO 修改下载excel的功能，请求所有的数据
           const tHeader = ['timestamp', 'title', 'type', 'importance', 'status']
           const filterVal = ['timestamp', 'title', 'type', 'importance', 'status']
           const data = this.formatJson(filterVal, this.list)
           excel.export_json_to_excel(tHeader, data, 'table-list')
           this.downloadLoading = false
         })
+      },
+      formatJson(filterVal, jsonData) {
+        return jsonData.map(v => filterVal.map(j => {
+          if (j === 'timestamp') {
+            return parseTime(v[j])
+          } else {
+            return v[j]
+          }
+        }))
       }
     }
   }

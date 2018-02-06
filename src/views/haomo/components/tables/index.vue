@@ -1,7 +1,8 @@
 <template>
   <div class="app-container calendar-list-container">
-    <hm-complex-table :schema="schema">
-    </hm-complex-table>
+    <hm-complex-table :schema="schema['HmUser']"></hm-complex-table>
+    <hm-complex-table :schema="schema['Department']"></hm-complex-table>
+    <hm-complex-table :schema="schema['Role']"></hm-complex-table>
   </div>
 </template>
 
@@ -23,7 +24,7 @@
     filters: {
     },
     created() {
-      this.schema = schema['HmUser']
+      this.schema = schema
     },
     methods: {}
   }
