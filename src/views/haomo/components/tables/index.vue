@@ -7,7 +7,7 @@
 
 <script>
   import HmComplexTable from './HmComplexTable.vue'
-  import schema from '../../schema'
+  import schema from '../../schemas/hm_org_schema'
 
   export default {
     name: 'HmComplexTable',

@@ -230,7 +230,8 @@
       getList() {
         const self = this
         self.listLoading = true
-        request(self.schema).then(resp => {
+        request(self.schema.modelUnderscorePlural).then(resp => {
+          console.log(resp)
           self.list = resp.data.data
           self.total = resp.data.total
           self.listLoading = false
