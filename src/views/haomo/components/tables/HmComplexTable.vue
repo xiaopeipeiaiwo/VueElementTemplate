@@ -10,9 +10,9 @@
     <!-- 表格 -->
     <el-table :data="list" v-loading="listLoading" element-loading-text="给我一点时间" border fit highlight-current-row
               style="width: 100%">
-      <el-table-column v-for="" align="center" :label="$t('table.id')" width="65">
+      <el-table-column v-for="column in showColumns" align="center" :label="column.name">
         <template slot-scope="scope">
-          <span>{{scope.row.id}}</span>
+          <span>{{ scope.row[column.code] }}</span>
         </template>
       </el-table-column>
     </el-table>
@@ -113,19 +113,27 @@
           sort_item: 'create_time',
           sort_order: 'desc'
         },
-        downloadLoading: false
+        downloadLoading: false,
+
+        showColumns: []
       }
     },
     created() {
-      // @TODO init
+      this.init()
 
       this.getList()
     },
     methods: {
       init() {
-        let self = this
-        if(!self.columns || !self.columns.length){
-          self.columns =
+        const self = this
+        if (!self.columns || !self.columns.length) {
+          _.each(self.schema['columns'], function(column){
+            const tmp = JSON.parse(JSON.stringify(column))
+            self.$set(tmp, 'code', tmp.code.toLowerCase())
+            self.showColumns.push(tmp)
+          })
+        } else {
+          self.showColumns = JSON.parse(JSON.stringify(self.columns))
         }
       },
       getList() {
@@ -134,7 +142,7 @@
         request(self.schema.modelUnderscorePlural).then(resp => {
           console.log(resp)
           self.list = resp.data
-          self.total = resp.headers.total
+          self.total = parseInt(resp.headers.total)
           self.listLoading = false
         })
       },
