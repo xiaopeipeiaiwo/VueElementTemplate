@@ -20,8 +20,8 @@
 
     <!-- 翻页 -->
     <div class="pagination-container">
-      <el-pagination background @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page.sync="listQuery.page"
-                     :page-sizes="[10,20,50]" :page-size="listQuery.limit" layout="total, sizes, prev, pager, next, jumper" :total="total">
+      <el-pagination background @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page.sync="listQuery.page_no"
+                     :page-sizes="[10,20,50]" :page-size="listQuery.page_size" layout="total, sizes, prev, pager, next, jumper" :total="total">
       </el-pagination>
     </div>
     <!-- end翻页 -->
@@ -116,7 +116,7 @@
         },
         downloadLoading: false,
 
-        showColumns: []
+        showColumns: [] // 要显示的列数据
       }
     },
     created() {
@@ -128,7 +128,7 @@
       init() {
         const self = this
         if (!self.columns || !self.columns.length) {
-          _.each(self.schema['columns'], function(column){
+          _.each(self.schema['columns'], function(column) {
             const tmp = JSON.parse(JSON.stringify(column))
             self.$set(tmp, 'code', tmp.code.toLowerCase())
             self.showColumns.push(tmp)
@@ -140,7 +140,9 @@
       getList() {
         const self = this
         self.listLoading = true
-        request(self.schema.modelUnderscorePlural).then(resp => {
+        request(self.schema.modelUnderscorePlural, {
+          params: self.listQuery
+        }).then(resp => {
           console.log(resp)
           self.list = resp.data
           self.total = parseInt(resp.headers.total)
@@ -148,7 +150,7 @@
         })
       },
       handleFilter() {
-        this.listQuery.page = 1
+        this.listQuery.page_no = 1
         this.getList()
       },
       handleSizeChange(val) {
@@ -156,7 +158,7 @@
         this.getList()
       },
       handleCurrentChange(val) {
-        this.listQuery.page = val
+        this.listQuery.page_no = val
         this.getList()
       },
       handleDelete(row) {
