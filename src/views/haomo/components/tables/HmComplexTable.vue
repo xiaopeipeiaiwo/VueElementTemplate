@@ -173,7 +173,6 @@
 
         _.each(Object.keys(ret[self.schema['modelUnderscore']]), function(column) {
           const operValue = ret[self.schema['modelUnderscore']][column]
-          console.log(`column: ${column}`)
           if (Object.keys(operValue)[0] === 'like') {
             ret[self.schema['modelUnderscore']][column]['like'] = '%' + ret[self.schema['modelUnderscore']][column]['like'] + '%'
           }
@@ -255,7 +254,6 @@
         request(self.schema.modelUnderscorePlural, {
           params: params
         }).then(resp => {
-          console.log(resp)
           self.list = resp.data
           self.total = parseInt(resp.headers.total)
           self.listLoading = false
