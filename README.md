@@ -37,7 +37,6 @@
 
 ### 目录结构
 
-
 ```bash
 # 克隆项目
 git clone https://github.com/PanJiaChen/vue-element-admin.git
@@ -60,6 +59,16 @@ npm run build:sit
 
 # 构建生成环境
 npm run build:prod
+```
+
+### 生成文档
+
+```bash
+# 实时预览文档
+npm run styleguide
+
+# 生成html
+npm run styleguide:build
 ```
 
 ### 其它

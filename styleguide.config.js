@@ -13,6 +13,7 @@ function resolve(dir) {
 }
 
 module.exports = {
+  styleguideDir: './dist-styleguide',
   components: 'src/views/haomo/components/**/[A-Z]*.vue',
   ignore: [
     '**/index.vue'
