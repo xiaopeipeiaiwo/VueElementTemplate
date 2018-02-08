@@ -49,6 +49,7 @@
   import request from '@/utils/request'
   import waves from '@/directive/waves' // 水波纹指令
   import { parseTime } from '@/utils'
+  import * as excel from '@/vendor/Export2Excel'
 
   export default {
     name: 'HmComplexTable',
@@ -282,14 +283,12 @@
       },
       handleDownload() {
         this.downloadLoading = true
-        import('@/vendor/Export2Excel').then(excel => {
-          // @TODO 修改下载excel的功能，请求所有的数据
-          const tHeader = ['timestamp', 'title', 'type', 'importance', 'status']
-          const filterVal = ['timestamp', 'title', 'type', 'importance', 'status']
-          const data = this.formatJson(filterVal, this.list)
-          excel.export_json_to_excel(tHeader, data, 'table-list')
-          this.downloadLoading = false
-        })
+        // @TODO 修改下载excel的功能，请求所有的数据
+        const tHeader = ['timestamp', 'title', 'type', 'importance', 'status']
+        const filterVal = ['timestamp', 'title', 'type', 'importance', 'status']
+        const data = this.formatJson(filterVal, this.list)
+        excel.export_json_to_excel(tHeader, data, 'table-list')
+        this.downloadLoading = false
       },
       formatJson(filterVal, jsonData) {
         return jsonData.map(v => filterVal.map(j => {
