@@ -8,8 +8,6 @@ const path = require('path')
 const utils = require('./build/utils')
 // const baseWebpackConfig = require('./build/webpack.base.conf')
 
-console.log(path.join(__dirname, 'src/assets/custom-theme/index.css'))
-
 function resolve(dir) {
   return path.join(__dirname, dir)
 }
@@ -62,10 +60,7 @@ module.exports = {
   sections: sections,
   assetsDir: resolve('src/assets/'),
   require: [
-    resolve('./src/main.js'),
-    resolve('./src/assets/custom-theme/index.css'),
-    resolve('./src/assets/custom-theme/fonts/element-icons.ttf'),
-    resolve('./src/assets/custom-theme/fonts/element-icons.woff')
+    resolve('./src/main.js')
   ],
   webpackConfig: Object.assign({
     resolve: {

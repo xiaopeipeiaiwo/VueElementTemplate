@@ -83,12 +83,19 @@
       },
       /**
        * 搜索过滤选项。默认没有过滤功能。完整的示例为：
+       *
        *  {
+       *
        *    "column1": {
+       *
        *      like: '%abc%',                 模糊查询,包含字符”abc”
+       *
        *      notLike: ''                    模糊查询,不包含字符
+       *
        *      between: [1, 10],              取值在[1,10]之间,包含1与10
+       *
        *      notBetween: [1, 10],           取值小于1大于10
+       *
        *      isNull: true,     // 只能为true 判断字段是否为空
        *      isNotNull: true,  // 只能为true 判断字段是否不为空
        *      equalTo: "abc",                相等于
