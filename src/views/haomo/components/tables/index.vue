@@ -13,7 +13,7 @@
   import schema from '../../schemas/hm_org_schema'
 
   export default {
-    name: 'HmComplexTable',
+    name: 'HmComplexTableIndex',
     // 继承其他组件
     extends: {},
     // 使用其它组件

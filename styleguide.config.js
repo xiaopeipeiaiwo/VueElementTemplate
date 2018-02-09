@@ -26,20 +26,13 @@ const sections = [
   },
   {
     name: '组件',
-    sections: [
-      {
-        name: '列表',
-        content: './src/views/haomo/components/tables/HmComplexTable.md'
-      },
-      {
-        name: '表单',
-        content: './src/views/haomo/components/forms/HmComplexForm.md'
-      },
-      {
-        name: '详情',
-        content: './src/views/haomo/components/details/HmComplexDetail.md'
-      }
-    ]
+    components: function() {
+      return [
+        './src/views/haomo/components/tables/HmComplexTable.vue',
+        './src/views/haomo/components/forms/HmComplexForm.vue',
+        './src/views/haomo/components/details/HmComplexDetail.vue'
+      ]
+    }
   },
   {
     name: '页面',
@@ -63,12 +56,16 @@ module.exports = {
   ignore: [
     '**/index.vue'
   ],
+  showUsage: true,
   defaultExample: true,
+  showCode: true,
   sections: sections,
+  assetsDir: resolve('src/assets/'),
   require: [
-    path.join(__dirname, 'src/assets/custom-theme/index.css'),
-    path.join(__dirname, 'src/assets/custom-theme/fonts/element-icons.ttf'),
-    path.join(__dirname, 'src/assets/custom-theme/fonts/element-icons.woff')
+    resolve('./src/main.js'),
+    resolve('./src/assets/custom-theme/index.css'),
+    resolve('./src/assets/custom-theme/fonts/element-icons.ttf'),
+    resolve('./src/assets/custom-theme/fonts/element-icons.woff')
   ],
   webpackConfig: Object.assign({
     resolve: {
@@ -132,7 +129,5 @@ module.exports = {
         }
       ]
     }
-  }),
-  showUsage: true,
-  showCode: true
+  })
 }
