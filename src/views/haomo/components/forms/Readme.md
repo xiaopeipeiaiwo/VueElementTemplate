@@ -1,3 +1,96 @@
+输入姓名:
+
+```jsx
+<input/>  JACK
+```
+
+选择性别:
+
+```jsx
+<input type="radio" value="男" name="gender"/>
+<input type="radio" value="女" name="gender"/>
+```
+
+输入年龄:
+
+```jsx
+<input/> 18
+```
+
+输入出生日期:
+
+```jsx
+<input/> 20180207
+```
+
+上传照片:
+
+```jsx
+<input type="file"/>
+```
+
+学历:
+
+```jsx
+
+<select>
+ <option>博士</option>
+ <option>硕士</option>
+ <option>本科</option>
+ <option>专科</option>
+ <option>其他</option>
+</select>
+```
+
+密码:
+
+```jsx
+<input type="password"/>
+```
+
+填写网站:
+
+```jsx
+<input type="url"/>
+```
+
+最喜欢的颜色:
+
+```jsx
+
+<input type="color"/>
+```
+
+填写手机号:
+
+```jsx
+<input type="number"/>
+```
+
+填写邮箱:
+
+```jsx
+<input type="email"/>
+```
+
+填写地址:
+
+```jsx
+<textarea>家庭地址</textarea>
+```
+
+
+
+
+
+
+
+
+
+
+
+
+```vue
 <template>
   <el-row type="flex" class="hm-form">
     <!--左侧留白-->
@@ -168,3 +261,5 @@
   }
 
 </style>
+
+```
