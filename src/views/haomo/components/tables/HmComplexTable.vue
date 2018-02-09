@@ -50,26 +50,39 @@
   import waves from '@/directive/waves' // 水波纹指令
   import { parseTime } from '@/utils'
   import * as excel from '@/vendor/Export2Excel'
+  import { Button, Table, TableColumn, Pagination, Loading } from 'element-ui'
 
+  /**
+   * 毫末科技的表格组件.
+   *
+   *   demo地址: factory.haomo-studio.com/vue-element/#/haomo/components/table
+   * @author 胡小根
+   */
   export default {
     name: 'HmComplexTable',
     // 集成其他组件
-    extends: {},
+    extends: {
+    },
     // 使用其它组件
-    components: {},
+    components: {
+      'el-button': Button,
+      'el-table': Table,
+      'el-table-column': TableColumn,
+      'el-pagination': Pagination
+    },
     // 混入公共对象
     mixins: [],
     props: {
       /**
        * 组件所使用的表定义schema。表定义schema，请使用 model2codejs 从pdm文件生成schema。
-       * 对于所有毫末科技的组件，必须传schema，已完成数据的交互
+       * 对于所有毫末科技的组件，必须传schema，以完成数据的交互
        */
       schema: {
         type: Object,
         required: true
       },
       /**
-       * 搜索过滤选项。默认没有过滤功能。完整的实力为：
+       * 搜索过滤选项。默认没有过滤功能。完整的示例为：
        *  {
        *    "column1": {
        *      like: '%abc%',                 模糊查询,包含字符”abc”
@@ -141,7 +154,8 @@
       }
     },
     directives: {
-      waves
+      waves,
+      Loading
     },
     data() {
       return {
@@ -243,6 +257,12 @@
           delete filters[tableName]['placeholder']
           self.$set(self.listQuery, 'filters', filters)
         }
+
+        if (!request.defaults.baseURL) {
+          request.defaults.baseURL = '/org/api'
+        }
+        console.log(request.defaults)
+        console.log(`request.defaults.baseURL: ${request.defaults.baseURL}`)
       },
       getList() {
         const self = this
