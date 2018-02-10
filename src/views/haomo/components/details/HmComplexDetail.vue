@@ -73,8 +73,9 @@
           params: params
         }).then(resp => {
           self.list = resp.data
-          self.detail = self.list[0]
           console.log(self.list)
+          self.detail = self.list[0]
+          // console.log(self.list)
         })
       }
     }

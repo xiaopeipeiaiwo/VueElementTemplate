@@ -1,12 +1,13 @@
 <template>
   <div>
-    <hm-complex-form>
+    <hm-complex-form :schema="schema['HmUser']">
     </hm-complex-form>
   </div>
 </template>
 
 <script>
   import HmComplexForm from './HmComplexForm.vue'
+  import schema from '../../schemas/hm_org_schema'
 
   export default {
     name: 'HmComplexForm',
@@ -24,6 +25,8 @@
     filters: {
     },
     created() {
+      this.schema = schema
+      // console.log(this.schema)
     },
     methods: {}
   }
