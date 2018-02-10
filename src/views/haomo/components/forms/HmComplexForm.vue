@@ -64,7 +64,7 @@
         </el-form>-->
       <el-form label-width="110px" status-icon style="width:80%;margin:0 auto">
         <el-form-item v-for="column in showColumns" :label="column.name">
-          <el-input :placeholder="column.codeCamel"></el-input>
+          <el-input :placeholder="column.name"></el-input>
         </el-form-item>
         <el-form-item>
           <el-col :span="12">
@@ -103,7 +103,6 @@
     },
     data() {
       return {
-        list: null,
         form: null,
         showColumns: [] // 要显示的列数据
         // form: {
