@@ -32,6 +32,9 @@
         type: Object,
         required: true
       },
+      /*
+      * 在详情页需要传入用户的id用来带出用户信息
+      * */
       userId: {
         type: null,
         required: true
@@ -64,18 +67,23 @@
           request.defaults.baseURL = '/org/api'
         }
         console.log(request.defaults)
+        console.log(`request.defaults.baseURL: ${request.defaults.baseURL}`)
       },
-      getList() {
+      getList: function () {
         const self = this
         self.listLoading = true
         const params = {}
+        // 拿到所有的用户
         request(self.schema.modelUnderscorePlural, {
           params: params
         }).then(resp => {
           self.list = resp.data
-          console.log(self.list)
-          self.detail = self.list[0]
-          // console.log(self.list)
+          // 匹配需要展示的用户
+          _.each(self.list, function (item) {
+            if (item.id === self.userId) {
+              self.detail = item
+            }
+          })
         })
       }
     }
