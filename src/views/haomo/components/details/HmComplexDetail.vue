@@ -150,7 +150,4 @@
   .title{
     text-align: center;
   }
-  .detail-content{
-    background-color: #F8F8F8;
-  }
 </style>
