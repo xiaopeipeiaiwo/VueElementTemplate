@@ -104,7 +104,6 @@
       },
       init() {
         const self = this
-        console.log(self.schema);
         // 处理要显示的列
         if (!self.columns || !self.columns.length) {
           _.each(self.schema['columns'], function(column) {
@@ -137,8 +136,6 @@
         request(self.schema.modelUnderscorePlural, {
           params: params
         }).then(resp => {
-          console.log('=============')
-          console.log(self.schema.modelUnderscorePlural)
           self.list = resp.data
           // 匹配需要展示的用户
           _.each(self.list, function(item) {
