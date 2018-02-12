@@ -1,7 +1,6 @@
 <template>
   <el-row type="flex">
-    <el-col :span="6"><div></div></el-col>
-    <el-col :span="12" class="detail-content">
+    <el-col :span="24" class="detail-content">
       <h2 class="title">详情页面</h2>
       <el-form :data="detail" label-width="110px" status-icon style="width:80%;margin:0 auto">
         <el-form-item v-for="(column,index) in showColumns" :key="index" :label="column.name">
@@ -9,7 +8,6 @@
         </el-form-item>
       </el-form>
     </el-col>
-    <el-col :span="6"><div ></div></el-col>
   </el-row>
 </template>
 
