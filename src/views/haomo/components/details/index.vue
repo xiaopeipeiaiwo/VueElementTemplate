@@ -1,6 +1,6 @@
 <template>
   <div>
-    <hm-complex-detail :schema="schema['HmUser']" :userId="userId">
+    <hm-complex-detail :schema="schema['HmUser']" :userId="userId" :columns="showUserColumns">
     </hm-complex-detail>
   </div>
 </template>
@@ -18,7 +18,9 @@
       'hm-complex-detail': HmComplexDetail
     },
     data() {
-      return {}
+      return {
+        showUserColumns: ['mobile', 'loginid']
+      }
     },
     computed: {
     },

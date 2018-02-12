@@ -32,6 +32,32 @@
         type: Object,
         required: true
       },
+      /**
+       * 指定要显示的列。默认为根据schema得到的所有列。完整示例为：
+       *  [
+       *    {
+       *      "name": "姓名",
+       *      "code": "username",
+       *      "render": function(value){
+       *        return "<a href='value'></a>"
+       *      }
+       *    },
+       *    "mobile",
+       *    "sexual"
+       *  ]
+       */
+      columns: {
+        type: Array,
+        required: false,
+        validator: function(value) {
+          if (typeof value !== 'object') {
+            console.warn(`传入的columns不符合要求，必须是数组`)
+            return false
+          }
+
+          return true
+        }
+      },
       /*
       * 在详情页需要传入用户的id用来带出用户信息
       * */
@@ -52,17 +78,51 @@
     filters: {
     },
     created() {
-      this.init()
       this.getList()
+      this.init()
     },
     methods: {
+      validate() {
+        const self = this
+        // this.columns数组元素本身必须是string或者object. 且必须是schema中定义的列
+        // 由于vue中不允许通过其他的props来验证当前props，只能在created里进行调用
+        _.each(self.columns, function(item) {
+          if (!item) {
+            return 0
+          }
+
+          if (typeof item !== 'string' && typeof item !== 'object') {
+            console.error(`传入的columns不符合要求，数组元素必须是字符串或对象`)
+          }
+          if (typeof item === 'string' && !_.keyBy(self.schema['columns'], 'code')[item.toUpperCase()]) {
+            console.error(`传入的columns不符合要求，字符串元素[${item}]必须是schema中定义的列[code]`)
+          }
+          if (typeof item === 'object' && !_.keyBy(self.schema['columns'], 'code')[item['code'].toUpperCase()]) {
+            console.error(`传入的columns不符合要求，元素的code属性[${item['code']}]必须是schema中定义的列[code]`)
+          }
+        })
+      },
       init() {
         const self = this
-        _.each(self.schema['columns'], function(column) {
-          const tmp = JSON.parse(JSON.stringify(column))
-          self.showColumns.push(tmp)
-        })
-
+        console.log(self.schema);
+        // 处理要显示的列
+        if (!self.columns || !self.columns.length) {
+          _.each(self.schema['columns'], function(column) {
+            const tmp = JSON.parse(JSON.stringify(column))
+            self.showColumns.push(tmp)
+          })
+        } else {
+          self.showColumns = [];
+          // 将字符串对象进行替换处理
+          _.each(self.schema['columns'], function(column) {
+            _.each(self.columns,function(item){
+              if(column.codeCamel===item){
+                const tmp = JSON.parse(JSON.stringify(column))
+                self.showColumns.push(tmp)
+              }
+            })
+          })
+        }
         if (!request.defaults.baseURL) {
           request.defaults.baseURL = '/org/api'
         }
