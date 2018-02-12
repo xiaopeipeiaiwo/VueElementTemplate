@@ -4,7 +4,7 @@
     <el-col :span="12" class="detail-content">
       <h2 class="title">详情页面</h2>
       <el-form :data="detail" label-width="110px" status-icon style="width:80%;margin:0 auto">
-        <el-form-item v-for="column in showColumns" :label="column.name">
+        <el-form-item v-for="(column,index) in showColumns" :key="index" :label="column.name">
           <div>{{detail[column.codeCamel]}}</div>
         </el-form-item>
       </el-form>
@@ -129,7 +129,7 @@
         console.log(request.defaults)
         console.log(`request.defaults.baseURL: ${request.defaults.baseURL}`)
       },
-      getList: function () {
+      getList: function() {
         const self = this
         self.listLoading = true
         const params = {}
@@ -137,9 +137,11 @@
         request(self.schema.modelUnderscorePlural, {
           params: params
         }).then(resp => {
+          console.log('=============')
+          console.log(self.schema.modelUnderscorePlural)
           self.list = resp.data
           // 匹配需要展示的用户
-          _.each(self.list, function (item) {
+          _.each(self.list, function(item) {
             if (item.id === self.userId) {
               self.detail = item
             }

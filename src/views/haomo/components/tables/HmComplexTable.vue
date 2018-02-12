@@ -21,7 +21,7 @@
     <!-- 表格 -->
     <el-table :data="list" v-loading="listLoading" element-loading-text="给我一点时间" border fit highlight-current-row
               style="width: 100%">
-      <el-table-column v-for="column in showColumns" align="center" :label="column.name">
+      <el-table-column v-for="(column,index) in showColumns" :key="index" align="center" :label="column.name">
         <template slot-scope="scope">
           <span>{{ scope.row[column.code] }}</span>
         </template>
@@ -241,16 +241,22 @@
             self.$set(tmp, 'code', tmp.code.toLowerCase())
             self.showColumns.push(tmp)
           })
+          console.log(self.showColumns)
         } else {
           self.showColumns = JSON.parse(JSON.stringify(self.columns))
+          console.log('1111111')
+          console.log(self.showColumns)
           // 将字符串对象进行替换处理
           _.each(self.showColumns, function(column, index) {
             if (typeof column === 'string') {
               const tmp = _.keyBy(self.schema['columns'], 'code')[column.toUpperCase()]
+              console.log(tmp)
               self.$set(tmp, 'code', tmp.code.toLowerCase())
               self.$set(self.showColumns, index, tmp)
             }
           })
+          console.log('2222222')
+          console.log(self.showColumns)
         }
 
         // 处理过滤条件
