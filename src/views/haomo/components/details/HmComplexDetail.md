@@ -1,7 +1,7 @@
 ### 基本使用
 
 ```jsx
-    <hm-complex-table   :userId="0e26566e953449a7a7500c34be39fd26"   
+    <hm-complex-detail   :userId="0e26566e953449a7a7500c34be39fd26"   
                         :schema="{
                                    'model': 'HmUser',
                                    'modelPlural': 'HmUsers',
@@ -197,7 +197,7 @@
                                        'type': 'number'
                                      }
                                    ]
-                                 }"></hm-complex-table>
+                                 }"></hm-complex-detail>
 ```
 ### 指定列表显示的列
 
