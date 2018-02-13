@@ -109,6 +109,15 @@ export const asyncRouterMap = [
               title: '详情',
               icon: 'table'
             }
+          },
+          {
+            path: 'panel',
+            component: _import('haomo/components/panel/index'),
+            name: 'haomo-panel',
+            meta: {
+              title: '面板',
+              icon: 'table'
+            }
           }
         ]
       },
