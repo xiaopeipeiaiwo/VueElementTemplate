@@ -1,17 +1,18 @@
 <template>
   <el-row type="flex">
-    <el-col :span="24" class="detail-content" style="margin:0 50px;">
+    <el-col :span="hmCollapse" class="detail-content" style="margin:0 auto">
       <h2 class="title">面板页面</h2>
-      <el-card class="box-card">
-        <div slot="header" class="clearfix">
-          <span>这是面板Demo</span>
+      <el-card class="box-card" :style="hmStyle">
+        <div slot="header" class="clearfix" :class="hmTitleClass">
+          <span>{{hmTitle}}</span>
         </div>
-        <div style="height:100px;">
-          <el-form :data="detail" label-width="110px" status-icon style="width:80%;margin:0 auto">
-            <el-form-item v-for="(column,index) in showColumns" :key="index" :label="column.name">
-              <div>{{detail[column.codeCamel]}}</div>
-            </el-form-item>
-          </el-form>
+        <div :style="hmPanelHeight" :class="hmContentClass">
+          <span>{{hmContentText}}</span>
+          <!--<el-form :data="detail" label-width="110px" status-icon style="width:80%;margin:0 auto">-->
+            <!--<el-form-item v-for="(column,index) in showColumns" :key="index" :label="column.name">-->
+              <!--<div>{{detail[column.codeCamel]}}</div>-->
+            <!--</el-form-item>-->
+          <!--</el-form>-->
         </div>
       </el-card>
     </el-col>
@@ -69,6 +70,34 @@
       userId: {
         type: null,
         required: true
+      },
+      hmTitle: {
+        type: null,
+        required: false
+      },
+      hmTitleClass: {
+        type: null,
+        required: false
+      },
+      hmContentClass: {
+        type: null,
+        required: false
+      },
+      hmContentText: {
+        type: null,
+        required: false
+      },
+      hmStyle: {
+        type: Object,
+        required: false
+      },
+      hmPanelHeight: {
+        type: Object,
+        required: false
+      },
+      hmCollapse: {
+        type: null,
+        required: false
       }
     },
     data() {
@@ -155,6 +184,9 @@
 </script>
 <style scoped>
   .title{
+    text-align: center;
+  }
+  .center{
     text-align: center;
   }
 </style>
