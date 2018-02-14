@@ -111,9 +111,10 @@
         } else {
           self.showColumns = [];
           // 将字符串对象进行替换处理
-          _.each(self.schema['columns'], function(column) {
-            _.each(self.columns,function(item){
-              if(column.codeCamel===item){
+          _.each(self.columns,function(item){
+            _.each(self.schema['columns'], function(column) {
+              if(item===column.codeCamel){
+                console.log(item);
                 const tmp = JSON.parse(JSON.stringify(column))
                 self.showColumns.push(tmp)
               }

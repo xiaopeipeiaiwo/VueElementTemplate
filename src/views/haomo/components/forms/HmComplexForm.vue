@@ -61,9 +61,10 @@
             </el-col>
           </el-form-item>
         </el-form>-->
-      <el-form label-width="110px" status-icon style="width:80%;margin:0 auto">
-        <el-form-item v-for="(column,index) in showFields" :key="index" :label="column.name">
-          <el-input :placeholder="column.name" v-model="formModel[column.codeCamel]"></el-input>
+      <el-form ref="form" :model="formModel" :rules="rules" label-width="110px" status-icon style="width:80%;margin:0 auto">
+        <el-form-item v-for="(column,index) in showFields" :key="index" :label="column.name" :prop="column.codeCamel">
+          <el-input v-if="column.codeCamel==='password'" type="password" :placeholder="column.name" v-model="formModel[column.codeCamel]"></el-input>
+          <el-input v-if="column.codeCamel!=='password'"  :placeholder="column.name" v-model="formModel[column.codeCamel]"></el-input>
         </el-form-item>
         <el-form-item>
           <el-col :span="12">
@@ -123,7 +124,7 @@
       return {
         form: null,
         formModel: {}, // 双向绑定的数据变量
-        showFields: [] // 要显示的字段
+        showFields: [], // 要显示的字段
         // form: {
         //   name: '',
         //   gender: '男',
@@ -138,32 +139,25 @@
         //   email: '',
         //   address: ''
         // },
-        // rules: {
-        //   name: [
-        //     { required: true, message: '请输入姓名', trigger: 'blur' },
-        //     { min: 2, max: 5, message: '长度在 2 到 5 个字符', trigger: 'blur' }
-        //   ],
-        //   age: [
-        //     { required: true, message: '请输入年龄', trigger: 'blur' },
-        //     { type: 'number', message: '年龄必须为数字', trigger: 'change' }
-        //   ],
-        //   website: [
-        //     { required: true, message: '请输入网址', trigger: 'blur' },
-        //     { pattern: /[a-zA-z]+:\/\/[^\s]*/, message: '请输入正确的网址', trigger: 'change' }
-        //   ],
-        //   password: [
-        //     { required: true, message: '请输入密码', trigger: 'blur' },
-        //     { pattern: /^(?![0-9]+$)(?![a-zA-Z]+$)[0-9A-Za-z]{6,20}$/, message: '密码必须同时包含数字和字母 6-20位', trigger: 'change' }
-        //   ],
-        //   phone: [
-        //     { type: 'number', required: true, message: '请输入手机号', trigger: 'blur' },
-        //     { pattern: /^1[34578]\d{9}$/, message: '请输入正确的手机号', trigger: 'change' }
-        //   ],
-        //   email: [
-        //     { required: true, message: '请输入邮箱地址', trigger: 'blur' },
-        //     { type: 'email', message: '请输入正确的邮箱地址', trigger: 'blur,change' }
-        //   ]
-        // }
+        rules: {
+          username: [
+            { required: true, message: '请输入用户名', trigger: 'blur' },
+            { min: 2, max: 10, message: '长度在 2 到 10 个字符', trigger: 'blur' }
+          ],
+          loginid: [
+            { required: true, message: '请输入登陆ID', trigger: 'blur' }
+          ],
+          password: [
+            { required: true, message: '请输入密码', trigger: 'blur' },
+            { pattern: /^(?![0-9]+$)(?![a-zA-Z]+$)[0-9A-Za-z]{6,20}$/, message: '密码必须同时包含数字和字母 6-20位', trigger: 'change' }
+          ],
+          mobile: [
+            { pattern: /^((0\d{2,3}-\d{7,8})|(1[3584]\d{9}))$/, message: '请输入正确的电话号码或手机号', trigger: 'blur&change' }
+          ],
+          email: [
+            { type: 'email', message: '请输入正确的邮箱地址', trigger: 'blur&change' }
+          ]
+        }
       }
     },
 
@@ -178,21 +172,21 @@
         if (!self.fields || !self.fields.length) {
           _.each(self.schema['columns'], function(column) {
             const tmp = JSON.parse(JSON.stringify(column))
-            self.$set(tmp, 'code', tmp.code.toLowerCase())
+            // self.$set(tmp, 'code', tmp.code.toLowerCase())
             self.showFields.push(tmp)
           })
-          console.log(self.showFields)
+          // console.log(self.showFields)
         } else { // 如果传入了fields，则只显示传入的字段
           self.showFields = JSON.parse(JSON.stringify(self.fields))
           console.log('1111111')
-          console.log(self.showFields)
+          // console.log(self.showFields)
           // 将字符串对象进行替换处理
           _.each(self.showFields, function(column, index) {
             if (typeof column === 'string') {
               // 生成一个新对象
-              var tmp = _.keyBy(self.schema['columns'], 'code')[column.toUpperCase()]
-              console.log(tmp)
-              self.$set(tmp, 'code', tmp.code.toLowerCase())
+              const tmp = _.keyBy(self.schema['columns'], 'code')[column.toUpperCase()]
+              // console.log(tmp)
+              // self.$set(tmp, 'code', tmp.code.toLowerCase())
               self.$set(self.showFields, index, tmp)
             }
           })
@@ -218,22 +212,27 @@
        * 验证失败，禁止提交并给出提示
        */
       onSubmit() {
-        // this.formModel['X-Auth-Token'] = '111'
-        // console.log(this.formModel)
-        // console.log(this.schema)
-        request(this.schema.modelUnderscorePlural + '/new', {
-          params: this.formModel
-        }).then(resp => {
-          console.log(resp.data)
+        const self = this
+        console.log(self.formModel)
+        self.$refs.form.validate((valid) => {
+          if (valid) {
+            console.log('提交成功!')
+            request(self.schema.modelUnderscorePlural + '/new', {
+              method: 'post',
+              headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+              data: self.formModel
+            }).then(resp => {
+              console.log(resp.data)
+            })
+          } else {
+            console.log('提交失败!!')
+            return false
+          }
         })
-        // this.$refs.form.validate((valid) => {
-        //   if (valid) {
-        //     console.log('提交成功!')
-        //   } else {
-        //     console.log('提交失败!!')
-        //     return false
-        //   }
-        // })
+        // paramsSerializer: function(data) {
+        //   const keys = Object.keys(data)
+        //   return encodeURI(keys.map(name => `${name}=${data[name]}`).join('&'))
+        // }
       },
       // 重置
       /**
