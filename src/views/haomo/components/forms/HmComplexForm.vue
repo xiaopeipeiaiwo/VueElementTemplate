@@ -1,7 +1,10 @@
 <template>
   <el-row type="flex" class="hm-form">
-    <el-col :span="6"><div></div></el-col>
-    <el-col :span="12" style="border:1px solid orange"><div>
+    <el-col :span="6">
+      <div></div>
+    </el-col>
+    <el-col :span="12" style="border:1px solid orange">
+      <div>
         <h2 class="title">表单页面</h2>
         <!--表单部分-->
         <!--<el-form :model="form" ref="form" :rules="rules"  label-width="110px" status-icon style="width:80%;margin:0 auto">
@@ -61,29 +64,35 @@
             </el-col>
           </el-form-item>
         </el-form>-->
-      <el-form ref="form" :model="formModel" :rules="rules" label-width="110px" status-icon style="width:80%;margin:0 auto">
-        <el-form-item v-for="(column,index) in showFields" :key="index" :label="column.name" :prop="column.codeCamel">
-          <el-input v-if="column.codeCamel==='password'" type="password" :placeholder="column.name" v-model="formModel[column.codeCamel]"></el-input>
-          <el-input v-if="column.codeCamel!=='password'"  :placeholder="column.name" v-model="formModel[column.codeCamel]"></el-input>
-        </el-form-item>
-        <el-form-item>
-          <el-col :span="12">
-            <el-button type="primary" @click="onSubmit()">确定</el-button>
-          </el-col>
-          <el-col :span="12">
-            <el-button @click="resetForm()">重置</el-button>
-          </el-col>
-        </el-form-item>
-      </el-form>
+        <el-form ref="form" :model="formModel" :rules="rules" label-width="110px" status-icon
+                 style="width:80%;margin:0 auto">
+          <el-form-item v-for="(column,index) in showFields" :key="index" :label="column.name" :prop="column.codeCamel">
+            <el-input v-if="column.codeCamel==='password'" type="password" :placeholder="column.name"
+                      v-model="formModel[column.codeCamel]"></el-input>
+            <el-input v-if="column.codeCamel!=='password'" :placeholder="column.name"
+                      v-model="formModel[column.codeCamel]"></el-input>
+          </el-form-item>
+          <el-form-item>
+            <el-col :span="12">
+              <el-button type="primary" @click="onSubmit()">确定</el-button>
+            </el-col>
+            <el-col :span="12">
+              <el-button @click="resetForm()">重置</el-button>
+            </el-col>
+          </el-form-item>
+        </el-form>
       </div>
     </el-col>
-    <el-col :span="6"><div></div></el-col>
+    <el-col :span="6">
+      <div></div>
+    </el-col>
   </el-row>
 </template>
 
 <script>
   import _ from 'lodash'
   import request from '@/utils/request'
+  
   /**
    * 表单页面。
    */
@@ -110,12 +119,12 @@
       fields: {
         type: Array,
         required: false,
-        validator: function(value) {
+        validator: function (value) {
           if (typeof value !== 'object') {
             console.warn(`传入的fields不符合要求，必须是数组`)
             return false
           }
-
+          
           return true
         }
       }
@@ -141,26 +150,26 @@
         // },
         rules: {
           username: [
-            { required: true, message: '请输入用户名', trigger: 'blur' },
-            { min: 2, max: 10, message: '长度在 2 到 10 个字符', trigger: 'blur' }
+            {required: true, message: '请输入用户名', trigger: 'blur'},
+            {min: 2, max: 10, message: '长度在 2 到 10 个字符', trigger: 'blur'}
           ],
           loginid: [
-            { required: true, message: '请输入登陆ID', trigger: 'blur' }
+            {required: true, message: '请输入登陆ID', trigger: 'blur'}
           ],
           password: [
-            { required: true, message: '请输入密码', trigger: 'blur' },
-            { pattern: /^(?![0-9]+$)(?![a-zA-Z]+$)[0-9A-Za-z]{6,20}$/, message: '密码必须同时包含数字和字母 6-20位', trigger: 'change' }
+            {required: true, message: '请输入密码', trigger: 'blur'},
+            {pattern: /^(?![0-9]+$)(?![a-zA-Z]+$)[0-9A-Za-z]{6,20}$/, message: '密码必须同时包含数字和字母 6-20位', trigger: 'change'}
           ],
           mobile: [
-            { pattern: /^((0\d{2,3}-\d{7,8})|(1[3584]\d{9}))$/, message: '请输入正确的电话号码或手机号', trigger: 'blur&change' }
+            {pattern: /^((0\d{2,3}-\d{7,8})|(1[3584]\d{9}))$/, message: '请输入正确的电话号码或手机号', trigger: 'blur&change'}
           ],
           email: [
-            { type: 'email', message: '请输入正确的邮箱地址', trigger: 'blur&change' }
+            {type: 'email', message: '请输入正确的邮箱地址', trigger: 'blur&change'}
           ]
         }
       }
     },
-
+    
     created() {
       this.init()
       // console.log(this.schema)
@@ -170,7 +179,7 @@
         const self = this
         // 如果没有传fields，则全部显示
         if (!self.fields || !self.fields.length) {
-          _.each(self.schema['columns'], function(column) {
+          _.each(self.schema['columns'], function (column) {
             const tmp = JSON.parse(JSON.stringify(column))
             // self.$set(tmp, 'code', tmp.code.toLowerCase())
             self.showFields.push(tmp)
@@ -181,7 +190,7 @@
           console.log('1111111')
           // console.log(self.showFields)
           // 将字符串对象进行替换处理
-          _.each(self.showFields, function(column, index) {
+          _.each(self.showFields, function (column, index) {
             if (typeof column === 'string') {
               // 生成一个新对象
               const tmp = _.keyBy(self.schema['columns'], 'code')[column.toUpperCase()]
@@ -193,9 +202,9 @@
           console.log('2222222')
           console.log(self.showFields)
         }
-
+        
         // 提取v-model绑定的变量
-        _.each(self.showFields, function(item) {
+        _.each(self.showFields, function (item) {
           self.formModel[item.codeCamel] = ''
         })
         console.log(self.formModel)
@@ -219,8 +228,15 @@
             console.log('提交成功!')
             request(self.schema.modelUnderscorePlural + '/new', {
               method: 'post',
-              headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
-              data: self.formModel
+              headers: {'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'},
+              data: self.formModel,
+              transformRequest:
+                function (obj) {
+                  var str = [];
+                  for (var p in obj)
+                    str.push(encodeURIComponent(p) + "=" + encodeURIComponent(obj[p]));
+                  return str.join("&");
+                }
             }).then(resp => {
               console.log(resp.data)
             })
@@ -244,16 +260,16 @@
         this.$refs.form.resetFields()
       }
     }
-
+    
   }
 </script>
 <style scoped>
-  .title{
+  .title {
     line-height: 40px;
-    background:orange;
-    color:#fff;
-    text-align:center;
-    margin-top:0;
+    background: orange;
+    color: #fff;
+    text-align: center;
+    margin-top: 0;
   }
 
 </style>
