@@ -7,64 +7,7 @@
       <div>
         <h2 class="title">表单页面</h2>
         <!--表单部分-->
-        <!--<el-form :model="form" ref="form" :rules="rules"  label-width="110px" status-icon style="width:80%;margin:0 auto">
-          <el-form-item label="姓名" prop="name">
-            <el-input type="text" v-model="form.name" autofocus placeholder="请输入姓名"></el-input>
-          </el-form-item>
-          <el-form-item label="性别" prop="gender">
-            <el-radio-group v-model="form.gender">
-              <el-radio label="男"></el-radio>
-              <el-radio label="女"></el-radio>
-            </el-radio-group>
-          </el-form-item>
-          <el-form-item label="年龄" prop="age">
-            <el-input type="age" v-model.number="form.age" placeholder="请输入年龄"></el-input>
-          </el-form-item>
-          <el-form-item label="出生日期" prop="date">
-            <el-date-picker v-model="form.date" type="date" placeholder="选择日期"></el-date-picker>
-          </el-form-item>
-          <el-form-item label="照片" prop="img">
-            <input type="file">
-          </el-form-item>
-          &lt;!&ndash;选择学历&ndash;&gt;
-          <el-form-item label="学历" prop="education">
-            <el-select v-model="form.education" placeholder="请选择学历">
-              <el-option label="博士" value="doctor"></el-option>
-              <el-option label="硕士" value="master"></el-option>
-              <el-option label="本科" value="bachelor"></el-option>
-              <el-option label="专科" value="professional"></el-option>
-              <el-option label="其他" value="others"></el-option>
-            </el-select>
-          </el-form-item>
-          <el-form-item label="密码" prop="password">
-            <el-input type="password" v-model="form.password" placeholder="请输入密码"></el-input>
-          </el-form-item>
-          <el-form-item label="最常用的网站" prop="website">
-            <el-input type="url" v-model="form.url" placeholder="请输入网址"></el-input>
-          </el-form-item>
-          <el-form-item label="最喜欢的颜色" prop="color" class="color">
-            <input type="color" v-model="form.color" style="width:200px;height:36px;border:none;outline:0"/>
-          </el-form-item>
-          <el-form-item label="手机号" prop="phone">
-            <el-input v-model.number="form.phone" placeholder="请输入手机号"></el-input>
-          </el-form-item>
-          <el-form-item label="邮箱" prop="email">
-            <el-input v-model="form.email" placeholder="请输入邮箱"></el-input>
-          </el-form-item>
-          <el-form-item label="住址" prop="address">
-            <el-input type="textarea" placeholder="请填写地址" :autosize="{ minRows: 2, maxRows: 4}" resize="none" v-model="form.address"></el-input>
-          </el-form-item>
-          &lt;!&ndash;确定提交和重置&ndash;&gt;
-          <el-form-item>
-            <el-col :span="12">
-              <el-button type="primary" @click="onSubmit()">确定</el-button>
-            </el-col>
-            <el-col :span="12">
-              <el-button @click="resetForm()">重置</el-button>
-            </el-col>
-          </el-form-item>
-        </el-form>-->
-        <el-form ref="form" :model="formModel" :rules="rules" label-width="110px" status-icon
+        <el-form ref="form" :model="formModel" :rules="rules" label-width="110px"
                  style="width:80%;margin:0 auto">
           <el-form-item v-for="(column,index) in showFields" :key="index" :label="column.name" :prop="column.codeCamel">
             <el-input v-if="column.codeCamel==='password'" type="password" :placeholder="column.name"
@@ -92,7 +35,7 @@
 <script>
   import _ from 'lodash'
   import request from '@/utils/request'
-  
+
   /**
    * 表单页面。
    */
@@ -119,12 +62,12 @@
       fields: {
         type: Array,
         required: false,
-        validator: function (value) {
+        validator: function(value) {
           if (typeof value !== 'object') {
             console.warn(`传入的fields不符合要求，必须是数组`)
             return false
           }
-          
+
           return true
         }
       }
@@ -150,26 +93,26 @@
         // },
         rules: {
           username: [
-            {required: true, message: '请输入用户名', trigger: 'blur'},
-            {min: 2, max: 10, message: '长度在 2 到 10 个字符', trigger: 'blur'}
+            { required: true, message: '请输入用户名', trigger: 'blur' },
+            { min: 2, max: 10, message: '长度在 2 到 10 个字符', trigger: 'blur' }
           ],
           loginid: [
-            {required: true, message: '请输入登陆ID', trigger: 'blur'}
+            { required: true, message: '请输入登陆ID', trigger: 'blur' }
           ],
           password: [
-            {required: true, message: '请输入密码', trigger: 'blur'},
-            {pattern: /^(?![0-9]+$)(?![a-zA-Z]+$)[0-9A-Za-z]{6,20}$/, message: '密码必须同时包含数字和字母 6-20位', trigger: 'change'}
+            { required: true, message: '请输入密码', trigger: 'blur' },
+            { pattern: /^(?![0-9]+$)(?![a-zA-Z]+$)[0-9A-Za-z]{6,20}$/, message: '密码必须同时包含数字和字母 6-20位', trigger: 'change' }
           ],
           mobile: [
-            {pattern: /^((0\d{2,3}-\d{7,8})|(1[3584]\d{9}))$/, message: '请输入正确的电话号码或手机号', trigger: 'blur&change'}
+            { pattern: /^((0\d{2,3}-\d{7,8})|(1[3584]\d{9}))$/, message: '请输入正确的电话号码或手机号', trigger: 'blur&change' }
           ],
           email: [
-            {type: 'email', message: '请输入正确的邮箱地址', trigger: 'blur&change'}
+            { type: 'email', message: '请输入正确的邮箱地址', trigger: 'blur&change' }
           ]
         }
       }
     },
-    
+
     created() {
       this.init()
       // console.log(this.schema)
@@ -179,7 +122,7 @@
         const self = this
         // 如果没有传fields，则全部显示
         if (!self.fields || !self.fields.length) {
-          _.each(self.schema['columns'], function (column) {
+          _.each(self.schema['columns'], function(column) {
             const tmp = JSON.parse(JSON.stringify(column))
             // self.$set(tmp, 'code', tmp.code.toLowerCase())
             self.showFields.push(tmp)
@@ -202,9 +145,8 @@
           console.log('2222222')
           console.log(self.showFields)
         }
-        
         // 提取v-model绑定的变量
-        _.each(self.showFields, function (item) {
+        _.each(self.showFields, function(item) {
           self.formModel[item.codeCamel] = ''
         })
         console.log(self.formModel)
@@ -228,17 +170,19 @@
             console.log('提交成功!')
             request(self.schema.modelUnderscorePlural + '/new', {
               method: 'post',
-              headers: {'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'},
+              headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
               data: self.formModel,
               transformRequest:
-                function (obj) {
-                  var str = [];
-                  for (var p in obj)
-                    str.push(encodeURIComponent(p) + "=" + encodeURIComponent(obj[p]));
-                  return str.join("&");
+                function(obj) {
+                  var str = []
+                  for (var p in obj) {
+                    str.push(encodeURIComponent(p) + '=' + encodeURIComponent(obj[p]))
+                  }
+                  return str.join('&')
                 }
             }).then(resp => {
               console.log(resp.data)
+              self.resetForm()
             })
           } else {
             console.log('提交失败!!')
@@ -260,7 +204,7 @@
         this.$refs.form.resetFields()
       }
     }
-    
+
   }
 </script>
 <style scoped>

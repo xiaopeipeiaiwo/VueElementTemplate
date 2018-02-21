@@ -28,7 +28,6 @@
     },
     created() {
       this.schema = schema
-      // console.log(this.schema)
     },
     methods: {}
   }
