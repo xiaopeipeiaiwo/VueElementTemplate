@@ -1,12 +1,20 @@
 <template>
   <el-row type="flex">
-    <el-col :span="24" class="detail-content">
-      <h2 class="title">详情页面</h2>
-      <el-form :data="detail" label-width="110px" status-icon style="width:80%;margin:0 auto">
-        <el-form-item v-for="(column,index) in showColumns" :key="index" :label="column.name">
-          <div>{{detail[column.codeCamel]}}</div>
-        </el-form-item>
-      </el-form>
+    <el-col :span="hmCollapse" class="detail-content" style="margin:0 auto">
+      <h2 class="title">面板页面</h2>
+      <el-card class="box-card" :style="hmStyle">
+        <div slot="header" class="clearfix" :class="hmTitleClass">
+          <span>{{hmTitle}}</span>
+        </div>
+        <div :style="hmPanelHeight" :class="hmContentClass">
+          <span>{{hmContentText}}</span>
+          <!--<el-form :data="detail" label-width="110px" status-icon style="width:80%;margin:0 auto">-->
+            <!--<el-form-item v-for="(column,index) in showColumns" :key="index" :label="column.name">-->
+              <!--<div>{{detail[column.codeCamel]}}</div>-->
+            <!--</el-form-item>-->
+          <!--</el-form>-->
+        </div>
+      </el-card>
     </el-col>
   </el-row>
 </template>
@@ -57,11 +65,39 @@
         }
       },
       /*
-      * 在详情页需要传入用户的id用来带出用户信息
-      * */
+       * 在详情页需要传入用户的id用来带出用户信息
+       * */
       userId: {
         type: null,
         required: true
+      },
+      hmTitle: {
+        type: null,
+        required: false
+      },
+      hmTitleClass: {
+        type: null,
+        required: false
+      },
+      hmContentClass: {
+        type: null,
+        required: false
+      },
+      hmContentText: {
+        type: null,
+        required: false
+      },
+      hmStyle: {
+        type: Object,
+        required: false
+      },
+      hmPanelHeight: {
+        type: Object,
+        required: false
+      },
+      hmCollapse: {
+        type: null,
+        required: false
       }
     },
     data() {
@@ -111,10 +147,9 @@
         } else {
           self.showColumns = [];
           // 将字符串对象进行替换处理
-          _.each(self.columns,function(item){
-            _.each(self.schema['columns'], function(column) {
-              if(item===column.codeCamel){
-                console.log(item);
+          _.each(self.schema['columns'], function(column) {
+            _.each(self.columns,function(item){
+              if(column.codeCamel===item){
                 const tmp = JSON.parse(JSON.stringify(column))
                 self.showColumns.push(tmp)
               }
@@ -149,6 +184,9 @@
 </script>
 <style scoped>
   .title{
+    text-align: center;
+  }
+  .center{
     text-align: center;
   }
 </style>
