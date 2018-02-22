@@ -130,10 +130,10 @@
           // console.log(self.showFields)
         } else { // 如果传入了fields，则只显示传入的字段
           self.showFields = JSON.parse(JSON.stringify(self.fields))
-          console.log('1111111')
+          // console.log('1111111')
           // console.log(self.showFields)
           // 将字符串对象进行替换处理
-          _.each(self.showFields, function (column, index) {
+          _.each(self.showFields, function(column, index) {
             if (typeof column === 'string') {
               // 生成一个新对象
               const tmp = _.keyBy(self.schema['columns'], 'code')[column.toUpperCase()]
@@ -142,7 +142,7 @@
               self.$set(self.showFields, index, tmp)
             }
           })
-          console.log('2222222')
+          // console.log('2222222')
           console.log(self.showFields)
         }
         // 提取v-model绑定的变量
