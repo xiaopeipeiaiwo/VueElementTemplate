@@ -200,6 +200,7 @@
                                  }"></hm-complex-form>
 ```
 ### 指定显示的表单类型
+
 ```vue
 <template>
   <div>
@@ -210,17 +211,8 @@
 </template>
 
 <script>
-  import HmComplexForm from './HmComplexForm.vue'
-  import schema from '../../schemas/hm_org_schema'
-
   export default {
     name: 'HmComplexForm',
-    // 继承其他组件
-    extends: {},
-    // 使用其它组件
-    components: {
-      'hm-complex-form': HmComplexForm
-    },
     data() {
       return {
         schema: {
@@ -424,16 +416,9 @@
         showFields: ['username', 'loginid', 'password', 'mobile', 'email']
       }
     },
-    computed: {
-    },
-    filters: {
-    },
     created() {
       this.schema = schema
-    },
-    methods: {}
+    }
   }
 </script>
-<style scoped>
-</style>
 ```
