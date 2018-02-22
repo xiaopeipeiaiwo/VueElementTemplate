@@ -12,8 +12,7 @@
     "build:prod": "cross-env NODE_ENV=production env_config=prod node build/build.js",
     "build:sit": "cross-env NODE_ENV=production env_config=sit node build/build.js",
     "lint": "eslint --ext .js,.vue src",
-    "test": "npm run lint",
-    "postinstall": "cp .hooks/* .git/hooks/"
+    "test": "npm run lint"
   },
   "dependencies": {
     "axios": "0.17.1",
@@ -45,6 +44,9 @@
     "vuedraggable": "2.15.0",
     "vuex": "3.0.1",
     "xlsx": "^0.11.16"
+  },
+  "pre-commit": {
+    "run": ["lint"]
   },
   "devDependencies": {
     "autoprefixer": "7.2.3",
@@ -78,6 +80,7 @@
     "postcss-import": "11.0.0",
     "postcss-loader": "2.0.9",
     "postcss-url": "7.3.0",
+    "pre-commit": "^1.2.2",
     "pushstate-server": "3.0.1",
     "rimraf": "2.6.2",
     "sass-loader": "6.0.6",
