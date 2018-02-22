@@ -58,7 +58,7 @@
       /*
       * 在详情页需要传入用户的id用来带出用户信息
       * */
-      userId: {
+      tableId: {
         type: String,
         required: true
       }
@@ -137,7 +137,7 @@
           self.list = resp.data
           // 匹配需要展示的用户
           _.each(self.list, function(item) {
-            if (item.id === self.userId) {
+            if (item.id === self.tableId) {
               self.detail = item
             }
           })

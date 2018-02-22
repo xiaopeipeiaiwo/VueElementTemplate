@@ -1,8 +1,8 @@
 <template>
   <div>
-    <hm-complex-detail :schema="schema['HmUser']" :userId="userId">
+    <hm-complex-detail :schema="schema['HmUser']" :tableId="tableId">
     </hm-complex-detail>
-    <hm-complex-detail :schema="schema['HmUser']" :userId="userId" :columns="showUserColumns">
+    <hm-complex-detail :schema="schema['HmUser']" :tableId="tableId" :columns="showUserColumns">
     </hm-complex-detail>
   </div>
 </template>
@@ -30,7 +30,7 @@
     },
     created() {
       this.schema = schema
-      this.userId = '0e26566e953449a7a7500c34be39fd26'
+      this.tableId = '0e26566e953449a7a7500c34be39fd26'
     },
     methods: {}
   }
