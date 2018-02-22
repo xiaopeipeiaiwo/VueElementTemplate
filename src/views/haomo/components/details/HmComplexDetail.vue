@@ -1,7 +1,7 @@
 <template>
   <el-row type="flex">
     <el-col :span="24" class="detail-content">
-      <!--<h2 class="title">详情页面</h2>-->
+      <h2 class="title" v-if="title">{{title}}</h2>
       <el-form :data="detail" label-width="110px" status-icon style="width:80%;margin:0 auto">
         <el-form-item v-for="(column,index) in showColumns" :key="index" :label="column.name">
           <div>{{detail[column.codeCamel]}}</div>
@@ -62,13 +62,20 @@
       userId: {
         type: null,
         required: true
+      },
+      /*
+      * 标题
+      * */
+      title: {
+        type: null,
+        required: true
       }
     },
     data() {
       return {
         list: null,
         detail: null,
-        showColumns: [] // 要显示的列数据
+        showColumns: [] // 要显示的列数据,
       }
     },
     computed: {
