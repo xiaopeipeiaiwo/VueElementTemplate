@@ -1,7 +1,6 @@
 <template>
   <el-row type="flex">
     <el-col :span="24" class="detail-content">
-      <h2 class="title">详情页面</h2>
       <el-form :data="detail" label-width="110px" status-icon style="width:80%;margin:0 auto">
         <el-form-item v-for="(column,index) in showColumns" :key="index" :label="column.name">
           <div>{{detail[column.codeCamel]}}</div>
@@ -56,11 +55,11 @@
           return true
         }
       },
-      /*
-      * 在详情页需要传入用户的id用来带出用户信息
-      * */
-      userId: {
-        type: null,
+      /**
+       * 在详情页需要传入用户的id用来带出用户信息
+       */
+      tableId: {
+        type: String,
         required: true
       }
     },
@@ -68,7 +67,7 @@
       return {
         list: null,
         detail: null,
-        showColumns: [] // 要显示的列数据
+        showColumns: [] // 要显示的列数据,
       }
     },
     computed: {
@@ -138,7 +137,7 @@
           self.list = resp.data
           // 匹配需要展示的用户
           _.each(self.list, function(item) {
-            if (item.id === self.userId) {
+            if (item.id === self.tableId) {
               self.detail = item
             }
           })
