@@ -201,6 +201,7 @@
        * 清空所有输入及提示信息。
        */
       resetForm() {
+        console.log('chongzhi')
         this.$refs.form.resetFields()
       }
     }
