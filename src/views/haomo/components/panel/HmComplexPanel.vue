@@ -8,11 +8,8 @@
         </div>
         <div :style="hmPanelHeight" :class="hmContentClass">
           <span>{{hmContentText}}</span>
-          <!--<el-form :data="detail" label-width="110px" status-icon style="width:80%;margin:0 auto">-->
-            <!--<el-form-item v-for="(column,index) in showColumns" :key="index" :label="column.name">-->
-              <!--<div>{{detail[column.codeCamel]}}</div>-->
-            <!--</el-form-item>-->
-          <!--</el-form>-->
+          <hm-complex-detail :schema="schema['HmUser']" :tableId="userId" :columns="showFields">
+          </hm-complex-detail>
         </div>
       </el-card>
     </el-col>
@@ -20,6 +17,8 @@
 </template>
 
 <script>
+  import HmComplexDetail from '../details/HmComplexDetail.vue'
+  import schema from '../../schemas/hm_org_schema'
   import _ from 'lodash'
   import request from '@/utils/request'
 
@@ -28,7 +27,9 @@
     // 继承其他组件
     extends: {},
     // 使用其它组件
-    components: {},
+    components: {
+      'hm-complex-detail': HmComplexDetail
+    },
     props: {
       /**
        * 组件所使用的表定义schema。表定义schema，请使用 model2codejs 从pdm文件生成schema。
@@ -68,23 +69,23 @@
        * 在详情页需要传入用户的id用来带出用户信息
        * */
       userId: {
-        type: null,
+        type: String,
         required: true
       },
       hmTitle: {
-        type: null,
+        type: String,
         required: false
       },
       hmTitleClass: {
-        type: null,
+        type: String,
         required: false
       },
       hmContentClass: {
-        type: null,
+        type: String,
         required: false
       },
       hmContentText: {
-        type: null,
+        type: String,
         required: false
       },
       hmStyle: {
@@ -97,6 +98,10 @@
       },
       hmCollapse: {
         type: null,
+        required: false
+      },
+      showFields: {
+        type: Object,
         required: false
       }
     },
@@ -112,6 +117,7 @@
     filters: {
     },
     created() {
+      this.schema = schema
       this.getList()
       this.init()
     },

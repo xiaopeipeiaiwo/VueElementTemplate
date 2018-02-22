@@ -1,10 +1,10 @@
 <template>
   <div>
-    <hm-complex-panel :schema="schema['HmUser']" :userId="userId" :hmTitle="hmTitle" :hmTitleClass="hmTitleClass"
-                      :hmContentText="hmContentText" :hmStyle="hmStyle" :hmPanelHeight="hmPanelHeight" :hmCollapse="collapses">
-    </hm-complex-panel>
     <hm-complex-panel :schema="schema['HmUser']" :userId="userId" :hmTitle="titleBak" :hmContentClass="hmContentClass" :showFields="showFields"
-                      :hmContentText="hmContentTextBak" :hmStyle="styleBak" :hmPanelHeight="panelHeightBak" :hmCollapse="collapseBak">
+                      :hmStyle="styleBak" :hmPanelHeight="panelHeightBak" :hmCollapse="collapseBak">
+    </hm-complex-panel>
+    <hm-complex-panel :schema="schema['HmUser']" :userId="userId2" :hmTitle="hmTitle" :hmTitleClass="hmTitleClass" :showFields="showFields2"
+                      :hmContentText="hmContentText" :hmStyle="hmStyle" :hmPanelHeight="hmPanelHeight" :hmCollapse="collapses">
     </hm-complex-panel>
   </div>
 </template>
@@ -33,6 +33,7 @@
     created() {
       this.schema = schema
       this.userId = '0e26566e953449a7a7500c34be39fd26'
+      this.userId2 = '1efff63125954583b0ac5a9c252b9041'
       this.hmTitle = '面版名称'
       this.hmTitleClass = 'center'
       this.hmContentClass = 'center'
@@ -47,11 +48,11 @@
       }
       this.collapses = 12
       this.showFields = ['username', 'loginid', 'password', 'mobile', 'email']
+      this.showFields2 = ['mobile', 'loginid']
       this.titleBak = '测试面板'
-      this.hmContentTextBak = '我测试一下'
       this.styleBak = {
         width: '100%',
-        background: '#f56c6c',
+        marginTop: '20px',
         marginBottom: '20px'
       }
       this.panelHeightBak = {
