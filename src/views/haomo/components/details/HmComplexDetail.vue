@@ -55,9 +55,9 @@
           return true
         }
       },
-      /*
-      * 在详情页需要传入用户的id用来带出用户信息
-      * */
+      /**
+       * 在详情页需要传入用户的id用来带出用户信息
+       */
       tableId: {
         type: String,
         required: true
