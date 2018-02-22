@@ -1,7 +1,7 @@
 ### 基本使用
 
 ```jsx
-    <hm-complex-detail   :userId="0e26566e953449a7a7500c34be39fd26"   
+    <hm-complex-detail  :tableId="0e26566e953449a7a7500c34be39fd26"   
                         :schema="{
                                    'model': 'HmUser',
                                    'modelPlural': 'HmUsers',
@@ -205,7 +205,7 @@
 <template>
   <div>
     <hm-complex-detail :schema="schema['HmUser']" 
-                       :userId="userId" 
+                       :tableId="tableId" 
                        :columns="showUserColumns">
     </hm-complex-detail>
   </div>
@@ -430,7 +430,7 @@
     filters: {
     },
     created() {
-      this.userId = '0e26566e953449a7a7500c34be39fd26'
+      this.tableId = '0e26566e953449a7a7500c34be39fd26'
     },
     methods: {}
   }
