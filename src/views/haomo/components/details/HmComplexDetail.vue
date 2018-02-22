@@ -1,7 +1,6 @@
 <template>
   <el-row type="flex">
     <el-col :span="24" class="detail-content">
-      <h2 class="title" v-if="title">{{title}}</h2>
       <el-form :data="detail" label-width="110px" status-icon style="width:80%;margin:0 auto">
         <el-form-item v-for="(column,index) in showColumns" :key="index" :label="column.name">
           <div>{{detail[column.codeCamel]}}</div>
@@ -60,14 +59,7 @@
       * 在详情页需要传入用户的id用来带出用户信息
       * */
       userId: {
-        type: null,
-        required: true
-      },
-      /*
-      * 标题
-      * */
-      title: {
-        type: null,
+        type: String,
         required: true
       }
     },
