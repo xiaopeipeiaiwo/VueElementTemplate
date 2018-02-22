@@ -1,7 +1,7 @@
 <template>
   <el-row type="flex">
     <el-col :span="hmCollapse" class="detail-content" style="margin:0 auto">
-      <h2 class="title">面板页面</h2>
+      <!--<h2 class="title">面板页面</h2>-->
       <el-card class="box-card" :style="hmStyle">
         <div slot="header" class="clearfix" :class="hmTitleClass">
           <span>{{hmTitle}}</span>
