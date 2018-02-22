@@ -210,18 +210,10 @@
     </hm-complex-detail>
   </div>
 </template>
-<script>
-  import HmComplexDetail from './HmComplexDetail.vue'
-  import schema from '../../schemas/hm_org_schema'
 
+<script>
   export default {
     name: 'HmComplexDetail',
-    // 继承其他组件
-    extends: {},
-    // 使用其它组件
-    components: {
-      'hm-complex-detail': HmComplexDetail
-    },
     data() {
       return {
         schema: {
@@ -430,7 +422,8 @@
     filters: {
     },
     created() {
-      this.tableId = '0e26566e953449a7a7500c34be39fd26'
+       this.tableId = '0e26566e953449a7a7500c34be39fd26'
+       this.schema = schema
     },
     methods: {}
   }
