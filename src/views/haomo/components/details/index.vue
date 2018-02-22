@@ -1,7 +1,7 @@
 <template>
   <div>
-    <!--<hm-complex-detail :schema="schema['HmUser']" :userId="userId">-->
-    <!--</hm-complex-detail>-->
+    <hm-complex-detail :schema="schema['HmUser']" :userId="userId">
+    </hm-complex-detail>
     <hm-complex-detail :schema="schema['HmUser']" :userId="userId" :columns="showUserColumns">
     </hm-complex-detail>
   </div>
