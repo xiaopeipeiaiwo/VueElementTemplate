@@ -1,11 +1,10 @@
 <template>
-  <el-row type="flex" class="hm-form">
+  <el-row type="flex" class="hm-form" style="margin-top: 50px">
     <el-col :span="6">
       <div></div>
     </el-col>
-    <el-col :span="12" style="border:1px solid orange">
+    <el-col :span="12">
       <div>
-        <h2 class="title">表单页面</h2>
         <!--表单部分-->
         <el-form ref="form" :model="formModel" :rules="rules" label-width="110px"
                  style="width:80%;margin:0 auto">
@@ -136,6 +135,7 @@
           _.each(self.showFields, function(column, index) {
             if (typeof column === 'string') {
               // 生成一个新对象
+              console.log(column)
               const tmp = _.keyBy(self.schema['columns'], 'code')[column.toUpperCase()]
               // console.log(tmp)
               // self.$set(tmp, 'code', tmp.code.toLowerCase())
@@ -209,12 +209,5 @@
   }
 </script>
 <style scoped>
-  .title {
-    line-height: 40px;
-    background: orange;
-    color: #fff;
-    text-align: center;
-    margin-top: 0;
-  }
 
 </style>
