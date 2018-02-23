@@ -1,13 +1,12 @@
 <template>
   <el-row type="flex">
-    <el-col :span="hmCollapse" class="detail-content" style="margin:0 auto">
+    <el-col :span="options.panel_span" class="detail-content" style="margin:0 auto">
       <!--<h2 class="title">面板页面</h2>-->
-      <el-card class="box-card" :style="hmStyle">
-        <div slot="header" class="clearfix" :class="hmTitleClass">
-          <span>{{hmTitle}}</span>
+      <el-card class="box-card" :style="options.panel_style">
+        <div slot="header" class="clearfix" :class="options.title_class" @click="toggle()">
+          <span>{{options.title}}</span>
         </div>
-        <div :style="hmPanelHeight" :class="hmContentClass">
-          <span>{{hmContentText}}</span>
+        <div :style="options.content_height" :class="options.content_class" v-show="collapse">
           <slot></slot>
         </div>
       </el-card>
@@ -27,106 +26,33 @@
     components: {},
     props: {
       /**
-       * 组件所使用的表定义schema。表定义schema，请使用 model2codejs 从pdm文件生成schema。
-       * 对于所有毫末科技的组件，必须传schema，以完成数据的交互
+       * 在面板页传入面板对象
        */
-      schema: {
+      options: {
         type: Object,
         required: true
-      },
-      /**
-       * 指定要显示的列。默认为根据schema得到的所有列。完整示例为：
-       *  [
-       *    {
-       *      "name": "姓名",
-       *      "code": "username",
-       *      "render": function(value){
-       *        return "<a href='value'></a>"
-       *      }
-       *    },
-       *    "mobile",
-       *    "sexual"
-       *  ]
-       */
-      columns: {
-        type: Array,
-        required: false,
-        validator: function(value) {
-          if (typeof value !== 'object') {
-            console.warn(`传入的columns不符合要求，必须是数组`)
-            return false
-          }
-
-          return true
-        }
-      },
-      /**
-       * 在面板页传入面板标题
-       */
-      hmTitle: {
-        type: String,
-        required: false
-      },
-      /**
-       * 在面板页传入标题类名
-       */
-      hmTitleClass: {
-        type: String,
-        required: false
-      },
-      /**
-       * 在面板页传入内容类名
-       */
-      hmContentClass: {
-        type: String,
-        required: false
-      },
-      /**
-       * 在面板页传入内容
-       */
-      hmContentText: {
-        type: String,
-        required: false
-      },
-      /**
-       * 在面板页传入面板样式
-       */
-      hmStyle: {
-        type: Object,
-        required: false
-      },
-      /**
-       * 在面板页传入面板内容高度
-       */
-      hmPanelHeight: {
-        type: Object,
-        required: false
-      },
-      /**
-       * 在面板页传入面板宽度
-       */
-      hmCollapse: {
-        type: Number,
-        required: false
-      },
-      showFields: {
-        type: Object,
-        required: false
       }
     },
     data() {
       return {
-        list: null,
-        detail: null,
-        showColumns: [] // 要显示的列数据
+        collapse: true
       }
     },
     computed: {
     },
     filters: {
     },
-    created() {},
+    created() {
+    },
     methods: {
+      toggle() {
+        if (this.options.canCollapse) {
+          this.collapse = !this.collapse
+          console.log('收起展开')
+        } else {
+          console.log('不可收起')
+        }
+      },
       validate() {
         const self = this
         // this.columns数组元素本身必须是string或者object. 且必须是schema中定义的列

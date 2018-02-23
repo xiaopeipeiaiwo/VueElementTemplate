@@ -1,12 +1,10 @@
 <template>
   <div>
-    <hm-panel :schema="schema['HmUser']" :hmTitle="titleBak" :hmContentClass="hmContentClass"
-                      :hmStyle="styleBak" :hmPanelHeight="panelHeightBak" :hmCollapse="collapseBak">
+    <hm-panel :options="options">
       <hm-complex-detail :schema="schema['HmUser']" :tableId="userId">
       </hm-complex-detail>
     </hm-panel>
-    <hm-panel :schema="schema['HmUser']" :hmTitle="hmTitle" :hmTitleClass="hmTitleClass"
-                      :hmContentText="hmContentText" :hmStyle="hmStyle" :hmPanelHeight="hmPanelHeight" :hmCollapse="collapses">
+    <hm-panel :options="options2">
       <hm-complex-form :schema="schema['HmUser']" :fields="showFields">
       </hm-complex-form>
     </hm-panel>
@@ -39,34 +37,38 @@
     filters: {
     },
     created() {
+      this.options = {
+        title: '面版名称',
+        panel_class: 'center',
+        title_class: 'weight',
+        content_class: 'center',
+        panel_style: {
+          width: '100%',
+          marginTop: '20px',
+          marginBottom: '20px'
+        },
+        panel_span: 22,
+        content_height: {
+          height: '600px'
+        },
+        canCollapse: true
+      }
+      this.options2 = {
+        title: '测试面板',
+        panel_class: 'center',
+        title_class: 'center',
+        content_class: 'center',
+        panel_style: {
+          width: '80%',
+          background: '#42b983',
+          margin: '0 auto'
+        },
+        panel_span: 20,
+        canCollapse: false
+      }
       this.schema = schema
       this.userId = '0e26566e953449a7a7500c34be39fd26'
-      this.userId2 = '1efff63125954583b0ac5a9c252b9041'
-      this.hmTitle = '面版名称'
-      this.hmTitleClass = 'center'
-      this.hmContentClass = 'center'
-      this.hmContentText = '面板文字'
-      this.hmStyle = {
-        width: '80%',
-        background: '#42b983',
-        margin: '0 auto'
-      }
-      this.hmPanelHeight = {
-        height: '400px'
-      }
-      this.collapses = 22
       this.showFields = ['username', 'loginid', 'password', 'mobile', 'email']
-      this.showFields2 = ['mobile', 'loginid']
-      this.titleBak = '测试面板'
-      this.styleBak = {
-        width: '100%',
-        marginTop: '20px',
-        marginBottom: '20px'
-      }
-      this.panelHeightBak = {
-        height: '500px'
-      }
-      this.collapseBak = 22
     },
     methods: {}
   }
