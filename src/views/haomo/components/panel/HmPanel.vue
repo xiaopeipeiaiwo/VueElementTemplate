@@ -27,6 +27,9 @@
     props: {
       /**
        * 在面板页传入面板对象
+       * 完整示例为：{ title: '面版名称', panel_class: '面板类名', title_class: '标题类名',
+        content_class: '内容类名', panel_style: '面板样式', panel_span: '面板宽度比例', content_height: '内容高度',
+        canCollapse: '是否可收起'}
        */
       options: {
         type: Object,
