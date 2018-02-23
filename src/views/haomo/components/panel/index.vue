@@ -1,26 +1,26 @@
 <template>
   <div>
-    <hm-complex-panel :schema="schema['HmUser']" :hmTitle="titleBak" :hmContentClass="hmContentClass"
+    <hm-panel :schema="schema['HmUser']" :hmTitle="titleBak" :hmContentClass="hmContentClass"
                       :hmStyle="styleBak" :hmPanelHeight="panelHeightBak" :hmCollapse="collapseBak">
-    </hm-complex-panel>
-    <hm-complex-panel :schema="schema['HmUser']" :hmTitle="hmTitle" :hmTitleClass="hmTitleClass"
+    </hm-panel>
+    <hm-panel :schema="schema['HmUser']" :hmTitle="hmTitle" :hmTitleClass="hmTitleClass"
                       :hmContentText="hmContentText" :hmStyle="hmStyle" :hmPanelHeight="hmPanelHeight" :hmCollapse="collapses">
-    </hm-complex-panel>
+    </hm-panel>
   </div>
 </template>
 
 <script>
-  import HmComplexPanel from './HmComplexPanel.vue'
+  import HmPanel from './HmPanel.vue'
   import schema from '../../schemas/hm_org_schema'
   import HmComplexDetail from '../details/HmComplexDetail.vue'
 
   export default {
-    name: 'HmComplexPanel',
+    name: 'HmPanel',
     // 继承其他组件
     extends: {},
     // 使用其它组件
     components: {
-      'hm-complex-panel': HmComplexPanel,
+      'hm-panel': HmPanel,
       'hm-complex-detail': HmComplexDetail
     },
     data() {

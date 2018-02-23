@@ -20,7 +20,7 @@
   import request from '@/utils/request'
 
   export default {
-    name: 'HmComplexPanel',
+    name: 'HmPanel',
     // 继承其他组件
     extends: {},
     // 使用其它组件

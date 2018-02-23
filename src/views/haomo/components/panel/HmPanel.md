@@ -1,7 +1,7 @@
 ### 基本使用
 
 ```jsx
-    <hm-complex-panel     :hmTitle="面板标题"
+    <hm-panel     :hmTitle="面板标题"
                           :hmTitleClass='center'
                           :hmContentClass='center'
                           :hmContentText='面板文字'
@@ -201,22 +201,22 @@
                                        'type': 'number'
                                      }
                                    ]
-                                 }"></hm-complex-panel>
+                                 }"></hm-panel>
 ```
 ### 指定显示的表单类型
 
 ```vue
 <template>
   <div>
-    <hm-complex-panel  :schema="schema['HmUser']" :hmTitle="hmTitle" :hmTitleClass="hmTitleClass" :hmContentClass="hmContentClass"
+    <hm-panel  :schema="schema['HmUser']" :hmTitle="hmTitle" :hmTitleClass="hmTitleClass" :hmContentClass="hmContentClass"
                       :hmContentText="hmContentText" :hmPanelHeight="hmPanelHeight">
-    </hm-complex-panel>
+    </hm-panel>
   </div>
 </template>
 
 <script>
   export default {
-    name: 'HmComplexPanel',
+    name: 'HmPanel',
     data() {
       return {
         schema: {
