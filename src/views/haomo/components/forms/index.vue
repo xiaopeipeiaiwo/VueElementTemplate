@@ -1,6 +1,6 @@
 <template>
   <div>
-    <hm-complex-form :schema="schema['HmUser']" :fields="showFields">
+    <hm-complex-form :schema="schema['HmUser']" :columns="showUserColumns">
     </hm-complex-form>
   </div>
 </template>
@@ -19,7 +19,7 @@
     },
     data() {
       return {
-        showFields: ['username', 'loginid', 'password', 'mobile', 'email']
+        showUserColumns: ['username', 'loginid', 'password', 'mobile', 'email']
       }
     },
     computed: {

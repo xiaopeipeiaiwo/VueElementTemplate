@@ -1,7 +1,7 @@
 ### 基本使用
 
 ```jsx
-    <hm-complex-form      :fields="['username', 'loginid', 'password', 'mobile', 'email']" 
+    <hm-complex-form      :columns="['username', 'loginid', 'password', 'mobile', 'email']" 
                           :schema="{
                                    'model': 'HmUser',
                                    'modelPlural': 'HmUsers',
@@ -205,7 +205,7 @@
 <template>
   <div>
     <hm-complex-form  :schema="schema['HmUser']" 
-                      :fields="showFields">
+                      :columns="showUserColumns">
     </hm-complex-form>
   </div>
 </template>
@@ -413,7 +413,7 @@
                         ]
                       }
                 },
-        showFields: ['username', 'loginid', 'password', 'mobile', 'email']
+        showUserColumns: ['username', 'loginid', 'password', 'mobile', 'email']
       }
     },
     created() {

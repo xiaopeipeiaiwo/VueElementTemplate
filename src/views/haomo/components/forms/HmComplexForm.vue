@@ -8,7 +8,7 @@
         <!--表单部分-->
         <el-form ref="form" :model="formModel" :rules="rules" label-width="110px"
                  style="width:80%;margin:0 auto">
-          <el-form-item v-for="(column,index) in showFields" :key="index" :label="column.name" :prop="column.codeCamel">
+          <el-form-item v-for="(column,index) in showUserColumns" :key="index" :label="column.name" :prop="column.codeCamel">
             <el-input v-if="column.codeCamel==='password'" type="password" :placeholder="column.name"
                       v-model="formModel[column.codeCamel]"></el-input>
             <el-input v-if="column.codeCamel!=='password'" :placeholder="column.name"
@@ -58,12 +58,12 @@
       /**
        * 指定要显示的字段。默认为根据schema得到的所有字段。
        */
-      fields: {
+      columns: {
         type: Array,
         required: false,
         validator: function(value) {
           if (typeof value !== 'object') {
-            console.warn(`传入的fields不符合要求，必须是数组`)
+            console.warn(`传入的columns不符合要求，必须是数组`)
             return false
           }
 
@@ -75,7 +75,7 @@
       return {
         form: null,
         formModel: {}, // 双向绑定的数据变量
-        showFields: [], // 要显示的字段
+        showUserColumns: [], // 要显示的字段
         // form: {
         //   name: '',
         //   gender: '男',
@@ -119,34 +119,34 @@
     methods: {
       init() {
         const self = this
-        // 如果没有传fields，则全部显示
-        if (!self.fields || !self.fields.length) {
+        // 如果没有传columns，则全部显示
+        if (!self.columns || !self.columns.length) {
           _.each(self.schema['columns'], function(column) {
             const tmp = JSON.parse(JSON.stringify(column))
             // self.$set(tmp, 'code', tmp.code.toLowerCase())
-            self.showFields.push(tmp)
+            self.showUserColumns.push(tmp)
           })
-          // console.log(self.showFields)
-        } else { // 如果传入了fields，则只显示传入的字段
-          self.showFields = JSON.parse(JSON.stringify(self.fields))
+          // console.log(self.showUserColumns)
+        } else { // columns，则只显示传入的字段
+          self.showUserColumns = JSON.parse(JSON.stringify(self.columns))
           // console.log('1111111')
-          // console.log(self.showFields)
+          // console.log(self.showUserColumns)
           // 将字符串对象进行替换处理
-          _.each(self.showFields, function(column, index) {
+          _.each(self.showUserColumns, function(column, index) {
             if (typeof column === 'string') {
               // 生成一个新对象
               console.log(column)
               const tmp = _.keyBy(self.schema['columns'], 'code')[column.toUpperCase()]
               // console.log(tmp)
               // self.$set(tmp, 'code', tmp.code.toLowerCase())
-              self.$set(self.showFields, index, tmp)
+              self.$set(self.showUserColumns, index, tmp)
             }
           })
           // console.log('2222222')
-          console.log(self.showFields)
+          console.log(self.showUserColumns)
         }
         // 提取v-model绑定的变量
-        _.each(self.showFields, function(item) {
+        _.each(self.showUserColumns, function(item) {
           self.formModel[item.codeCamel] = ''
         })
         console.log(self.formModel)
