@@ -106,7 +106,7 @@
        * 在面板页传入面板宽度
        */
       hmCollapse: {
-        type: String,
+        type: Number,
         required: false
       },
       showFields: {

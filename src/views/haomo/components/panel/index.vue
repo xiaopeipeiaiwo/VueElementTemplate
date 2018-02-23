@@ -2,9 +2,13 @@
   <div>
     <hm-panel :schema="schema['HmUser']" :hmTitle="titleBak" :hmContentClass="hmContentClass"
                       :hmStyle="styleBak" :hmPanelHeight="panelHeightBak" :hmCollapse="collapseBak">
+      <hm-complex-detail :schema="schema['HmUser']" :tableId="userId">
+      </hm-complex-detail>
     </hm-panel>
     <hm-panel :schema="schema['HmUser']" :hmTitle="hmTitle" :hmTitleClass="hmTitleClass"
                       :hmContentText="hmContentText" :hmStyle="hmStyle" :hmPanelHeight="hmPanelHeight" :hmCollapse="collapses">
+      <hm-complex-form :schema="schema['HmUser']" :fields="showFields">
+      </hm-complex-form>
     </hm-panel>
   </div>
 </template>
@@ -13,6 +17,7 @@
   import HmPanel from './HmPanel.vue'
   import schema from '../../schemas/hm_org_schema'
   import HmComplexDetail from '../details/HmComplexDetail.vue'
+  import HmComplexForm from '../forms/HmComplexForm.vue'
 
   export default {
     name: 'HmPanel',
@@ -21,7 +26,8 @@
     // 使用其它组件
     components: {
       'hm-panel': HmPanel,
-      'hm-complex-detail': HmComplexDetail
+      'hm-complex-detail': HmComplexDetail,
+      'hm-complex-form': HmComplexForm
     },
     data() {
       return {
@@ -41,14 +47,14 @@
       this.hmContentClass = 'center'
       this.hmContentText = '面板文字'
       this.hmStyle = {
-        width: '50%',
+        width: '80%',
         background: '#42b983',
         margin: '0 auto'
       }
       this.hmPanelHeight = {
-        height: '100px'
+        height: '400px'
       }
-      this.collapses = 12
+      this.collapses = 22
       this.showFields = ['username', 'loginid', 'password', 'mobile', 'email']
       this.showFields2 = ['mobile', 'loginid']
       this.titleBak = '测试面板'
@@ -58,7 +64,7 @@
         marginBottom: '20px'
       }
       this.panelHeightBak = {
-        height: '200px'
+        height: '500px'
       }
       this.collapseBak = 22
     },
