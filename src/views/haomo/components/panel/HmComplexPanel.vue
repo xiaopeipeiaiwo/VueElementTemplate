@@ -8,8 +8,7 @@
         </div>
         <div :style="hmPanelHeight" :class="hmContentClass">
           <span>{{hmContentText}}</span>
-          <hm-complex-detail :schema="schema['HmUser']" :tableId="userId" :columns="showFields">
-          </hm-complex-detail>
+          <slot></slot>
         </div>
       </el-card>
     </el-col>
@@ -17,19 +16,15 @@
 </template>
 
 <script>
-  import HmComplexDetail from '../details/HmComplexDetail.vue'
-  import schema from '../../schemas/hm_org_schema'
   import _ from 'lodash'
   import request from '@/utils/request'
 
   export default {
-    name: 'HmComplexDetail',
+    name: 'HmComplexPanel',
     // 继承其他组件
     extends: {},
     // 使用其它组件
-    components: {
-      'hm-complex-detail': HmComplexDetail
-    },
+    components: {},
     props: {
       /**
        * 组件所使用的表定义schema。表定义schema，请使用 model2codejs 从pdm文件生成schema。
@@ -65,39 +60,53 @@
           return true
         }
       },
-      /*
-       * 在详情页需要传入用户的id用来带出用户信息
-       * */
-      userId: {
-        type: String,
-        required: true
-      },
+      /**
+       * 在面板页传入面板标题
+       */
       hmTitle: {
         type: String,
         required: false
       },
+      /**
+       * 在面板页传入标题类名
+       */
       hmTitleClass: {
         type: String,
         required: false
       },
+      /**
+       * 在面板页传入内容类名
+       */
       hmContentClass: {
         type: String,
         required: false
       },
+      /**
+       * 在面板页传入内容
+       */
       hmContentText: {
         type: String,
         required: false
       },
+      /**
+       * 在面板页传入面板样式
+       */
       hmStyle: {
         type: Object,
         required: false
       },
+      /**
+       * 在面板页传入面板内容高度
+       */
       hmPanelHeight: {
         type: Object,
         required: false
       },
+      /**
+       * 在面板页传入面板宽度
+       */
       hmCollapse: {
-        type: null,
+        type: String,
         required: false
       },
       showFields: {
@@ -116,11 +125,7 @@
     },
     filters: {
     },
-    created() {
-      this.schema = schema
-      this.getList()
-      this.init()
-    },
+    created() {},
     methods: {
       validate() {
         const self = this
@@ -189,8 +194,8 @@
   }
 </script>
 <style scoped>
-  .title{
-    text-align: center;
+  .weight{
+    font-weight: 700;
   }
   .center{
     text-align: center;

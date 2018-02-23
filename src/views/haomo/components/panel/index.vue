@@ -1,9 +1,9 @@
 <template>
   <div>
-    <hm-complex-panel :schema="schema['HmUser']" :userId="userId" :hmTitle="titleBak" :hmContentClass="hmContentClass" :showFields="showFields"
+    <hm-complex-panel :schema="schema['HmUser']" :hmTitle="titleBak" :hmContentClass="hmContentClass"
                       :hmStyle="styleBak" :hmPanelHeight="panelHeightBak" :hmCollapse="collapseBak">
     </hm-complex-panel>
-    <hm-complex-panel :schema="schema['HmUser']" :userId="userId2" :hmTitle="hmTitle" :hmTitleClass="hmTitleClass" :showFields="showFields2"
+    <hm-complex-panel :schema="schema['HmUser']" :hmTitle="hmTitle" :hmTitleClass="hmTitleClass"
                       :hmContentText="hmContentText" :hmStyle="hmStyle" :hmPanelHeight="hmPanelHeight" :hmCollapse="collapses">
     </hm-complex-panel>
   </div>
@@ -12,6 +12,7 @@
 <script>
   import HmComplexPanel from './HmComplexPanel.vue'
   import schema from '../../schemas/hm_org_schema'
+  import HmComplexDetail from '../details/HmComplexDetail.vue'
 
   export default {
     name: 'HmComplexPanel',
@@ -19,7 +20,8 @@
     extends: {},
     // 使用其它组件
     components: {
-      'hm-complex-panel': HmComplexPanel
+      'hm-complex-panel': HmComplexPanel,
+      'hm-complex-detail': HmComplexDetail
     },
     data() {
       return {

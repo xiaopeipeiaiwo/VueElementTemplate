@@ -28,7 +28,8 @@ const sections = [
       return [
         './src/views/haomo/components/tables/HmComplexTable.vue',
         './src/views/haomo/components/forms/HmComplexForm.vue',
-        './src/views/haomo/components/details/HmComplexDetail.vue'
+        './src/views/haomo/components/details/HmComplexDetail.vue',
+        './src/views/haomo/components/panel/HmComplexPanel.vue'
       ]
     }
   },
