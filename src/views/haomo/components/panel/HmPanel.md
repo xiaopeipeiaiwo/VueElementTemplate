@@ -2,7 +2,6 @@
 
 ```jsx
     <hm-panel :options="{
-        'title': '面版名称',
         'panel_class': 'center',
         'title_class': 'weight',
         'content_class': 'center',
@@ -27,7 +26,7 @@
 <template>
   <div>
     <hm-panel :options="options">
-      <div slot="title">面板标题</div>
+      <div slot="title">测试面板</div>
       <div slot="content">面板内容</div>
     </hm-panel>
   </div>
@@ -42,7 +41,6 @@
     },
     created() {
       this.options = {
-        title: '测试面板',
         panel_class: 'center',
         title_class: 'center',
         content_class: 'center',
