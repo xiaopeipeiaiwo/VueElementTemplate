@@ -1,7 +1,6 @@
 <template>
   <el-row type="flex">
-    <el-col :span="options.panel_span" class="detail-content" style="margin:0 auto">
-      <!--<h2 class="title">面板页面</h2>-->
+    <el-col :span="options.panel_span" class="detail-content" :class="options.panel_class" style="margin:0 auto">
       <el-card class="box-card" :style="options.panel_style">
         <div slot="header" class="clearfix" :class="options.title_class" @click="toggle()">
           <slot name="title"></slot>

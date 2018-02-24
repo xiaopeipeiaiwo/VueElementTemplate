@@ -50,8 +50,7 @@
         content_class: 'center',
         panel_style: {
           width: '100%',
-          marginTop: '20px',
-          marginBottom: '20px'
+          margin: '20px auto'
         },
         panel_span: 22,
         content_height: {
