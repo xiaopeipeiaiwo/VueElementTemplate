@@ -17,6 +17,8 @@
         },
         'canCollapse': true
       }">
+      <div slot="title">面板标题</div>
+      <div slot="content">面板内容</div>
     </hm-panel>
 ```
 ### 不可收起的panel
@@ -25,6 +27,8 @@
 <template>
   <div>
     <hm-panel :options="options">
+      <div slot="title">面板标题</div>
+      <div slot="content">面板内容</div>
     </hm-panel>
   </div>
 </template>

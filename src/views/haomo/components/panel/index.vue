@@ -1,12 +1,19 @@
 <template>
   <div>
     <hm-panel :options="options">
-      <hm-complex-detail :schema="schema['HmUser']" :tableId="userId">
-      </hm-complex-detail>
+      <div slot="title">面板标题</div>
+      <div slot="content">
+        <hm-complex-detail :schema="schema['HmUser']" :tableId="userId">
+        </hm-complex-detail>
+      </div>
     </hm-panel>
     <hm-panel :options="options2">
-      <hm-complex-form :schema="schema['HmUser']" :fields="showFields">
-      </hm-complex-form>
+      <div slot="title">
+        <hm-complex-form :schema="schema['HmUser']" :fields="showFields"></hm-complex-form>
+      </div>
+      <div slot="content">
+        <hm-complex-form :schema="schema['HmUser']" :fields="showFields"></hm-complex-form>
+      </div>
     </hm-panel>
   </div>
 </template>
@@ -38,7 +45,6 @@
     },
     created() {
       this.options = {
-        title: '面版名称',
         panel_class: 'center',
         title_class: 'weight',
         content_class: 'center',
@@ -54,7 +60,6 @@
         canCollapse: true
       }
       this.options2 = {
-        title: '测试面板',
         panel_class: 'center',
         title_class: 'center',
         content_class: 'center',
