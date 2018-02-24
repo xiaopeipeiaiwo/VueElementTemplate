@@ -9,10 +9,18 @@
         <el-form ref="form" :model="formModel" :rules="rules" label-width="110px"
                  style="width:80%;margin:0 auto">
           <el-form-item v-for="(column,index) in showUserColumns" :key="index" :label="column.name" :prop="column.codeCamel">
-            <el-input v-if="column.codeCamel==='password'" type="password" :placeholder="column.name"
-                      v-model="formModel[column.codeCamel]"></el-input>
-            <el-input v-if="column.codeCamel!=='password'" :placeholder="column.name"
-                      v-model="formModel[column.codeCamel]"></el-input>
+            <!--el-input<el-input v-if="column.codeCamel==='password'" type="password"
+                      v-model="formModel[column.codeCamel]"></el-input>-->
+            <el-input v-if="column.codeCamel!=='securityLevel'" v-model="formModel[column.codeCamel]"></el-input>
+            <!-- quill-editor -->
+            <quill-editor v-if="column.codeCamel==='securityLevel'" class="editor-example bubble"
+                          ref="textEditor"
+                          v-model="formModel[column.codeCamel]"
+                          :options="editorOption"
+                          @blur="onEditorBlur($event)"
+                          @focus="onEditorFocus($event)"
+                          @ready="onEditorReady($event)">
+            </quill-editor>
           </el-form-item>
           <el-form-item>
             <el-col :span="12">
@@ -36,7 +44,10 @@
   import request from '@/utils/request'
 
   /**
-   * 表单页面。
+   * 毫末科技的表单组件.
+   *
+   *   demo地址: factory.haomo-studio.com/vue-element/#/haomo/components/forms
+   * @author 王康
    */
   export default {
     name: 'HmComplexForm',
@@ -69,6 +80,13 @@
 
           return true
         }
+      },
+      /**
+       * 传入用户的id用来修改用户信息
+       */
+      tableId: {
+        type: String,
+        required: false
       }
     },
     data() {
@@ -99,8 +117,8 @@
             { required: true, message: '请输入登陆ID', trigger: 'blur' }
           ],
           password: [
-            { required: true, message: '请输入密码', trigger: 'blur' },
-            { pattern: /^(?![0-9]+$)(?![a-zA-Z]+$)[0-9A-Za-z]{6,20}$/, message: '密码必须同时包含数字和字母 6-20位', trigger: 'change' }
+            { required: true, message: '请输入密码', trigger: 'blur' }
+            // { pattern: /^(?![0-9]+$)(?![a-zA-Z]+$)[0-9A-Za-z]{6,20}$/, message: '密码必须同时包含数字和字母 6-20位', trigger: 'change' }
           ],
           mobile: [
             { pattern: /^((0\d{2,3}-\d{7,8})|(1[3584]\d{9}))$/, message: '请输入正确的电话号码或手机号', trigger: 'blur&change' }
@@ -108,15 +126,34 @@
           email: [
             { type: 'email', message: '请输入正确的邮箱地址', trigger: 'blur&change' }
           ]
+        },
+        editorOption: {
+          placeholder: '',
+          modules: {
+            toolbar: [
+              ['bold', 'italic', 'underline', 'strike'],
+              [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+              [{ 'color': [] }, { 'background': [] }],
+              ['image']
+            ]
+          }
         }
       }
     },
-
     created() {
       this.init()
       // console.log(this.schema)
     },
     methods: {
+      onEditorBlur(editor) {
+        console.log('editor blur!')
+      },
+      onEditorFocus(editor) {
+        console.log('editor focus!')
+      },
+      onEditorReady(editor) {
+        console.log('editor ready!')
+      },
       init() {
         const self = this
         // 如果没有传columns，则全部显示
@@ -168,22 +205,46 @@
         self.$refs.form.validate((valid) => {
           if (valid) {
             console.log('提交成功!')
-            request(self.schema.modelUnderscorePlural + '/new', {
-              method: 'post',
-              headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
-              data: self.formModel,
-              transformRequest:
-                function(obj) {
-                  var str = []
-                  for (var p in obj) {
-                    str.push(encodeURIComponent(p) + '=' + encodeURIComponent(obj[p]))
+            // 存在tableId 则修改信息
+            if (self.tableId) {
+              request(self.schema.modelUnderscorePlural + '/' + self.tableId + '/edit', {
+                method: 'post',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+                data: self.formModel,
+                transformRequest:
+                  function(obj) {
+                    var str = []
+                    // 删除空值的属性
+                    obj = _.omitBy(obj, function(value) {
+                      return !value
+                    })
+                    for (var p in obj) {
+                      str.push(encodeURIComponent(p) + '=' + encodeURIComponent(obj[p]))
+                    }
+                    return str.join('&')
                   }
-                  return str.join('&')
-                }
-            }).then(resp => {
-              console.log(resp.data)
-              self.resetForm()
-            })
+              }).then(resp => {
+                console.log('修改成功')
+                self.resetForm()
+              })
+            } else { // 不存在tableId 则创建一条数据
+              request(self.schema.modelUnderscorePlural + '/new', {
+                method: 'post',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+                data: self.formModel,
+                transformRequest:
+                  function(obj) {
+                    var str = []
+                    for (var p in obj) {
+                      str.push(encodeURIComponent(p) + '=' + encodeURIComponent(obj[p]))
+                    }
+                    return str.join('&')
+                  }
+              }).then(resp => {
+                console.log('创建成功')
+                self.resetForm()
+              })
+            }
           } else {
             console.log('提交失败!!')
             return false
