@@ -1,7 +1,8 @@
 ### 基本使用
 
 ```jsx
-    <hm-complex-form      :columns="['username', 'loginid', 'password', 'mobile', 'email']" 
+    <hm-complex-form      :tableId="tableId"
+                          :columns="['username', 'loginid', 'password', 'mobile', 'email']" 
                           :schema="{
                                    'model': 'HmUser',
                                    'modelPlural': 'HmUsers',
@@ -204,7 +205,9 @@
 ```vue
 <template>
   <div>
-    <hm-complex-form  :schema="schema['HmUser']" 
+    <hm-complex-form  
+                      :tableId="tableId"
+                      :schema="schema['HmUser']" 
                       :columns="showUserColumns">
     </hm-complex-form>
   </div>
@@ -418,6 +421,7 @@
     },
     created() {
       this.schema = schema
+      this.tableId = '0e26566e953449a7a7500c34be39fd26'
     }
   }
 </script>
