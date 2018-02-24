@@ -2,12 +2,11 @@
   <el-row type="flex">
     <el-col :span="options.panel_span" class="detail-content" :class="options.panel_class" style="margin:0 auto">
       <el-card class="box-card" :style="options.panel_style">
-        <div slot="header" class="clearfix" :class="options.title_class" @click="toggle()">
+        <div slot="header" class="clearfix" :class="[options.title_class, options.canCollapse ? 'pointer' : '']" @click="toggle()">
           <slot name="title"></slot>
         </div>
         <div :style="options.content_height" :class="options.content_class" v-show="collapse">
           <slot name="content"></slot>
-          <slot></slot>
         </div>
       </el-card>
     </el-col>
@@ -61,5 +60,8 @@
   }
   .center{
     text-align: center;
+  }
+  .pointer{
+    cursor:pointer;
   }
 </style>
