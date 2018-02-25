@@ -141,10 +141,31 @@
       }
     },
     created() {
+      // this.validate()
       this.init()
       // console.log(this.schema)
     },
     methods: {
+      validate() {
+        const self = this
+        // this.columns数组元素本身必须是string或者object. 且必须是schema中定义的列
+        // 由于vue中不允许通过其他的props来验证当前props，只能在created里进行调用
+        _.each(self.columns, function(item) {
+          if (!item) {
+            return 0
+          }
+
+          if (typeof item !== 'string' && typeof item !== 'object') {
+            console.error(`传入的columns不符合要求，数组元素必须是字符串或对象`)
+          }
+          if (typeof item === 'string' && !_.keyBy(self.schema['columns'], 'code')[item.toUpperCase()]) {
+            console.error(`传入的columns不符合要求，字符串元素[${item}]必须是schema中定义的列[code]`)
+          }
+          if (typeof item === 'object' && !_.keyBy(self.schema['columns'], 'code')[item['code'].toUpperCase()]) {
+            console.error(`传入的columns不符合要求，元素的code属性[${item['code']}]必须是schema中定义的列[code]`)
+          }
+        })
+      },
       onEditorBlur(editor) {
         console.log('editor blur!')
       },
@@ -160,22 +181,21 @@
         if (!self.columns || !self.columns.length) {
           _.each(self.schema['columns'], function(column) {
             const tmp = JSON.parse(JSON.stringify(column))
-            // self.$set(tmp, 'code', tmp.code.toLowerCase())
+            self.$set(tmp, 'code', tmp.code.toLowerCase())
             self.showUserColumns.push(tmp)
           })
           // console.log(self.showUserColumns)
         } else { // columns，则只显示传入的字段
           self.showUserColumns = JSON.parse(JSON.stringify(self.columns))
           // console.log('1111111')
-          // console.log(self.showUserColumns)
+          console.log(self.showUserColumns)
           // 将字符串对象进行替换处理
           _.each(self.showUserColumns, function(column, index) {
             if (typeof column === 'string') {
               // 生成一个新对象
-              console.log(column)
-              const tmp = _.keyBy(self.schema['columns'], 'code')[column.toUpperCase()]
-              // console.log(tmp)
-              // self.$set(tmp, 'code', tmp.code.toLowerCase())
+              // const tmp = _.keyBy(self.schema['columns'], 'code')[column.toUpperCase()]
+              const tmp = _.keyBy(self.schema['columns'], 'codeCamel')[column]
+              self.$set(tmp, 'code', tmp.code.toLowerCase())
               self.$set(self.showUserColumns, index, tmp)
             }
           })
