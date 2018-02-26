@@ -19,8 +19,8 @@
     },
     data() {
       return {
-        // showUserColumns: ['username', 'loginid', 'password', 'mobile', 'email']
-        showUserColumns: []
+        showUserColumns: ['username', 'loginid', 'password', 'mobile', 'email', 'securityLevel']
+        // showUserColumns: []
       }
     },
     computed: {
