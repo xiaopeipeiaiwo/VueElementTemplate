@@ -123,6 +123,7 @@ export const asyncRouterMap = [
       },
       {
         path: '/haomo/pages',
+        component: _import('haomo/pages/index'),
         redirect: '/haomo/pages/login',
         name: 'haomo-pages',
         meta: {
@@ -132,7 +133,7 @@ export const asyncRouterMap = [
         children: [
           {
             path: 'login',
-            component: _import('haomo/pages/login'),
+            component: _import('haomo/pages/login/index'),
             name: 'haomo-login',
             meta: {
               title: '登录',
@@ -141,7 +142,7 @@ export const asyncRouterMap = [
           },
           {
             path: 'personal',
-            component: _import('haomo/pages/personal'),
+            component: _import('haomo/pages/personal-center/index'),
             name: 'haomo-personal',
             meta: {
               title: '个人中心',
