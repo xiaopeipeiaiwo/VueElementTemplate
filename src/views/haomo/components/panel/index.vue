@@ -1,25 +1,38 @@
 <template>
   <div>
-    <hm-complex-panel :schema="schema['HmUser']" :userId="userId" :hmTitle="hmTitle" :hmTitleClass="hmTitleClass"
-                      :hmContentText="hmContentText" :hmStyle="hmStyle" :hmPanelHeight="hmPanelHeight" :hmCollapse="collapses">
-    </hm-complex-panel>
-    <hm-complex-panel :schema="schema['HmUser']" :userId="userId" :hmTitle="titleBak" :hmContentClass="hmContentClass" :showFields="showFields"
-                      :hmContentText="hmContentTextBak" :hmStyle="styleBak" :hmPanelHeight="panelHeightBak" :hmCollapse="collapseBak">
-    </hm-complex-panel>
+    <hm-panel :options="options">
+      <div slot="title">面板标题</div>
+      <div slot="content">
+        <hm-complex-detail :schema="schema['HmUser']" :tableId="userId">
+        </hm-complex-detail>
+      </div>
+    </hm-panel>
+    <hm-panel :options="options2">
+      <div slot="title">
+        <hm-complex-form :schema="schema['HmUser']" :fields="showFields"></hm-complex-form>
+      </div>
+      <div slot="content">
+        <hm-complex-form :schema="schema['HmUser']" :fields="showFields"></hm-complex-form>
+      </div>
+    </hm-panel>
   </div>
 </template>
 
 <script>
-  import HmComplexPanel from './HmComplexPanel.vue'
+  import HmPanel from './HmPanel.vue'
   import schema from '../../schemas/hm_org_schema'
+  import HmComplexDetail from '../details/HmComplexDetail.vue'
+  import HmComplexForm from '../forms/HmComplexForm.vue'
 
   export default {
-    name: 'HmComplexPanel',
+    name: 'HmPanel',
     // 继承其他组件
     extends: {},
     // 使用其它组件
     components: {
-      'hm-complex-panel': HmComplexPanel
+      'hm-panel': HmPanel,
+      'hm-complex-detail': HmComplexDetail,
+      'hm-complex-form': HmComplexForm
     },
     data() {
       return {
@@ -31,33 +44,35 @@
     filters: {
     },
     created() {
+      this.options = {
+        panel_class: 'center',
+        title_class: 'weight',
+        content_class: 'center',
+        panel_style: {
+          width: '100%',
+          margin: '20px auto'
+        },
+        panel_span: 22,
+        content_height: {
+          height: '600px'
+        },
+        canCollapse: true
+      }
+      this.options2 = {
+        panel_class: 'center',
+        title_class: 'center',
+        content_class: 'center',
+        panel_style: {
+          width: '80%',
+          background: '#42b983',
+          margin: '0 auto'
+        },
+        panel_span: 20,
+        canCollapse: false
+      }
       this.schema = schema
       this.userId = '0e26566e953449a7a7500c34be39fd26'
-      this.hmTitle = '面版名称'
-      this.hmTitleClass = 'center'
-      this.hmContentClass = 'center'
-      this.hmContentText = '面板文字'
-      this.hmStyle = {
-        width: '50%',
-        background: '#42b983',
-        margin: '0 auto'
-      }
-      this.hmPanelHeight = {
-        height: '100px'
-      }
-      this.collapses = 12
       this.showFields = ['username', 'loginid', 'password', 'mobile', 'email']
-      this.titleBak = '测试面板'
-      this.hmContentTextBak = '我测试一下'
-      this.styleBak = {
-        width: '100%',
-        background: '#f56c6c',
-        marginBottom: '20px'
-      }
-      this.panelHeightBak = {
-        height: '200px'
-      }
-      this.collapseBak = 22
     },
     methods: {}
   }

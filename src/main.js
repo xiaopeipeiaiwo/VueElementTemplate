@@ -1,4 +1,5 @@
 import Vue from 'vue'
+import VueQuillEditor from 'vue-quill-editor' // 富文本插件
 
 import 'normalize.css/normalize.css'// A modern alternative to CSS resets
 
@@ -17,12 +18,16 @@ import './errorLog'// error log
 import './permission' // permission control
 import './mock' // simulation data
 
+import 'quill/dist/quill.core.css' // 富文本CSS
+import 'quill/dist/quill.snow.css' // 富文本CSS
+
 import * as filters from './filters' // global filters
 
 import Icon from 'vue-awesome/components/Icon'
 
 Vue.component('icon', Icon)
 
+Vue.use(VueQuillEditor) // 富文本
 Vue.use(Element, {
   size: 'medium', // set element-ui default size
   i18n: (key, value) => i18n.t(key, value)

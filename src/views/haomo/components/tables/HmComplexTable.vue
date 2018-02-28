@@ -242,7 +242,9 @@
           // 将字符串对象进行替换处理
           _.each(self.showColumns, function(column, index) {
             if (typeof column === 'string') {
-              const tmp = _.keyBy(self.schema['columns'], 'code')[column.toUpperCase()]
+              // const tmp = _.keyBy(self.schema['columns'], 'code')[column.toUpperCase()]
+              // 王康 修改 2018年02月25日22:58:23
+              const tmp = _.keyBy(self.schema['columns'], 'codeCamel')[column]
               console.log(tmp)
               self.$set(tmp, 'code', tmp.code.toLowerCase())
               self.$set(self.showColumns, index, tmp)
