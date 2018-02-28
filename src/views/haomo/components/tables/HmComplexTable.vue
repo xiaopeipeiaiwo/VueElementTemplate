@@ -56,7 +56,7 @@
    * 毫末科技的表格组件.
    *
    *   demo地址: factory.haomo-studio.com/vue-element/#/haomo/components/table
-   * @author 胡小根
+   * @author 胡小根 hxg@haomo-studio.com
    */
   export default {
     name: 'HmComplexTable',
