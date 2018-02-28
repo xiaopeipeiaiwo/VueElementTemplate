@@ -28,10 +28,11 @@
 
 ### 打包
 
-
+    npm run build:prod
 
 ### 部署
 
+    rsync -avz dist/* member@haomo-studio.com:/var/www/html/software_factory/vue-element/
 
 ## 开发
 
