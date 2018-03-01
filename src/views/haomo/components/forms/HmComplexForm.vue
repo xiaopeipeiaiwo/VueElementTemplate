@@ -11,8 +11,8 @@
           <el-form-item v-for="(column,index) in showUserColumns" :key="index" :label="column.name" :prop="column.codeCamel">
             <!--el-input<el-input v-if="column.codeCamel==='password'" type="password"
                       v-model="formModel[column.codeCamel]"></el-input>-->
-            <el-input v-if="column.codeCamel!=='securityLevel'" v-model="formModel[column.codeCamel]"></el-input>
-            <!-- quill-editor -->
+
+            <!-- 富文本 -->
             <quill-editor v-if="column.codeCamel==='securityLevel'" class="editor-example bubble"
                           ref="textEditor"
                           v-model="formModel[column.codeCamel]"
@@ -21,6 +21,30 @@
                           @focus="onEditorFocus($event)"
                           @ready="onEditorReady($event)">
             </quill-editor>
+            <!-- 日期选择 -->
+            <el-date-picker v-else-if="column.codeCamel === 'createTime' || column.codeCamel === 'lastUpdateTime' || column.codeCamel === 'lastLoginTime'"
+                            v-model="formModel[column.codeCamel]"
+                            :placeholder="column.codeCamel"
+                            type="datetime"
+                            align="right"
+                            @change="logTimeChange"
+                            :picker-options="pickerOptions">
+            </el-date-picker>
+            <!-- 下拉框 -->
+            <el-select v-else-if="column.codeCamel === 'type'" v-model="formModel[column.codeCamel]">
+              <el-option v-for="item in selectOptions"
+                        :key="item.value"
+                        :value="item.value">
+              </el-option>
+            </el-select>
+            <!-- 文本域 -->
+            <el-input v-else-if="column.codeCamel === 'departmentId'" v-model="formModel[column.codeCamel]"
+                      type="textarea"
+                      :autosize="{ minRows: 2, maxRows: 5}"
+                      :rows="2">
+            </el-input>
+            <!-- 普通input -->
+            <el-input v-else v-model="formModel[column.codeCamel]"></el-input>
           </el-form-item>
           <el-form-item>
             <el-col :span="12">
@@ -91,9 +115,11 @@
     },
     data() {
       return {
+        vvv: '',
         form: null,
         formModel: {}, // 双向绑定的数据变量
         showUserColumns: [], // 要显示的字段
+
         // form: {
         //   name: '',
         //   gender: '男',
@@ -127,7 +153,7 @@
             { type: 'email', message: '请输入正确的邮箱地址', trigger: 'blur&change' }
           ]
         },
-        editorOption: {
+        editorOption: { // 富文本选项配置
           placeholder: '',
           modules: {
             toolbar: [
@@ -137,7 +163,36 @@
               ['image']
             ]
           }
-        }
+        },
+        pickerOptions: { // 日期选项配置
+          shortcuts: [{
+            text: '今天',
+            onClick(picker) {
+              picker.$emit('pick', new Date())
+            }
+          }, {
+            text: '昨天',
+            onClick(picker) {
+              const date = new Date()
+              date.setTime(date.getTime() - 3600 * 1000 * 24)
+              picker.$emit('pick', date)
+            }
+          }, {
+            text: '一周前',
+            onClick(picker) {
+              const date = new Date()
+              date.setTime(date.getTime() - 3600 * 1000 * 24 * 7)
+              picker.$emit('pick', date)
+            }
+          }]
+        },
+        selectOptions: [{
+          value: '1',
+          label: '企业'
+        }, {
+          value: '2',
+          label: '代理商'
+        }]
       }
     },
     created() {
@@ -146,6 +201,9 @@
       // console.log(this.schema)
     },
     methods: {
+      logTimeChange(value) {
+        console.log(value)
+      },
       validate() {
         const self = this
         // this.columns数组元素本身必须是string或者object. 且必须是schema中定义的列
