@@ -1,12 +1,12 @@
 <template>
   <div>
-    <hm-tab></hm-tab>
+    <hm-tab :schema="schema['CcHmUser']"></hm-tab>
   </div>
 </template>
 
 <script>
   import HmTab from './HmTab.vue'
-  // import schema from '../../schemas/hm_org_schema'
+  import schema from '../../schemas/hm_org_schema'
   export default {
     name: 'HmTab',
     // 继承其他组件
@@ -24,6 +24,7 @@
     filters: {
     },
     created() {
+      this.schema = schema
     },
     methods: {}
   }

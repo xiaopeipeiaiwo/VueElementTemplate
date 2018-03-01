@@ -34,7 +34,7 @@
 <script>
   // import _ from 'lodash'
   // import request from '@/utils/request'
-  import schema from '../../schemas/hm_org_schema'
+  // import schema from '../../schemas/hm_org_schema'
 
   /**
    * 毫末科技的选项卡组件.
@@ -55,11 +55,14 @@
      * 对于所有毫末科技的组件，必须传schema，以完成数据的交互
      */
     props: {
+      schema: {
+        type: Object,
+        required: true
+      }
     },
     data() {
       return {
         activeName: 'first',
-        schema: schema['CcHmUser'],
         swiperOption: {
           slidesPerView: 2,
           slidesPerGroup: 2,
