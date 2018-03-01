@@ -1,6 +1,6 @@
 <template>
   <div class="app-container calendar-list-container">
-    <hm-complex-table :schema="schema['HmUser']"
+    <hm-complex-table :schema="schema['HmUser2']"
                       :columns="showUserColumns"
                       :filters="userFilters"></hm-complex-table>
     <hm-complex-table :schema="schema['Department']"></hm-complex-table>
