@@ -1,6 +1,6 @@
 <template>
   <div>
-    <hm-complex-form :schema="schema['HmUser']" :columns="showUserColumns" :tableId="tableId">
+    <hm-complex-form :schema="schema['CcHmUser']" :columns="showUserColumns" :tableId="tableId">
     </hm-complex-form>
   </div>
 </template>

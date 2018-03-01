@@ -207,7 +207,7 @@
   <div>
     <hm-complex-form  
                       :tableId="tableId"
-                      :schema="schema['HmUser']" 
+                      :schema="schema['CcHmUser']" 
                       :columns="showUserColumns">
     </hm-complex-form>
   </div>
