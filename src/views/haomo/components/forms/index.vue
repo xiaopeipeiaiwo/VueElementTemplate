@@ -29,6 +29,7 @@
     },
     created() {
       this.schema = schema
+      console.log(this.schema)
       this.tableId = '0e26566e953449a7a7500c34be39fd26'
     },
     methods: {}

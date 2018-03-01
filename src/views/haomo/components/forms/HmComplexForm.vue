@@ -116,6 +116,7 @@
     data() {
       return {
         vvv: '',
+        requestUrl: '',
         form: null,
         formModel: {}, // 双向绑定的数据变量
         showUserColumns: [], // 要显示的字段
@@ -264,6 +265,9 @@
         _.each(self.showUserColumns, function(item) {
           self.formModel[item.codeCamel] = ''
         })
+        // 修改请求地址
+        self.requestUrl = self.schema.modelUnderscore.slice(0, -1) + 's'
+
         console.log(self.formModel)
         if (!request.defaults.baseURL) {
           request.defaults.baseURL = '/org/api'
@@ -285,7 +289,7 @@
             console.log('提交成功!')
             // 存在tableId 则修改信息
             if (self.tableId) {
-              request(self.schema.modelUnderscorePlural + '/' + self.tableId + '/edit', {
+              request(self.requestUrl + '/' + self.tableId + '/edit', {
                 method: 'post',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
                 data: self.formModel,
@@ -306,7 +310,7 @@
                 self.resetForm()
               })
             } else { // 不存在tableId 则创建一条数据
-              request(self.schema.modelUnderscorePlural + '/new', {
+              request(self.requestUrl + '/new', {
                 method: 'post',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
                 data: self.formModel,
