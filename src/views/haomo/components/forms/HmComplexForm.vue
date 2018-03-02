@@ -83,11 +83,11 @@
     components: {},
     // 混入公共对象
     mixins: [],
-    /**
-     * 组件所使用的表定义schema。表定义schema，请使用 model2codejs 从pdm文件生成schema。
-     * 对于所有毫末科技的组件，必须传schema，以完成数据的交互
-     */
     props: {
+      /**
+       * 组件所使用的表定义schema。表定义schema，请使用 model2codejs 从pdm文件生成schema。
+       * 对于所有毫末科技的组件，必须传schema，以完成数据的交互
+       */
       schema: {
         type: Object,
         required: true
