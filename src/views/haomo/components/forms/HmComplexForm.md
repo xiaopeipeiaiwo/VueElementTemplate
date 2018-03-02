@@ -2,7 +2,7 @@
 
 ```jsx
     <hm-complex-form      :tableId="tableId"
-                          :columns="['username', 'loginid', 'password', 'mobile', 'email']" 
+                          :columns="['username', 'loginid', 'password', 'mobile', 'email','avatar','createTime','lastUpdateTime','lastLoginTime','securityLevel','type','departmentId']" 
                           :schema="{
                                    'model': 'HmUser',
                                    'modelPlural': 'HmUsers',
@@ -196,7 +196,24 @@
                                        'codeUnderscore': 'type',
                                        'codeUnderscorePlural': 'types',
                                        'type': 'number'
-                                     }
+                                     },
+                                     {
+                                             'id': 'o340',
+                                             'objectId': 'B5BCB5C5-192F-4BD0-8215-BB65A8288168',
+                                             'name': '部门id',
+                                             'code': 'department_id',
+                                             'creationDate': '1503476586',
+                                             'creator': 'yide',
+                                             'modificationDate': '1517186153',
+                                             'modifier': 'yide',
+                                             'dataType': 'varchar(128)',
+                                             'length': '128',
+                                             'codeCamel': 'departmentId',
+                                             'codeCamelPlural': 'departmentIds',
+                                             'codeUnderscore': 'department_id',
+                                             'codeUnderscorePlural': 'department_ids',
+                                             'type': 'string'
+                                           }
                                    ]
                                  }"></hm-complex-form>
 ```
@@ -207,7 +224,7 @@
   <div>
     <hm-complex-form  
                       :tableId="tableId"
-                      :schema="schema['CcHmUser']" 
+                      :schema="schema['HmUser2']" 
                       :columns="showUserColumns">
     </hm-complex-form>
   </div>
