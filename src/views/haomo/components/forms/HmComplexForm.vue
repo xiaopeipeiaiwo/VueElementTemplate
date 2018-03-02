@@ -24,16 +24,17 @@
             <!-- 日期选择 -->
             <el-date-picker v-else-if="column.codeCamel === 'createTime' || column.codeCamel === 'lastUpdateTime' || column.codeCamel === 'lastLoginTime'"
                             v-model="formModel[column.codeCamel]"
-                            :placeholder="column.codeCamel"
                             type="datetime"
                             align="right"
                             @change="logTimeChange"
+                            value-format="yyyy-MM-dd HH:mm:ss"
                             :picker-options="pickerOptions">
             </el-date-picker>
             <!-- 下拉框 -->
             <el-select v-else-if="column.codeCamel === 'type'" v-model="formModel[column.codeCamel]">
               <el-option v-for="item in selectOptions"
                         :key="item.value"
+                        :label="item.label"
                         :value="item.value">
               </el-option>
             </el-select>
@@ -66,6 +67,7 @@
 <script>
   import _ from 'lodash'
   import request from '@/utils/request'
+  // import { parseTime } from '@/utils/index'
 
   /**
    * 毫末科技的表单组件.
@@ -114,29 +116,47 @@
       }
     },
     data() {
+      // var validateUsername = (rule, value, callback) => {
+      //   console.log(value.length)
+      //   if (!value) {
+      //     callback(new Error('请输入用户名'))
+      //   } else if ((value.length < 2 || value.length > 10)) {
+      //     callback(new Error('用户名长度在 2 到 10 个字符'))
+      //   } else {
+      //     callback()
+      //   }
+      // }
+      // var validatePassword = (rule, value, callback) => {
+      //   if (value.length > 0 && !(/^(?![0-9]+$)(?![a-zA-Z]+$)[0-9A-Za-z]{6,20}$/.test(value))) {
+      //     callback(new Error('密码必须同时包含数字和字母 6-20位'))
+      //   } else {
+      //     callback()
+      //   }
+      // }
+      // var validateMobile = (rule, value, callback) => {
+      //   if (value.length > 0 && !(/^((0\d{2,3}-\d{7,8})|(1[3584]\d{9}))$/.test(value))) {
+      //     callback(new Error('请输入正确的电话号码或手机号'))
+      //   } else {
+      //     callback()
+      //   }
+      // }
+      // var validateEmail = (rule, value, callback) => {
+      //   if (value.length > 0) {
+      //     if (!(/^[A-Za-z0-9\u4e00-\u9fa5]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/.test(value))) {
+      //       callback(new Error('请输入正确的邮箱'))
+      //     } else {
+      //       callback()
+      //     }
+      //   }
+      // }
       return {
-        vvv: '',
         requestUrl: '',
         form: null,
         formModel: {}, // 双向绑定的数据变量
         showUserColumns: [], // 要显示的字段
-
-        // form: {
-        //   name: '',
-        //   gender: '男',
-        //   age: '',
-        //   password: '',
-        //   website: '',
-        //   img: '',
-        //   date: '',
-        //   education: '',
-        //   color: '#ff0000',
-        //   phone: '',
-        //   email: '',
-        //   address: ''
-        // },
         rules: {
           username: [
+            // { validator: validateUsername, trigger: 'change' }
             { required: true, message: '请输入用户名', trigger: 'blur' },
             { min: 2, max: 10, message: '长度在 2 到 10 个字符', trigger: 'blur' }
           ],
@@ -144,14 +164,16 @@
             { required: true, message: '请输入登陆ID', trigger: 'blur' }
           ],
           password: [
-            { required: true, message: '请输入密码', trigger: 'blur' }
-            // { pattern: /^(?![0-9]+$)(?![a-zA-Z]+$)[0-9A-Za-z]{6,20}$/, message: '密码必须同时包含数字和字母 6-20位', trigger: 'change' }
+            // { validator: validatePassword, trigger: 'change' }
+            { pattern: /^(?![0-9]+$)(?![a-zA-Z]+$)[0-9A-Za-z]{6,20}$/, message: '密码必须同时包含数字和字母 6-20位', trigger: 'change' }
           ],
           mobile: [
-            { pattern: /^((0\d{2,3}-\d{7,8})|(1[3584]\d{9}))$/, message: '请输入正确的电话号码或手机号', trigger: 'blur&change' }
+            // { validator: validateMobile, trigger: 'change' }
+            { pattern: /^((0\d{2,3}-\d{7,8})|(1[3584]\d{9}))$/, message: '请输入正确的电话号码', trigger: 'change' }
           ],
           email: [
-            { type: 'email', message: '请输入正确的邮箱地址', trigger: 'blur&change' }
+            // { validator: validateEmail, trigger: 'change' }
+            { type: 'email', message: '请输入正确的邮箱', trigger: 'change' }
           ]
         },
         editorOption: { // 富文本选项配置
@@ -166,6 +188,9 @@
           }
         },
         pickerOptions: { // 日期选项配置
+          disabledDate(time) {
+            return time.getTime() > Date.now()
+          },
           shortcuts: [{
             text: '今天',
             onClick(picker) {
@@ -203,6 +228,7 @@
     },
     methods: {
       logTimeChange(value) {
+        // value = parseTime(value)
         console.log(value)
       },
       validate() {
@@ -259,16 +285,17 @@
             }
           })
           // console.log('2222222')
-          console.log(self.showUserColumns)
+          // console.log(self.showUserColumns)
         }
         // 提取v-model绑定的变量
         _.each(self.showUserColumns, function(item) {
-          self.formModel[item.codeCamel] = ''
+          // self.formModel[item.codeCamel] = ''  这样写有问题
+          self.$set(self.formModel, item.codeCamel, '')
         })
         // 修改请求地址
         self.requestUrl = self.schema.modelUnderscore.slice(0, -1) + 's'
 
-        console.log(self.formModel)
+        // console.log(self.formModel)
         if (!request.defaults.baseURL) {
           request.defaults.baseURL = '/org/api'
         }
@@ -278,13 +305,14 @@
       /**
        * 确定提交函数。
        *
-       * 所有选项输入正并验证通过，正确提交
+       * 所有选项输入并验证通过，正确提交
        * 验证失败，禁止提交并给出提示
        */
       onSubmit() {
         const self = this
-        console.log(self.formModel)
+        console.log('点击了提交函数')
         self.$refs.form.validate((valid) => {
+          console.log(valid)
           if (valid) {
             console.log('提交成功!')
             // 存在tableId 则修改信息
