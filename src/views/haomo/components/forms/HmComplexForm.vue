@@ -116,30 +116,30 @@
       }
     },
     data() {
-      // var validateUsername = (rule, value, callback) => {
-      //   console.log(value.length)
-      //   if (!value) {
-      //     callback(new Error('请输入用户名'))
-      //   } else if ((value.length < 2 || value.length > 10)) {
-      //     callback(new Error('用户名长度在 2 到 10 个字符'))
-      //   } else {
-      //     callback()
-      //   }
-      // }
-      // var validatePassword = (rule, value, callback) => {
-      //   if (value.length > 0 && !(/^(?![0-9]+$)(?![a-zA-Z]+$)[0-9A-Za-z]{6,20}$/.test(value))) {
-      //     callback(new Error('密码必须同时包含数字和字母 6-20位'))
-      //   } else {
-      //     callback()
-      //   }
-      // }
-      // var validateMobile = (rule, value, callback) => {
-      //   if (value.length > 0 && !(/^((0\d{2,3}-\d{7,8})|(1[3584]\d{9}))$/.test(value))) {
-      //     callback(new Error('请输入正确的电话号码或手机号'))
-      //   } else {
-      //     callback()
-      //   }
-      // }
+      var validateUsername = (rule, value, callback) => {
+        // console.log(value.length)
+        if (!value) {
+          callback(new Error('请输入用户名'))
+        } else if ((value.length < 2 || value.length > 10)) {
+          callback(new Error('用户名长度在 2 到 10 个字符'))
+        } else {
+          callback()
+        }
+      }
+      var validatePassword = (rule, value, callback) => {
+        if (value.length > 0 && !(/^(?![0-9]+$)(?![a-zA-Z]+$)[0-9A-Za-z]{6,20}$/.test(value))) {
+          callback(new Error('密码必须同时包含数字和字母 6-20位'))
+        } else {
+          callback()
+        }
+      }
+      var validateMobile = (rule, value, callback) => {
+        if (value.length > 0 && !(/^((0\d{2,3}-\d{7,8})|(1[3584]\d{9}))$/.test(value))) {
+          callback(new Error('请输入正确的电话号码或手机号'))
+        } else {
+          callback()
+        }
+      }
       // var validateEmail = (rule, value, callback) => {
       //   if (value.length > 0) {
       //     if (!(/^[A-Za-z0-9\u4e00-\u9fa5]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/.test(value))) {
@@ -156,20 +156,20 @@
         showUserColumns: [], // 要显示的字段
         rules: {
           username: [
-            // { validator: validateUsername, trigger: 'change' }
-            { required: true, message: '请输入用户名', trigger: 'blur' },
-            { min: 2, max: 10, message: '长度在 2 到 10 个字符', trigger: 'blur' }
+            { validator: validateUsername, trigger: 'change' }
+            // { required: true, message: '请输入用户名', trigger: 'blur' },
+            // { min: 2, max: 10, message: '长度在 2 到 10 个字符', trigger: 'blur' }
           ],
           loginid: [
-            { required: true, message: '请输入登陆ID', trigger: 'blur' }
+            // { required: true, message: '请输入登陆ID', trigger: 'blur' }
           ],
           password: [
-            // { validator: validatePassword, trigger: 'change' }
-            { pattern: /^(?![0-9]+$)(?![a-zA-Z]+$)[0-9A-Za-z]{6,20}$/, message: '密码必须同时包含数字和字母 6-20位', trigger: 'change' }
+            { validator: validatePassword, trigger: 'change' }
+            // { pattern: /^(?![0-9]+$)(?![a-zA-Z]+$)[0-9A-Za-z]{6,20}$/, message: '密码必须同时包含数字和字母 6-20位', trigger: 'change' }
           ],
           mobile: [
-            // { validator: validateMobile, trigger: 'change' }
-            { pattern: /^((0\d{2,3}-\d{7,8})|(1[3584]\d{9}))$/, message: '请输入正确的电话号码', trigger: 'change' }
+            { validator: validateMobile, trigger: 'change' }
+            // { pattern: /^((0\d{2,3}-\d{7,8})|(1[3584]\d{9}))$/, message: '请输入正确的电话号码', trigger: 'change' }
           ],
           email: [
             // { validator: validateEmail, trigger: 'change' }
