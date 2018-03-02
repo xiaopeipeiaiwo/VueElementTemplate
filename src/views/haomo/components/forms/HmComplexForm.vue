@@ -22,7 +22,7 @@
                           @ready="onEditorReady($event)">
             </quill-editor>
             <!-- 日期选择 -->
-            <el-date-picker v-else-if="column.codeCamel === 'createTime' || column.codeCamel === 'lastUpdateTime' || column.codeCamel === 'lastLoginTime'"
+            <el-date-picker v-else-if="column.type === 'datetime' || column.codeCamel === 'date'"
                             v-model="formModel[column.codeCamel]"
                             type="datetime"
                             align="right"

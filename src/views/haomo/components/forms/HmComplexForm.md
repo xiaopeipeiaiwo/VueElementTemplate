@@ -1,15 +1,14 @@
 ### 基本使用
 
 ```jsx
-    <hm-complex-form      :tableId="tableId"
-                          :columns="['username', 'loginid', 'password', 'mobile', 'email','avatar','createTime','lastUpdateTime','lastLoginTime','securityLevel','type','departmentId']" 
+    <hm-complex-form      
                           :schema="{
-                                   'model': 'HmUser',
-                                   'modelPlural': 'HmUsers',
-                                   'modelCamel': 'hmUser',
-                                   'modelCamelPlural': 'hmUsers',
-                                   'modelUnderscore': 'hm_user',
-                                   'modelUnderscorePlural': 'hm_users',
+                                   'model': 'HmUser2',
+                                       'modelPlural': 'HmUser2S',
+                                       'modelCamel': 'hmUser2',
+                                       'modelCamelPlural': 'hmUser2S',
+                                       'modelUnderscore': 'hm_user2',
+                                       'modelUnderscorePlural': 'hm_user2S',
                                    'columns': [
                                      {
                                        'id': 'o50',
