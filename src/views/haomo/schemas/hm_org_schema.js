@@ -2981,7 +2981,8 @@ const ModelSchema = {
         'codeCamelPlural': 'avatars',
         'codeUnderscore': 'avatar',
         'codeUnderscorePlural': 'avatars',
-        'type': 'string'
+        'type': 'string',
+        'widgetType': 'checkbox'
       },
       {
         'id': 'o335',
@@ -3045,7 +3046,8 @@ const ModelSchema = {
         'codeCamelPlural': 'securityLevels',
         'codeUnderscore': 'security_level',
         'codeUnderscorePlural': 'security_levels',
-        'type': 'number'
+        'type': 'number',
+        'widgetType': 'richText'
       },
       {
         'id': 'o339',
@@ -3062,7 +3064,8 @@ const ModelSchema = {
         'codeCamelPlural': 'types',
         'codeUnderscore': 'type',
         'codeUnderscorePlural': 'types',
-        'type': 'number'
+        'type': 'number',
+        'widgetType': 'selectType'
       },
       {
         'id': 'o340',
@@ -3079,7 +3082,8 @@ const ModelSchema = {
         'codeCamelPlural': 'departmentIds',
         'codeUnderscore': 'department_id',
         'codeUnderscorePlural': 'department_ids',
-        'type': 'string'
+        'type': 'string',
+        'widgetType': 'textarea'
       }
     ]
   },

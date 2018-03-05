@@ -13,7 +13,7 @@
                       v-model="formModel[column.codeCamel]"></el-input>-->
 
             <!-- 富文本 -->
-            <quill-editor v-if="column.codeCamel==='securityLevel'" class="editor-example bubble"
+            <quill-editor v-if="column.widgetType==='richText'"
                           ref="textEditor"
                           v-model="formModel[column.codeCamel]"
                           :options="editorOption"
@@ -31,7 +31,7 @@
                             :picker-options="pickerOptions">
             </el-date-picker>
             <!-- 下拉框 -->
-            <el-select v-else-if="column.codeCamel === 'type'" v-model="formModel[column.codeCamel]">
+            <el-select v-else-if="column.widgetType === 'selectType'" v-model="formModel[column.codeCamel]">
               <el-option v-for="item in selectOptions"
                         :key="item.value"
                         :label="item.label"
@@ -39,11 +39,13 @@
               </el-option>
             </el-select>
             <!-- 文本域 -->
-            <el-input v-else-if="column.codeCamel === 'departmentId'" v-model="formModel[column.codeCamel]"
+            <el-input v-else-if="column.widgetType === 'textarea'" v-model="formModel[column.codeCamel]"
                       type="textarea"
                       :autosize="{ minRows: 2, maxRows: 5}"
                       :rows="2">
             </el-input>
+            <!-- 复选框 -->
+            <el-checkbox v-else-if="column.widgetType === 'checkbox'" v-model="formModel[column.codeCamel]"></el-checkbox>
             <!-- 普通input -->
             <el-input v-else v-model="formModel[column.codeCamel]"></el-input>
           </el-form-item>

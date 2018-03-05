@@ -3,12 +3,12 @@
 ```jsx
     <hm-complex-form      
                           :schema="{
-                                   'model': 'HmUser2',
-                                       'modelPlural': 'HmUser2S',
-                                       'modelCamel': 'hmUser2',
-                                       'modelCamelPlural': 'hmUser2S',
-                                       'modelUnderscore': 'hm_user2',
-                                       'modelUnderscorePlural': 'hm_user2S',
+                                   'model': 'HmUser',
+                                       'modelPlural': 'HmUserS',
+                                       'modelCamel': 'hmUser',
+                                       'modelCamelPlural': 'hmUserS',
+                                       'modelUnderscore': 'hm_user',
+                                       'modelUnderscorePlural': 'hm_userS',
                                    'columns': [
                                      {
                                        'id': 'o50',
@@ -214,7 +214,7 @@
                                              'type': 'string'
                                            }
                                    ]
-                                 }"></hm-complex-form>
+}"></hm-complex-form>
 ```
 ### 指定显示的表单类型
 
@@ -223,7 +223,7 @@
   <div>
     <hm-complex-form  
                       :tableId="tableId"
-                      :schema="schema['HmUser2']" 
+                      :schema="schema['HmUser']" 
                       :columns="showUserColumns">
     </hm-complex-form>
   </div>
@@ -231,7 +231,7 @@
 
 <script>
   export default {
-    name: 'HmComplexForm',
+    name: 'HmComplexFormIndex',
     data() {
       return {
         schema: {
