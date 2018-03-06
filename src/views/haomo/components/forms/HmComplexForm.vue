@@ -8,21 +8,14 @@
         <!--表单部分-->
         <el-form ref="form" :model="formModel" :rules="rules" label-width="110px"
                  style="width:80%;margin:0 auto">
-          <el-form-item v-for="(column,index) in showUserColumns" :key="index" :label="column.name" :prop="column.codeCamel">
+          <el-form-item v-for="(column,index) in showUserColumns" :key="column.id" :label="column.name" :prop="column.codeCamel">
             <!--el-input<el-input v-if="column.codeCamel==='password'" type="password"
                       v-model="formModel[column.codeCamel]"></el-input>-->
 
-            <!-- 富文本 -->
-            <quill-editor v-if="column.widgetType === 5"
-                          ref="textEditor"
-                          v-model="formModel[column.codeCamel]"
-                          :options="editorOption"
-                          @blur="onEditorBlur($event)"
-                          @focus="onEditorFocus($event)"
-                          @ready="onEditorReady($event)">
-            </quill-editor>
-            <!-- 日期选择 -->
-            <el-date-picker v-else-if="column.type === 'datetime' || column.type === 'date'"
+            <!-- 1 普通input -->
+            <el-input v-if="column.widgetType === 1" v-model="formModel[column.codeCamel]"></el-input>
+            <!-- 2 日期选择 -->
+            <el-date-picker v-else-if="column.widgetType === 6 || column.type === 'datetime' || column.type === 'date'"
                             v-model="formModel[column.codeCamel]"
                             type="datetime"
                             align="right"
@@ -30,31 +23,36 @@
                             value-format="yyyy-MM-dd HH:mm:ss"
                             :picker-options="pickerOptions">
             </el-date-picker>
-            <!-- 下拉框 -->
-            <el-select v-else-if="column.widgetType === 2" v-model="formModel[column.codeCamel]">
-              <el-option v-for="item in selectOptions"
-                        :key="item.value"
-                        :label="item.label"
-                        :value="item.value">
+            <!-- 3 下拉框 -->
+            <el-select v-else-if="column.widgetType === 2" v-model="formModel[column.codeCamel]" @change="selectChange(formModel[column.codeCamel])">
+              <el-option v-for="(item,key) in column.options"
+                        :key="key"
+                        :label="item"
+                        :value="key">
               </el-option>
             </el-select>
-            <!-- 文本域 -->
+            <!-- 4 文本域 -->
             <el-input v-else-if="column.widgetType === 4" v-model="formModel[column.codeCamel]"
                       type="textarea"
                       :autosize="{ minRows: 2, maxRows: 5}"
                       :rows="2">
             </el-input>
-            <!-- 复选框 -->
+            <!-- 5 复选框 -->
             <el-checkbox v-else-if="column.widgetType === 3" v-model="formModel[column.codeCamel]"></el-checkbox>
-            <!-- 普通input -->
-            <el-input v-else v-model="formModel[column.codeCamel]"></el-input>
+            <!-- 6 富文本 -->
+            <quill-editor v-else-if="column.widgetType === 5"
+                          ref="textEditor"
+                          v-model="formModel[column.codeCamel]"
+                          :options="editorOption"
+                          @blur="onEditorBlur($event)"
+                          @focus="onEditorFocus($event)"
+                          @ready="onEditorReady($event)">
+            </quill-editor>
           </el-form-item>
-          <el-form-item>
-            <el-col :span="12">
-              <el-button type="primary" @click="onSubmit()">确定</el-button>
-            </el-col>
-            <el-col :span="12">
-              <el-button @click="resetForm()">重置</el-button>
+          <el-form-item v-if="buttons.length">
+            <el-col :span="12" v-for="(btn,key) in buttons" :key="key">
+              <el-button v-if="btn === '确定' || btn === '提交'" type="primary" @click="onSubmit()">{{btn}}</el-button>
+              <el-button v-if="btn === '取消' || btn === '重置'" type="primary" @click="resetForm()">{{btn}}</el-button>
             </el-col>
           </el-form-item>
         </el-form>
@@ -69,7 +67,6 @@
 <script>
   import _ from 'lodash'
   import request from '@/utils/request'
-  // import { parseTime } from '@/utils/index'
 
   /**
    * 毫末科技的表单组件.
@@ -82,7 +79,8 @@
     // 集成其他组件
     extends: {},
     // 使用其它组件
-    components: {},
+    components: {
+    },
     // 混入公共对象
     mixins: [],
     props: {
@@ -95,11 +93,18 @@
         required: true
       },
       /**
-       * 指定要显示的表单字段及类型。默认为根据schema得到的所有字段。
+       * 指定要显示的表单字段及类型，必传。数组的每个元素须有name和widgetType两个字段，name表示要显示的表单字段，widgetType表示该字段要显示的表单类型(普通输入框、文本域、富文本、下拉框...)，取值1-6(1表示普通输入框,2表示下拉框,3表示复选框,4表示文本域,5表示富文本,6表示日期格式)，若表单类型为下拉框，还需传入options字段，值为数组(数组元素是下拉框的选项)
+       * 示例：[
+       *        { name: 'username', widgetType: 1 },
+       *        { name: 'securityLevel', widgetType: 5 },
+       *        { name: 'type', widgetType: 2, options: ['企业', '代理商'] },
+       *        { name: 'avatar', widgetType: 3 }, { name: 'departmentId', widgetType: 4 },
+       *        { name: 'createTime', widgetType: 6 }
+       *      ]
        */
       columns: {
         type: Array,
-        required: false,
+        required: true,
         validator: function(value) {
           if (typeof value !== 'object') {
             console.warn(`传入的columns不符合要求，必须是数组`)
@@ -108,6 +113,13 @@
 
           return true
         }
+      },
+      /**
+       * 指定要显示的按钮(确定、取消、重置)。默认不显示。
+       */
+      buttons: {
+        type: Array,
+        required: false
       },
       /**
        * 传入用户的id用来修改用户信息
@@ -152,7 +164,6 @@
       //   }
       // }
       return {
-        requestUrl: '',
         form: null,
         formModel: {}, // 双向绑定的数据变量
         showUserColumns: [], // 要显示的字段
@@ -213,24 +224,19 @@
               picker.$emit('pick', date)
             }
           }]
-        },
-        selectOptions: [{
-          value: '1',
-          label: '企业'
-        }, {
-          value: '2',
-          label: '代理商'
-        }]
+        }
       }
     },
     created() {
       // this.validate()
       this.init()
-      // console.log(this.schema)
+      console.log(this.buttons)
     },
     methods: {
+      selectChange(v) {
+        console.log(v)
+      },
       logTimeChange(value) {
-        // value = parseTime(value)
         console.log(value)
       },
       validate() {
