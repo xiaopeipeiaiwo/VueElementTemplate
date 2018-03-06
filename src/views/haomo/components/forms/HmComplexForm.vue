@@ -13,7 +13,7 @@
                       v-model="formModel[column.codeCamel]"></el-input>-->
 
             <!-- 富文本 -->
-            <quill-editor v-if="column.widgetType==='richText'"
+            <quill-editor v-if="column.widgetType === 5"
                           ref="textEditor"
                           v-model="formModel[column.codeCamel]"
                           :options="editorOption"
@@ -22,7 +22,7 @@
                           @ready="onEditorReady($event)">
             </quill-editor>
             <!-- 日期选择 -->
-            <el-date-picker v-else-if="column.type === 'datetime' || column.codeCamel === 'date'"
+            <el-date-picker v-else-if="column.type === 'datetime' || column.type === 'date'"
                             v-model="formModel[column.codeCamel]"
                             type="datetime"
                             align="right"
@@ -31,7 +31,7 @@
                             :picker-options="pickerOptions">
             </el-date-picker>
             <!-- 下拉框 -->
-            <el-select v-else-if="column.widgetType === 'selectType'" v-model="formModel[column.codeCamel]">
+            <el-select v-else-if="column.widgetType === 2" v-model="formModel[column.codeCamel]">
               <el-option v-for="item in selectOptions"
                         :key="item.value"
                         :label="item.label"
@@ -39,13 +39,13 @@
               </el-option>
             </el-select>
             <!-- 文本域 -->
-            <el-input v-else-if="column.widgetType === 'textarea'" v-model="formModel[column.codeCamel]"
+            <el-input v-else-if="column.widgetType === 4" v-model="formModel[column.codeCamel]"
                       type="textarea"
                       :autosize="{ minRows: 2, maxRows: 5}"
                       :rows="2">
             </el-input>
             <!-- 复选框 -->
-            <el-checkbox v-else-if="column.widgetType === 'checkbox'" v-model="formModel[column.codeCamel]"></el-checkbox>
+            <el-checkbox v-else-if="column.widgetType === 3" v-model="formModel[column.codeCamel]"></el-checkbox>
             <!-- 普通input -->
             <el-input v-else v-model="formModel[column.codeCamel]"></el-input>
           </el-form-item>
@@ -95,7 +95,7 @@
         required: true
       },
       /**
-       * 指定要显示的字段。默认为根据schema得到的所有字段。
+       * 指定要显示的表单字段及类型。默认为根据schema得到的所有字段。
        */
       columns: {
         type: Array,
@@ -271,37 +271,31 @@
             self.$set(tmp, 'code', tmp.code.toLowerCase())
             self.showUserColumns.push(tmp)
           })
-          // console.log(self.showUserColumns)
-        } else { // columns，则只显示传入的字段
+        } else { // 传了columns，则只显示传入的字段
           self.showUserColumns = JSON.parse(JSON.stringify(self.columns))
-          // console.log('1111111')
           console.log(self.showUserColumns)
           // 将字符串对象进行替换处理
           _.each(self.showUserColumns, function(column, index) {
-            if (typeof column === 'string') {
+            if (typeof column === 'object') {
               // 生成一个新对象
-              // const tmp = _.keyBy(self.schema['columns'], 'code')[column.toUpperCase()]
-              const tmp = _.keyBy(self.schema['columns'], 'codeCamel')[column]
+              const tmp = _.keyBy(self.schema['columns'], 'codeCamel')[column.name]
               self.$set(tmp, 'code', tmp.code.toLowerCase())
+              self.$set(tmp, 'widgetType', column.widgetType || 1)
+              self.$set(tmp, 'options', column.options)
               self.$set(self.showUserColumns, index, tmp)
+              console.log(self.showUserColumns)
             }
           })
-          // console.log('2222222')
           // console.log(self.showUserColumns)
         }
         // 提取v-model绑定的变量
         _.each(self.showUserColumns, function(item) {
-          // self.formModel[item.codeCamel] = ''  这样写有问题
           self.$set(self.formModel, item.codeCamel, '')
         })
-        // 修改请求地址
-        self.requestUrl = self.schema.modelUnderscore.slice(0, -1) + 's'
 
-        // console.log(self.formModel)
         if (!request.defaults.baseURL) {
           request.defaults.baseURL = '/org/api'
         }
-        console.log(request.defaults)
       },
       // 提交
       /**
@@ -319,7 +313,7 @@
             console.log('提交成功!')
             // 存在tableId 则修改信息
             if (self.tableId) {
-              request(self.requestUrl + '/' + self.tableId + '/edit', {
+              request(self.schema.modelUnderscorePlural + '/' + self.tableId + '/edit', {
                 method: 'post',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
                 data: self.formModel,
@@ -340,7 +334,7 @@
                 self.resetForm()
               })
             } else { // 不存在tableId 则创建一条数据
-              request(self.requestUrl + '/new', {
+              request(self.schema.modelUnderscorePlural + '/new', {
                 method: 'post',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
                 data: self.formModel,
