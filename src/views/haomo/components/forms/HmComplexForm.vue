@@ -24,7 +24,7 @@
                             :picker-options="pickerOptions">
             </el-date-picker>
             <!-- 3 下拉框 -->
-            <el-select v-else-if="column.widgetType === 2" v-model="formModel[column.codeCamel]" @change="selectChange(formModel[column.codeCamel])">
+            <el-select v-else-if="column.widgetType === 2" v-model="formModel[column.codeCamel]">
               <el-option v-for="(item,key) in column.options"
                         :key="key"
                         :label="item"
@@ -38,7 +38,7 @@
                       :rows="2">
             </el-input>
             <!-- 5 复选框 -->
-            <el-checkbox v-else-if="column.widgetType === 3" v-model="formModel[column.codeCamel]"></el-checkbox>
+            <el-checkbox v-else-if="column.widgetType === 3" v-model="formModel[column.codeCamel]" true-label="1" false-label="0"></el-checkbox>
             <!-- 6 富文本 -->
             <quill-editor v-else-if="column.widgetType === 5"
                           ref="textEditor"
@@ -233,9 +233,6 @@
       console.log(this.buttons)
     },
     methods: {
-      selectChange(v) {
-        console.log(v)
-      },
       logTimeChange(value) {
         console.log(value)
       },
@@ -313,6 +310,7 @@
       onSubmit() {
         const self = this
         console.log('点击了提交函数')
+        console.log(self.formModel)
         self.$refs.form.validate((valid) => {
           console.log(valid)
           if (valid) {
