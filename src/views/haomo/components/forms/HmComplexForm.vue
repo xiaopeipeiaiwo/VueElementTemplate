@@ -49,7 +49,7 @@
                           @ready="onEditorReady($event)">
             </quill-editor>
           </el-form-item>
-          <el-form-item v-if="buttons.length">
+          <el-form-item v-if="buttons && buttons.length > 0">
             <el-col :span="12" v-for="(btn,key) in buttons" :key="key">
               <el-button v-if="btn === '确定' || btn === '提交'" type="primary" @click="onSubmit()">{{btn}}</el-button>
               <el-button v-if="btn === '取消' || btn === '重置'" type="primary" @click="resetForm()">{{btn}}</el-button>
@@ -85,15 +85,15 @@
     mixins: [],
     props: {
       /**
-       * 组件所使用的表定义schema。表定义schema，请使用 model2codejs 从pdm文件生成schema。
-       * 对于所有毫末科技的组件，必须传schema，以完成数据的交互
+       * 必传，组件所使用的表定义schema。表定义schema，请使用 model2codejs 从pdm文件生成schema。
+       * 对于所有毫末科技的组件，必传schema，以完成数据的交互
        */
       schema: {
         type: Object,
         required: true
       },
       /**
-       * 指定要显示的表单字段及类型，必传。数组的每个元素须有name和widgetType两个字段，name表示要显示的表单字段，widgetType表示该字段要显示的表单类型(普通输入框、文本域、富文本、下拉框...)，取值1-6(1表示普通输入框,2表示下拉框,3表示复选框,4表示文本域,5表示富文本,6表示日期格式)，若表单类型为下拉框，还需传入options字段，值为数组(数组元素是下拉框的选项)
+       * 必传，指定要显示的表单字段及类型。数组的每个元素须有name和widgetType两个字段，name表示要显示的表单字段，widgetType表示该字段要显示的表单类型(普通输入框、文本域、富文本、下拉框...)，取值1-6(1表示普通输入框,2表示下拉框,3表示复选框,4表示文本域,5表示富文本,6表示日期格式)，若表单类型为下拉框，还需传入options字段，值为数组(数组元素是下拉框的选项)
        * 示例：[
        *        { name: 'username', widgetType: 1 },
        *        { name: 'securityLevel', widgetType: 5 },
@@ -115,14 +115,14 @@
         }
       },
       /**
-       * 指定要显示的按钮(确定、取消、重置)。默认不显示。
+       * 非必传，指定要显示的按钮(确定、保存、取消、提交、重置)。默认不显示。示例：['确定', '取消']
        */
       buttons: {
         type: Array,
         required: false
       },
       /**
-       * 传入用户的id用来修改用户信息
+       * 非必传，传入用户的id用来修改用户信息
        */
       tableId: {
         type: String,
