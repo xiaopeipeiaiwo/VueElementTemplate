@@ -127,6 +127,15 @@ export const asyncRouterMap = [
               title: '选项卡',
               icon: 'table'
             }
+          },
+          {
+            path: 'calendar',
+            component: _import('haomo/components/calendar/index'),
+            name: '',
+            meta: {
+              title: 'calendar',
+              icon: 'table'
+            }
           }
         ]
       },
