@@ -3,8 +3,8 @@
     <hm-complex-table :schema="schema['HmUser']"
                       :columns="showUserColumns"
                       :filters="userFilters"></hm-complex-table>
-    <hm-complex-table :schema="schema['Department']"></hm-complex-table>
-    <hm-complex-table :schema="schema['Role']"></hm-complex-table>
+    <!--<hm-complex-table :schema="schema['Department']"></hm-complex-table>-->
+    <!--<hm-complex-table :schema="schema['Role']"></hm-complex-table>-->
   </div>
 </template>
 
@@ -22,10 +22,10 @@
     },
     data() {
       return {
-        showUserColumns: ['mobile', 'loginid'],
+        showUserColumns: ['mobile', 'loginid', 'username', 'email'],
         userFilters: [
           { placeholder: '过滤手机号', 'mobile': { 'like': '' }},
-          { placeholder: '过滤登录Id', 'loginid': { 'like': '3001' }}
+          { placeholder: '过滤用户名', 'username': { 'equalTo': '' }}
         ]
       }
     },

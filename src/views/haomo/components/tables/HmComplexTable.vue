@@ -21,6 +21,7 @@
     <!-- 表格 -->
     <el-table :data="list" v-loading="listLoading" element-loading-text="给我一点时间" border fit highlight-current-row
               style="width: 100%">
+      <el-table-column type="index" :index="indexMethod"></el-table-column>
       <el-table-column v-for="(column,index) in showColumns" :key="index" align="center" :label="column.name">
         <template slot-scope="scope">
           <span>{{ scope.row[column.code] }}</span>
@@ -204,6 +205,9 @@
       this.getList()
     },
     methods: {
+      indexMethod(index) {
+        return this.listQuery.page_size * (this.listQuery.page_no - 1) + index + 1
+      },
       validate() {
         const self = this
         // this.columns数组元素本身必须是string或者object. 且必须是schema中定义的列
@@ -234,24 +238,18 @@
             self.$set(tmp, 'code', tmp.code.toLowerCase())
             self.showColumns.push(tmp)
           })
-          console.log(self.showColumns)
         } else {
           self.showColumns = JSON.parse(JSON.stringify(self.columns))
-          console.log('1111111')
-          console.log(self.showColumns)
           // 将字符串对象进行替换处理
           _.each(self.showColumns, function(column, index) {
             if (typeof column === 'string') {
               // const tmp = _.keyBy(self.schema['columns'], 'code')[column.toUpperCase()]
               // 王康 修改 2018年02月25日22:58:23
               const tmp = _.keyBy(self.schema['columns'], 'codeCamel')[column]
-              console.log(tmp)
               self.$set(tmp, 'code', tmp.code.toLowerCase())
               self.$set(self.showColumns, index, tmp)
             }
           })
-          console.log('2222222')
-          console.log(self.showColumns)
         }
 
         // 处理过滤条件
@@ -279,6 +277,7 @@
         // 处理过滤条件
         const params = JSON.parse(JSON.stringify(self.listQuery))
         params.filters = self.filterParams
+        params.filters = this.deleteFilter(params.filters)
 
         request(self.schema.modelUnderscorePlural, {
           params: params
@@ -287,6 +286,18 @@
           self.total = parseInt(resp.headers.total)
           self.listLoading = false
         })
+      },
+      // 删除过滤条件为空的filter
+      deleteFilter(filters) {
+        const newFilters = filters
+        _.forEach(newFilters, function(columns, columnsKey) {
+          _.forEach(newFilters[columnsKey], function(column, columnKey) {
+            if (columns[columnKey][Object.keys(column)] === '%%' || columns[columnKey][Object.keys(column)] === '' || columns[columnKey][Object.keys(column)] === null) {
+              delete (columns[columnKey])
+            }
+          })
+        })
+        return JSON.stringify(newFilters[Object.keys(newFilters)]) === '{}' ? {} : newFilters
       },
       handleFilter() {
         this.getList()
