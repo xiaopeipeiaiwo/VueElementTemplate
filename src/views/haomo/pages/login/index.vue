@@ -1,6 +1,6 @@
 <template>
   <div>
-    <hm-login></hm-login>
+    <hm-login :options="options"></hm-login>
   </div>
 </template>
 
@@ -21,8 +21,18 @@
     filters: {
     },
     created() {
+      this.options = {
+        spx: function(account, pass) {
+          alert(account + pass)
+        },
+        span: 10
+      }
     },
-    methods: {}
+    methods: {
+      test: function() {
+        alert(4)
+      }
+    }
   }
 </script>
 <style scoped>
