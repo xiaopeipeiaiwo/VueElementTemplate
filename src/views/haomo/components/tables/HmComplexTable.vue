@@ -28,6 +28,12 @@
           <span>{{ scope.row[column.code] }}</span>
         </template>
       </el-table-column>
+      <el-table-column fixed="right" label="操作" width="100">
+        <template slot-scope="scope">
+          <el-button @click="openDialog('editData',scope.row)" type="text" size="small">编辑</el-button>
+          <el-button @click="" type="text" size="small">删除</el-button>
+        </template>
+      </el-table-column>
     </el-table>
     <!-- end 表格 -->
 
@@ -306,11 +312,18 @@
         })
       },
       // 添加一条数据
-      openDialog(type) {
+      openDialog(type, data) {
         const self = this
         self.dialogType = type
         self.dialogFormVisible = true
         self.dialogForm = _.cloneDeep(self.schema.columns)
+
+        if (type === 'editData') {
+          _.map(self.dialogForm, function(item, index) {
+            item.value = data[item.code]
+            item.id = data.id
+          })
+        }
       },
       // 删除过滤条件为空的filter
       deleteFilter(filters) {
@@ -328,20 +341,22 @@
       submitDialog() {
         const self = this
         const params = {}
+        let url = self.schema.modelUnderscorePlural
+        let paramsId = ''
         self.dialogFormVisible = false
         _.each(self.dialogForm, function(data, index) {
           if (data.value) {
             params[data.code] = data.value
+            paramsId = data.id
           }
         })
-        // 新建
         if (self.dialogType === 'newData') {
-          self.addData(params)
+          url = url + '/new'
+        } else if (self.dialogType === 'editData') {
+          url = url + '/' + paramsId + '/edit'
         }
-      },
-      addData(params) {
-        const self = this
-        request(self.schema.modelUnderscorePlural + '/new', {
+
+        request(url, {
           method: 'POST',
           headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
           data: params,
