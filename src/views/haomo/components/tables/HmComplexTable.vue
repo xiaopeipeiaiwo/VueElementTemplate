@@ -15,6 +15,7 @@
 
       <el-button class="filter-item" type="primary" v-waves icon="el-icon-search" @click="handleFilter">搜索</el-button>
       <el-button class="filter-item" type="primary" :loading="downloadLoading" v-waves icon="el-icon-download" @click="handleDownload">导出</el-button>
+      <el-button class="filter-item" type="primary" v-waves icon="el-icon-plus" @click="openDialog('newData')">新建</el-button>
     </div>
     <!-- end 过滤 -->
 
@@ -40,6 +41,19 @@
 
     <!-- 弹窗 -->
     <!-- @TODO 补充弹窗 -->
+
+    <el-dialog title="收货地址" :visible.sync="dialogFormVisible" :close-on-click-modal="closeOnClickModal" width="dialogWidth">
+      <el-form>
+        <el-form-item :label="dialog.name" :label-width="formLabelWidth" v-for="dialog in dialogForm">
+          <el-input v-model="dialog.value" auto-complete="off"></el-input>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogFormVisible = false">取 消</el-button>
+        <el-button type="primary" @click="submitDialog">确 定</el-button>
+      </div>
+    </el-dialog>
+
     <!-- end 弹窗 -->
 
   </div>
@@ -49,7 +63,7 @@
   import _ from 'lodash'
   import request from '@/utils/request'
   import waves from '@/directive/waves' // 水波纹指令
-  import { parseTime } from '@/utils'
+  import { parseTime, param } from '@/utils'
   import * as excel from '@/vendor/Export2Excel'
   import { Button, Table, TableColumn, Pagination, Loading } from 'element-ui'
 
@@ -171,8 +185,12 @@
           filters: {}
         },
         downloadLoading: false,
-
-        showColumns: [] // 要显示的列数据
+        dialogFormVisible: false, // 是否显示弹窗
+        dialogForm: [], // 弹窗的数据
+        dialogType: '', // 弹窗的类型
+        showColumns: [], // 要显示的列数据
+        formLabelWidth: '120px',
+        closeOnClickModal: false
       }
     },
     computed: {
@@ -287,6 +305,13 @@
           self.listLoading = false
         })
       },
+      // 添加一条数据
+      openDialog(type) {
+        const self = this
+        self.dialogType = type
+        self.dialogFormVisible = true
+        self.dialogForm = _.cloneDeep(self.schema.columns)
+      },
       // 删除过滤条件为空的filter
       deleteFilter(filters) {
         const newFilters = filters
@@ -298,6 +323,34 @@
           })
         })
         return JSON.stringify(newFilters[Object.keys(newFilters)]) === '{}' ? {} : newFilters
+      },
+      // 弹框提交数据
+      submitDialog() {
+        const self = this
+        const params = {}
+        self.dialogFormVisible = false
+        _.each(self.dialogForm, function(data, index) {
+          if (data.value) {
+            params[data.code] = data.value
+          }
+        })
+        // 新建
+        if (self.dialogType === 'newData') {
+          self.addData(params)
+        }
+      },
+      addData(params) {
+        const self = this
+        request(self.schema.modelUnderscorePlural + '/new', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+          data: params,
+          transformRequest: param
+        }).then(data => {
+          if (data.data.id) {
+            self.getList()
+          }
+        })
       },
       handleFilter() {
         this.getList()

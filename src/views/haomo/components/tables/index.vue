@@ -3,8 +3,6 @@
     <hm-complex-table :schema="schema['HmUser']"
                       :columns="showUserColumns"
                       :filters="userFilters"></hm-complex-table>
-    <!--<hm-complex-table :schema="schema['Department']"></hm-complex-table>-->
-    <!--<hm-complex-table :schema="schema['Role']"></hm-complex-table>-->
   </div>
 </template>
 
