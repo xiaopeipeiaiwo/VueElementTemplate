@@ -31,7 +31,7 @@
       <el-table-column fixed="right" label="操作" width="100">
         <template slot-scope="scope">
           <el-button @click="openDialog('editData',scope.row)" type="text" size="small">编辑</el-button>
-          <el-button @click="" type="text" size="small">删除</el-button>
+          <el-button @click="deleteData(scope.row)" type="text" size="small">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -363,6 +363,22 @@
           transformRequest: param
         }).then(data => {
           if (data.data.id) {
+            self.getList()
+          }
+        })
+      },
+      // 删除一条数据
+      deleteData(data) {
+        const self = this
+        request(self.schema.modelUnderscorePlural + '/' + data.id + '/delete', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' }
+        }).then(data => {
+          if (data.data.message === 'delete success') {
+            self.$message({
+              message: data.data.message,
+              type: 'success'
+            })
             self.getList()
           }
         })
