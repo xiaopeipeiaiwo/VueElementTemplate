@@ -58,8 +58,9 @@
           </el-form-item>
           <el-form-item v-if="buttons && buttons.length > 0">
             <el-col :span="12" v-for="(btn,key) in buttons" :key="key">
-              <el-button v-if="btn === '确定' || btn === '提交'" type="primary" @click="onSubmit()">{{btn}}</el-button>
-              <el-button v-if="btn === '取消' || btn === '重置'" type="primary" @click="resetForm()">{{btn}}</el-button>
+              <el-button v-if="btn === '确定' || btn === '提交' || btn === '保存'" type="primary" @click="onSubmit()">{{btn}}</el-button>
+              <el-button v-if="btn === '重置'" type="primary" @click="resetForm()">{{btn}}</el-button>
+              <el-button v-if="btn === '取消'" type="primary" @click="cancelFunction?cancelFunction():''">{{btn}}</el-button>
             </el-col>
           </el-form-item>
         </el-form>
@@ -122,7 +123,9 @@
         }
       },
       /**
-       * 非必传，指定要显示的按钮(确定、保存、取消、提交、重置)。默认不显示。示例：['确定', '取消']
+       * 非必传，指定要显示的按钮(确定、保存、取消、提交、重置)，默认不显示。
+       * 如果要传入了确定/取消的回调函数，请先传入对应的按钮
+       * 示例：['确定', '取消']
        */
       buttons: {
         type: Array,
@@ -133,6 +136,22 @@
        */
       tableId: {
         type: String,
+        required: false
+      },
+      /**
+       * 非必传，传入点击'确定'后的回调函数，该回调函数会在form组件onSubmit函数的成功回调中调用
+       * 如果要传入该函数，请先传入对应的按钮
+       */
+      confirmFunction: {
+        type: Function,
+        required: false
+      },
+      /**
+       * 非必传，传入点击'取消'后的回调函数，该回调函数会在点击'取消'后直接调用
+       * 如果要传入该函数，请先传入对应的按钮
+       */
+      cancelFunction: {
+        type: Function,
         required: false
       }
     },
@@ -358,6 +377,7 @@
               }).then(resp => {
                 console.log('修改成功')
                 self.resetForm()
+                self.confirmFunction && self.confirmFunction()
               })
             } else { // 不存在tableId 则创建一条数据
               request(self.schema.modelUnderscorePlural + '/new', {
@@ -375,6 +395,7 @@
               }).then(resp => {
                 console.log('创建成功')
                 self.resetForm()
+                self.confirmFunction && self.confirmFunction()
               })
             }
           } else {
@@ -394,7 +415,7 @@
        * 清空所有输入及提示信息。
        */
       resetForm() {
-        console.log('chongzhi')
+        console.log('重置')
         this.$refs.form.resetFields()
       }
     }
