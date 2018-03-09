@@ -2,7 +2,8 @@
   <div class="app-container calendar-list-container">
     <hm-complex-table :schema="schema['HmUser']"
                       :columns="showUserColumns"
-                      :filters="userFilters"></hm-complex-table>
+                      :filters="userFilters"
+                      :options="userOptions"></hm-complex-table>
   </div>
 </template>
 
@@ -31,6 +32,12 @@
     },
     created() {
       this.schema = schema
+      this.userOptions = {
+        page_size: 10,
+        changeValue: {
+          username: { 1: '是', 0: '否' }
+        }
+      }
     },
     methods: {}
   }

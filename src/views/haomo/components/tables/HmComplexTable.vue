@@ -167,7 +167,10 @@
        *    "page_size": 10, // 默认为10条数据/页
        *    "showExport": false,  // 默认为不显示导出按钮
        *    "sort_item": "create_time", // 默认为create_time字段的desc排序
-            "sort_order": "desc"
+       *    "sort_order": "desc",
+       *    "changeValue": {      // 数据库字段转化显示，例如(0=否,1=是)
+       *      username: {1: '是', 0: '否'}
+       *    }
        *  }
        */
       options: {
@@ -307,10 +310,25 @@
         request(self.schema.modelUnderscorePlural, {
           params: params
         }).then(resp => {
+          if (self.options.changeValue) {
+            resp.data = self.changeValue(resp.data)
+          }
           self.list = resp.data
           self.total = parseInt(resp.headers.total)
           self.listLoading = false
         })
+      },
+      // 数据库字段转化显示，例如(0=否,1=是)
+      changeValue(data) {
+        const self = this
+        _.map(data, function(item, index) {
+          _.forEach(item, function(listValue, listKey) {
+            if (self.options.changeValue[listKey] && self.options.changeValue[listKey][listValue]) {
+              item[listKey] = self.options.changeValue[listKey][listValue]
+            }
+          })
+        })
+        return data
       },
       // 添加一条数据
       openDialog(type, data) {
