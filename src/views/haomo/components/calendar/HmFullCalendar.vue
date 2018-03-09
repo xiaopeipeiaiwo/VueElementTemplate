@@ -1,6 +1,10 @@
 <template>
 	<div class="calender">
-	  <full-calendar :events="fcEvents" locale="en"></full-calendar>
+    <i class="el-icon-date" @click="dialogTableVisible = true"></i>
+    <el-dialog title="日历" :visible.sync="dialogTableVisible">
+      <full-calendar :events="fcEvents" locale="en"></full-calendar>
+    </el-dialog>
+
 	</div>
 </template>
 
@@ -29,7 +33,8 @@
     },
     data() {
       return {
-        fcEvents: []
+        fcEvents: [],
+        dialogTableVisible: false
       }
     },
     computed: {
@@ -44,7 +49,7 @@
         const self = this
         console.log(self.schema)
         request(self.schema.modelUnderscorePlural).then(resp => {
-          // console.log(resp.data)
+          console.log(resp.data)
           _.each(resp.data, function(item, index) {
             const test = _.cloneDeep(self.demoEvents)
             test.title = item[self.demoEvents.title]
