@@ -16,6 +16,7 @@
       <el-button class="filter-item" type="primary" v-waves icon="el-icon-search" @click="handleFilter">搜索</el-button>
       <el-button class="filter-item" type="primary" :loading="downloadLoading" v-waves icon="el-icon-download" @click="handleDownload">导出</el-button>
       <el-button class="filter-item" type="primary" v-waves icon="el-icon-plus" @click="openDialog('newData')">新建</el-button>
+      <el-button class="filter-item" type="primary" v-waves icon="el-icon-refresh" @click="refreshList">刷新</el-button>
     </div>
     <!-- end 过滤 -->
 
@@ -166,7 +167,10 @@
        *    "page_size": 10, // 默认为10条数据/页
        *    "showExport": false,  // 默认为不显示导出按钮
        *    "sort_item": "create_time", // 默认为create_time字段的desc排序
-            "sort_order": "desc"
+       *    "sort_order": "desc",
+       *    "changeValue": {      // 数据库字段转化显示，例如(0=否,1=是)
+       *      username: {1: '是', 0: '否'}
+       *    }
        *  }
        */
       options: {
@@ -281,7 +285,7 @@
           const tableName = self.schema['modelUnderscore']
           const filters = {}
           filters[tableName] = {}
-          _.each(self.filters, function(filter) {
+          _.each(_.cloneDeep(self.filters), function(filter) {
             filters[tableName] = Object.assign(filters[tableName], filter)
           })
           delete filters[tableName]['placeholder']
@@ -306,10 +310,25 @@
         request(self.schema.modelUnderscorePlural, {
           params: params
         }).then(resp => {
+          if (self.options.changeValue) {
+            resp.data = self.changeValue(resp.data)
+          }
           self.list = resp.data
           self.total = parseInt(resp.headers.total)
           self.listLoading = false
         })
+      },
+      // 数据库字段转化显示，例如(0=否,1=是)
+      changeValue(data) {
+        const self = this
+        _.map(data, function(item, index) {
+          _.forEach(item, function(listValue, listKey) {
+            if (self.options.changeValue[listKey] && self.options.changeValue[listKey][listValue]) {
+              item[listKey] = self.options.changeValue[listKey][listValue]
+            }
+          })
+        })
+        return data
       },
       // 添加一条数据
       openDialog(type, data) {
@@ -370,18 +389,41 @@
       // 删除一条数据
       deleteData(data) {
         const self = this
-        request(self.schema.modelUnderscorePlural + '/' + data.id + '/delete', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' }
-        }).then(data => {
-          if (data.data.message === 'delete success') {
-            self.$message({
-              message: data.data.message,
-              type: 'success'
-            })
-            self.getList()
-          }
+        self.$confirm('此操作将永久删除该数据, 是否继续?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          request(self.schema.modelUnderscorePlural + '/' + data.id + '/delete', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' }
+          }).then(data => {
+            if (data.data.message === 'delete success') {
+              self.$message({
+                message: data.data.message,
+                type: 'success'
+              })
+              self.getList()
+            }
+          })
+        }).catch(() => {
+          self.$message({
+            message: '已取消删除',
+            type: 'success'
+          })
         })
+      },
+      refreshList() {
+        this.listQuery = {
+          page_no: 1,
+          page_size: 20,
+          sort_item: 'create_time',
+          sort_order: 'desc',
+          filters: {}
+        }
+        this.init()
+
+        this.getList()
       },
       handleFilter() {
         this.getList()
