@@ -1,40 +1,36 @@
 <template>
-	<div class="calender">
-	  <full-calendar :events="fcEvents" locale="en"></full-calendar>
-	</div>
+  <div class="app-container calendar-list-container">
+    <hm-full-calendar :schema="schema['HmUser']" :demoEvents="demoEvents"></hm-full-calendar>
+  </div>
 </template>
 
 <script>
-  import fullCalendar from 'vue-fullcalendar'
+  import HmFullCalendar from './HmFullCalendar.vue'
+  import schema from '../../schemas/hm_org_schema'
+
   export default {
-    name: 'calender',
+    name: 'HmFullCalendar',
     // 继承其他组件
     extends: {},
     // 使用其它组件
     components: {
-      'full-calendar': fullCalendar
+      'hm-full-calendar': HmFullCalendar
     },
     data() {
-      return {
-        fcEvents: [
-          {
-            title: 'Sunny Out of Office',
-            start: '2018-03-8',
-            end: '2018-03-8',
-            cssClass: 'aaa'
-          }
-        ]
-      }
-    },
-    computed: {
+      return {}
     },
     filters: {
+
     },
     created() {
+      this.schema = schema
+      this.demoEvents = {
+        title: 'username',
+        start: 'createTime',
+        end: 'lastUpdateTime'
+      }
     },
     methods: {}
   }
 </script>
-<style scoped>
-</style>
 
