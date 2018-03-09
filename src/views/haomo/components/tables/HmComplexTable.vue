@@ -16,6 +16,7 @@
       <el-button class="filter-item" type="primary" v-waves icon="el-icon-search" @click="handleFilter">搜索</el-button>
       <el-button class="filter-item" type="primary" :loading="downloadLoading" v-waves icon="el-icon-download" @click="handleDownload">导出</el-button>
       <el-button class="filter-item" type="primary" v-waves icon="el-icon-plus" @click="openDialog('newData')">新建</el-button>
+      <el-button class="filter-item" type="primary" v-waves icon="el-icon-refresh" @click="refreshList">刷新</el-button>
     </div>
     <!-- end 过滤 -->
 
@@ -281,7 +282,7 @@
           const tableName = self.schema['modelUnderscore']
           const filters = {}
           filters[tableName] = {}
-          _.each(self.filters, function(filter) {
+          _.each(_.cloneDeep(self.filters), function(filter) {
             filters[tableName] = Object.assign(filters[tableName], filter)
           })
           delete filters[tableName]['placeholder']
@@ -370,18 +371,41 @@
       // 删除一条数据
       deleteData(data) {
         const self = this
-        request(self.schema.modelUnderscorePlural + '/' + data.id + '/delete', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' }
-        }).then(data => {
-          if (data.data.message === 'delete success') {
-            self.$message({
-              message: data.data.message,
-              type: 'success'
-            })
-            self.getList()
-          }
+        self.$confirm('此操作将永久删除该数据, 是否继续?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          request(self.schema.modelUnderscorePlural + '/' + data.id + '/delete', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' }
+          }).then(data => {
+            if (data.data.message === 'delete success') {
+              self.$message({
+                message: data.data.message,
+                type: 'success'
+              })
+              self.getList()
+            }
+          })
+        }).catch(() => {
+          self.$message({
+            message: '已取消删除',
+            type: 'success'
+          })
         })
+      },
+      refreshList() {
+        this.listQuery = {
+          page_no: 1,
+          page_size: 20,
+          sort_item: 'create_time',
+          sort_order: 'desc',
+          filters: {}
+        }
+        this.init()
+
+        this.getList()
       },
       handleFilter() {
         this.getList()
