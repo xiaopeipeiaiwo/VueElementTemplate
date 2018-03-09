@@ -8,7 +8,7 @@
         <!--表单部分-->
         <el-form ref="form" :model="formModel" :rules="rules" label-width="110px"
                  style="width:80%;margin:0 auto">
-          <el-form-item v-for="(column,index) in showUserColumns" :key="column.id" :label="column.name" :prop="column.codeCamel">
+          <el-form-item v-for="column in showUserColumns" :key="column.id" :label="column.name" :prop="column.codeCamel">
             <!--el-input<el-input v-if="column.codeCamel==='password'" type="password"
                       v-model="formModel[column.codeCamel]"></el-input>-->
 
@@ -24,7 +24,7 @@
                             :picker-options="pickerOptions">
             </el-date-picker>
             <!-- 3 下拉框 -->
-            <el-select v-else-if="column.widgetType === 2" v-model="formModel[column.codeCamel]">
+            <el-select v-else-if="column.widgetType === 2" v-model="formModel[column.codeCamel]" clearable>
               <el-option v-for="(item,key) in column.options"
                         :key="key"
                         :label="item"
@@ -38,7 +38,10 @@
                       :rows="2">
             </el-input>
             <!-- 5 复选框 -->
-            <el-checkbox v-else-if="column.widgetType === 3" v-model="formModel[column.codeCamel]" true-label="1" false-label="0"></el-checkbox>
+            <el-checkbox v-else-if="column.widgetType === 3 && !column.options" v-model="formModel[column.codeCamel]" true-label="1" false-label="0"></el-checkbox>
+            <el-checkbox-group v-else-if="column.widgetType === 3 && column.options" v-model="formModel[column.codeCamel]">
+              <el-checkbox v-for="option in column.options" :label="option" :key="option">{{option}}</el-checkbox>
+            </el-checkbox-group>
             <!-- 6 富文本 -->
             <quill-editor v-else-if="column.widgetType === 5"
                           ref="textEditor"
@@ -48,6 +51,10 @@
                           @focus="onEditorFocus($event)"
                           @ready="onEditorReady($event)">
             </quill-editor>
+            <!-- 7 单选框 -->
+            <el-radio-group v-else-if="column.widgetType === 7" v-model="formModel[column.codeCamel]">
+              <el-radio v-for="(option,key) in column.options" :key="key" :label="key">{{option}}</el-radio>
+            </el-radio-group>
           </el-form-item>
           <el-form-item v-if="buttons && buttons.length > 0">
             <el-col :span="12" v-for="(btn,key) in buttons" :key="key">
@@ -93,7 +100,7 @@
         required: true
       },
       /**
-       * 必传，指定要显示的表单字段及类型。数组的每个元素须有name和widgetType两个字段，name表示要显示的表单字段，widgetType表示该字段要显示的表单类型(普通输入框、文本域、富文本、下拉框...)，取值1-6(1表示普通输入框,2表示下拉框,3表示复选框,4表示文本域,5表示富文本,6表示日期格式)，若表单类型为下拉框，还需传入options字段，值为数组(数组元素是下拉框的选项)
+       * 必传，指定要显示的表单字段及类型。数组的每个元素须有name和widgetType两个字段，name表示要显示的表单字段，widgetType表示该字段要显示的表单类型(普通输入框、文本域、富文本、下拉框...)，取值1-7(1表示普通输入框,2表示下拉框,3表示复选框,4表示文本域,5表示富文本,6表示日期格式，7表示单选框)，若表单类型为下拉框/复选框/单选框，还需传入options字段，值为数组(数组元素是下拉框/复选框/单选框的选项），对于复选框，如果只有一个备选项则不必传options
        * 示例：[
        *        { name: 'username', widgetType: 1 },
        *        { name: 'securityLevel', widgetType: 5 },
@@ -233,6 +240,13 @@
       console.log(this.buttons)
     },
     methods: {
+      // 判断是否一个对象的所有属性都为空
+      isEmpty(obj) {
+        _.forEach(obj, function(val) {
+          if (val) return false
+        })
+        return true
+      },
       logTimeChange(value) {
         console.log(value)
       },
@@ -257,47 +271,55 @@
         })
       },
       onEditorBlur(editor) {
-        console.log('editor blur!')
+        // console.log('editor blur!')
       },
       onEditorFocus(editor) {
-        console.log('editor focus!')
+        // console.log('editor focus!')
       },
       onEditorReady(editor) {
-        console.log('editor ready!')
+        // console.log('editor ready!')
       },
       init() {
         const self = this
         // 如果没有传columns，则全部显示
-        if (!self.columns || !self.columns.length) {
-          _.each(self.schema['columns'], function(column) {
-            const tmp = JSON.parse(JSON.stringify(column))
-            self.$set(tmp, 'code', tmp.code.toLowerCase())
-            self.showUserColumns.push(tmp)
-          })
-        } else { // 传了columns，则只显示传入的字段
+        // if (!self.columns || !self.columns.length) {
+        //   _.each(self.schema['columns'], function(column) {
+        //     const tmp = JSON.parse(JSON.stringify(column))
+        //     self.$set(tmp, 'code', tmp.code.toLowerCase())
+        //     self.showUserColumns.push(tmp)
+        //   })
+        // } else
+        if (self.columns && self.columns.length) {
           self.showUserColumns = JSON.parse(JSON.stringify(self.columns))
-          console.log(self.showUserColumns)
+          // console.log(self.showUserColumns)
           // 将字符串对象进行替换处理
           _.each(self.showUserColumns, function(column, index) {
             if (typeof column === 'object') {
               // 生成一个新对象
               const tmp = _.keyBy(self.schema['columns'], 'codeCamel')[column.name]
+              // console.log(tmp)
               self.$set(tmp, 'code', tmp.code.toLowerCase())
               self.$set(tmp, 'widgetType', column.widgetType || 1)
-              self.$set(tmp, 'options', column.options)
-              self.$set(self.showUserColumns, index, tmp)
-              console.log(self.showUserColumns)
+              column.options && self.$set(tmp, 'options', column.options)
+              self.$set(self.showUserColumns, index, tmp) // 顺序
+              // console.log(self.showUserColumns)
             }
           })
-          // console.log(self.showUserColumns)
-        }
-        // 提取v-model绑定的变量
-        _.each(self.showUserColumns, function(item) {
-          self.$set(self.formModel, item.codeCamel, '')
-        })
+          console.log(self.showUserColumns)
+          // 提取v-model绑定的变量
+          _.each(self.showUserColumns, function(item) {
+            if (item.widgetType === 3 && item.options && item.options.length > 0) {
+              self.$set(self.formModel, item.codeCamel, [])
+            } else {
+              self.$set(self.formModel, item.codeCamel, '')
+            }
+          })
 
-        if (!request.defaults.baseURL) {
-          request.defaults.baseURL = '/org/api'
+          if (!request.defaults.baseURL) {
+            request.defaults.baseURL = '/org/api'
+          }
+        } else {
+          console.log('columns为必传字段!!')
         }
       },
       // 提交
@@ -311,10 +333,10 @@
         const self = this
         console.log('点击了提交函数')
         console.log(self.formModel)
+        // if (self.isEmpty(self.formModel)) return
         self.$refs.form.validate((valid) => {
-          console.log(valid)
           if (valid) {
-            console.log('提交成功!')
+            console.log('valid通过!')
             // 存在tableId 则修改信息
             if (self.tableId) {
               request(self.schema.modelUnderscorePlural + '/' + self.tableId + '/edit', {
