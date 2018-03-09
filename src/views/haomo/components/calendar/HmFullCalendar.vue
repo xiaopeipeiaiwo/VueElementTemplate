@@ -1,7 +1,7 @@
 <template>
 	<div class="calender">
     <i class="el-icon-date" @click="dialogTableVisible = true"></i>
-    <el-dialog title="日历" :visible.sync="dialogTableVisible">
+    <el-dialog :visible.sync="dialogTableVisible">
       <full-calendar :events="fcEvents" locale="en"></full-calendar>
     </el-dialog>
 
