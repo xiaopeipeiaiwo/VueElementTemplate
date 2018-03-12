@@ -3486,13 +3486,13 @@ const ModelSchema = {
       }
     ]
   },
-  'HmUser3': {
+  'HmUser': {
     'model': 'HmUser3',
-    'modelPlural': 'HmUser3S',
-    'modelCamel': 'hmUser3',
-    'modelCamelPlural': 'hmUser3S',
-    'modelUnderscore': 'hm_user3',
-    'modelUnderscorePlural': 'hm_user3S',
+    'modelPlural': 'HmUsers',
+    'modelCamel': 'hmUser',
+    'modelCamelPlural': 'hmUsers',
+    'modelUnderscore': 'hm_user',
+    'modelUnderscorePlural': 'hm_users',
     'columns': [
       {
         'id': 'o449',

@@ -17,16 +17,19 @@
       <el-button class="filter-item" type="primary" :loading="downloadLoading" v-waves icon="el-icon-download" @click="handleDownload">导出</el-button>
       <el-button class="filter-item" type="primary" v-waves icon="el-icon-plus" @click="openDialog('newData')">新建</el-button>
       <el-button class="filter-item" type="primary" v-waves icon="el-icon-refresh" @click="refreshList">刷新</el-button>
+      <el-button class="filter-item" type="primary" v-waves icon="el-icon-close" @click="BatchRemove" v-if="multipleSelection.length">批量删除</el-button>
     </div>
     <!-- end 过滤 -->
 
     <!-- 表格 -->
     <el-table :data="list" v-loading="listLoading" element-loading-text="给我一点时间" border fit highlight-current-row
-              style="width: 100%">
-      <el-table-column type="index" :index="indexMethod"></el-table-column>
+              style="width: 100%" @selection-change="handleSelectionChange">
+      <el-table-column type="index" :index="indexMethod" label="序号" width="50px"></el-table-column>
+      <el-table-column type="selection" width="55">
+      </el-table-column>
       <el-table-column v-for="(column,index) in showColumns" :key="index" align="center" :label="column.name">
         <template slot-scope="scope">
-          <span>{{ scope.row[column.code] }}</span>
+          <span>{{ scope.row[column.codeCamel] }}</span>
         </template>
       </el-table-column>
       <el-table-column fixed="right" label="操作" width="100">
@@ -40,8 +43,8 @@
 
     <!-- 翻页 -->
     <div class="pagination-container">
-      <el-pagination background @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page.sync="listQuery.page_no"
-                     :page-sizes="[10,20,50]" :page-size="listQuery.page_size" layout="total, sizes, prev, pager, next, jumper" :total="total">
+      <el-pagination background @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page.sync="listQuery.pageNo"
+                     :page-sizes="[10,20,50]" :page-size="listQuery.pageSize" layout="total, sizes, prev, pager, next, jumper" :total="total">
       </el-pagination>
     </div>
     <!-- end翻页 -->
@@ -49,7 +52,7 @@
     <!-- 弹窗 -->
     <!-- @TODO 补充弹窗 -->
 
-    <el-dialog title="收货地址" :visible.sync="dialogFormVisible" :close-on-click-modal="closeOnClickModal" width="dialogWidth">
+    <el-dialog :title="dialogName" :visible.sync="dialogFormVisible" :close-on-click-modal="closeOnClickModal" width="dialogWidth">
       <el-form>
         <el-form-item :label="dialog.name" :label-width="formLabelWidth" v-for="dialog in dialogForm">
           <el-input v-model="dialog.value" auto-complete="off"></el-input>
@@ -133,7 +136,7 @@
        *  [
        *    {
        *      "name": "姓名",
-       *      "code": "username",
+       *      "codeCamel": "username",
        *      "render": function(value){
        *        return "<a href='value'></a>"
        *      }
@@ -162,12 +165,12 @@
         required: false
       },
       /**
-       * 表格的选项，包括：page_size。完整的示例为：
+       * 表格的选项，包括：pageSize。完整的示例为：
        *  {
-       *    "page_size": 10, // 默认为10条数据/页
+       *    "pageSize": 10, // 默认为10条数据/页
        *    "showExport": false,  // 默认为不显示导出按钮
-       *    "sort_item": "create_time", // 默认为create_time字段的desc排序
-       *    "sort_order": "desc",
+       *    "sortItem": "create_time", // 默认为create_time字段的desc排序
+       *    "sortOrder": "desc",
        *    "changeValue": {      // 数据库字段转化显示，例如(0=否,1=是)
        *      username: {1: '是', 0: '否'}
        *    }
@@ -188,10 +191,10 @@
         total: null,
         listLoading: true,
         listQuery: {
-          page_no: 1,
-          page_size: 20,
-          sort_item: 'create_time',
-          sort_order: 'desc',
+          pageNo: 1,
+          pageSize: 20,
+          sortItem: 'create_time',
+          sortOrder: 'desc',
           filters: {}
         },
         downloadLoading: false,
@@ -200,7 +203,9 @@
         dialogType: '', // 弹窗的类型
         showColumns: [], // 要显示的列数据
         formLabelWidth: '120px',
-        closeOnClickModal: false
+        closeOnClickModal: false,
+        multipleSelection: [], // 选择的数组
+        dialogName: ''
       }
     },
     computed: {
@@ -234,7 +239,7 @@
     },
     methods: {
       indexMethod(index) {
-        return this.listQuery.page_size * (this.listQuery.page_no - 1) + index + 1
+        return this.listQuery.pageSize * (this.listQuery.pageNo - 1) + index + 1
       },
       validate() {
         const self = this
@@ -338,10 +343,13 @@
         self.dialogForm = _.cloneDeep(self.schema.columns)
 
         if (type === 'editData') {
+          self.dialogName = '编辑'
           _.map(self.dialogForm, function(item, index) {
             item.value = data[item.code]
             item.id = data.id
           })
+        } else {
+          self.dialogName = '新建'
         }
       },
       // 删除过滤条件为空的filter
@@ -354,7 +362,7 @@
             }
           })
         })
-        return JSON.stringify(newFilters[Object.keys(newFilters)]) === '{}' ? {} : newFilters
+        return JSON.stringify(newFilters[Object.keys(newFilters)]) === '{}' ? null : newFilters
       },
       // 弹框提交数据
       submitDialog() {
@@ -415,25 +423,65 @@
       },
       refreshList() {
         this.listQuery = {
-          page_no: 1,
-          page_size: 20,
-          sort_item: 'create_time',
-          sort_order: 'desc',
+          pageNo: 1,
+          pageSize: 20,
+          sortItem: 'create_time',
+          sortOrder: 'desc',
           filters: {}
         }
         this.init()
 
         this.getList()
       },
+      // 批量删除
+      BatchRemove() {
+        const self = this
+        const datas = {
+          ids: []
+        }
+        if (!self.multipleSelection) return false
+        _.each(self.multipleSelection, function(item, index) {
+          datas.ids.push(item.id)
+        })
+        datas.ids = JSON.stringify(datas.ids)
+        self.$confirm('此操作将永久删除该数据, 是否继续?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          request(self.schema.modelUnderscorePlural + '/delete/batch', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+            data: datas,
+            transformRequest: param
+          }).then(data => {
+            if (data.data.message === 'delete success') {
+              self.$message({
+                message: data.data.message,
+                type: 'success'
+              })
+              self.getList()
+            }
+          })
+        }).catch(() => {
+          self.$message({
+            message: '已取消删除',
+            type: 'success'
+          })
+        })
+      },
+      handleSelectionChange(val) {
+        this.multipleSelection = val
+      },
       handleFilter() {
         this.getList()
       },
       handleSizeChange(val) {
-        this.listQuery.page_size = val
+        this.listQuery.pageSize = val
         this.getList()
       },
       handleCurrentChange(val) {
-        this.listQuery.page_no = val
+        this.listQuery.pageNo = val
         this.getList()
       },
       handleDelete(row) {
@@ -487,5 +535,8 @@
 <style>
   .hm-complex-table__filter-span {
     margin-right: 5px;
+  }
+  .el-table__body tr.current-row>td{
+    background-color: #ecf5ff;
   }
 </style>

@@ -33,10 +33,10 @@
     created() {
       this.schema = schema
       this.userOptions = {
-        page_size: 10,
         changeValue: {
           username: { 1: '是', 0: '否' }
         }
+
       }
     },
     methods: {}
