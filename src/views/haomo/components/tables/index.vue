@@ -61,7 +61,8 @@
           }
         },
         showRefresh: true,
-        showExport: true
+        showExport: true,
+        showDeleteButton: true
       }
     },
     methods: {}

@@ -32,10 +32,10 @@
           <span>{{ scope.row[column.codeCamel] }}</span>
         </template>
       </el-table-column>
-      <el-table-column fixed="right" label="操作" width="100">
+      <el-table-column fixed="right" label="操作" width="100" v-if="isShowEditDataButton || isShowDeleteButton">
         <template slot-scope="scope">
           <el-button @click="openDialog('editData',scope.row)" v-if="isShowEditDataButton" type="text" size="small">编辑</el-button>
-          <el-button @click="deleteData(scope.row)" type="text" size="small">删除</el-button>
+          <el-button @click="deleteData(scope.row)" type="text" v-if="isShowDeleteButton" size="small">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -215,6 +215,7 @@
 
         isShowNewButton: false, // 是否显示新建
         isShowEditDataButton: false, // 是否显示编辑
+        isShowDeleteButton: false, // 是否显示删除
         isShowExport: false, // 是否显示导出按钮
         formSchema: {}, // form弹窗的Schema定义
         showUserColumns: [], // form弹窗的Columns定义
@@ -328,6 +329,9 @@
         if (self.options.showExport) { // 判断是否显示刷新按钮
           self.isShowExport = self.options.showExport
         }
+        if (self.options.showDeleteButton) { // 判断是否显示刷新按钮
+          self.isShowDeleteButton = self.options.showDeleteButton
+        }
         console.log(request.defaults)
         console.log(`request.defaults.baseURL: ${request.defaults.baseURL}`)
       },
@@ -386,11 +390,13 @@
       formConfirm() {
         this.options.newData.formConfirm()
         this.dialogFormVisible = false
+        self.getList()
       },
       // 表单的取消
       formCancel() {
         this.options.newData.formCancel()
         this.dialogFormVisible = false
+        self.getList()
       },
       // 删除过滤条件为空的filter
       deleteFilter(filters) {
