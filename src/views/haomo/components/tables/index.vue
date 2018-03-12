@@ -38,7 +38,7 @@
         },
         newData: {
           isShow: true,
-          showUserColumns: [{ name: 'username', widgetType: 1 }],
+          showUserColumns: [{ name: 'username', widgetType: 1 }, { name: 'loginid', widgetType: 1 }, { name: 'type', widgetType: 1 }],
           formSchema: schema['HmUser'],
           showUserButtons: ['提交', '取消'],
           formConfirm() {
@@ -62,7 +62,8 @@
         },
         showRefresh: true,
         showExport: true,
-        showDeleteButton: true
+        showDeleteButton: true,
+        buttonGroup: false
       }
     },
     methods: {}

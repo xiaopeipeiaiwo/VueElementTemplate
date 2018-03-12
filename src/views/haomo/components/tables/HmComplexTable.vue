@@ -13,11 +13,22 @@
       </span>
       <!-- end 过滤条件 -->
 
-      <el-button class="filter-item" type="primary" v-waves icon="el-icon-search" @click="handleFilter">搜索</el-button>
-      <el-button class="filter-item" type="primary" :loading="downloadLoading" v-waves icon="el-icon-download" v-if="isShowExport" @click="handleDownload">导出</el-button>
-      <el-button class="filter-item" type="primary" v-waves icon="el-icon-plus" v-if="isShowNewButton" @click="openDialog('newData')">新建</el-button>
-      <el-button class="filter-item" type="primary" v-waves icon="el-icon-refresh" v-if="isShowRefresh" @click="refreshList">刷新</el-button>
-      <el-button class="filter-item" type="primary" v-waves icon="el-icon-close" v-if="multipleSelection.length" @click="BatchRemove">批量删除</el-button>
+      <el-button-group v-if="buttonGroup">
+        <el-button class="filter-item" type="primary" v-waves icon="el-icon-search" @click="handleFilter">搜索</el-button>
+        <el-button class="filter-item" type="primary" :loading="downloadLoading" v-waves icon="el-icon-download" v-if="isShowExport" @click="handleDownload">导出</el-button>
+        <el-button class="filter-item" type="primary" v-waves icon="el-icon-plus" v-if="isShowNewButton" @click="openDialog('newData')">新建</el-button>
+        <el-button class="filter-item" type="primary" v-waves icon="el-icon-refresh" v-if="isShowRefresh" @click="refreshList">刷新</el-button>
+        <el-button class="filter-item" type="primary" v-waves icon="el-icon-close" v-if="multipleSelection.length" @click="BatchRemove">批量删除</el-button>
+      </el-button-group>
+      <span v-if="!buttonGroup">
+        <el-button class="filter-item" type="primary" v-waves icon="el-icon-search" @click="handleFilter">搜索</el-button>
+        <el-button class="filter-item" type="primary" :loading="downloadLoading" v-waves icon="el-icon-download" v-if="isShowExport" @click="handleDownload">导出</el-button>
+        <el-button class="filter-item" type="primary" v-waves icon="el-icon-plus" v-if="isShowNewButton" @click="openDialog('newData')">新建</el-button>
+        <el-button class="filter-item" type="primary" v-waves icon="el-icon-refresh" v-if="isShowRefresh" @click="refreshList">刷新</el-button>
+        <el-button class="filter-item" type="primary" v-waves icon="el-icon-close" v-if="multipleSelection.length" @click="BatchRemove">批量删除</el-button>
+      </span>
+
+
     </div>
     <!-- end 过滤 -->
 
@@ -176,12 +187,23 @@
        *    },
        *    "newData": {  // 新建按钮的配置
        *      isShow: false,  // 默认不显示新建按钮
-       *      showUserColumns: [], // 新建表单的Columns配置
+       *      showUserColumns: [], // 新建表单的Columns配置,详情参考Form组件
        *      formSchema: {}, // 新建表单的schema配置
        *      showUserButtons: ['提交', '取消'],  // 新建表单的显示按钮
        *      formConfirm() {}, // 新建的提交回调
        *      formCancel() {}  // 新建的取消回调
        *    },
+       *    "editData": { // 编辑按钮的配置
+       *      isShow: false,  // 默认不显示编辑按钮
+       *      showUserColumns: [], // 编辑表单的Columns配置,详情参考Form组件
+       *      formSchema: {}, // 编辑表单的schema配置
+       *      showUserButtons: ['提交', '取消'], // 编辑表单的显示按钮
+       *      formConfirm() {}, // 编辑的提交回调
+       *      formCancel() {} // 编辑的取消回调
+       *    },
+       *    showRefresh: false, //默认不显示刷新按钮
+       *    showDeleteButton: false,  //默认不显示删除按钮
+       *    buttonGroup: false  //默认不以按钮组的方式呈现button
        *  }
        */
       options: {
@@ -222,7 +244,8 @@
         showUserButtons: [], // from弹窗显示按钮
         tableId: '',
 
-        isShowRefresh: false
+        isShowRefresh: false,
+        buttonGroup: false
       }
     },
     computed: {
@@ -332,6 +355,9 @@
         if (self.options.showDeleteButton) { // 判断是否显示刷新按钮
           self.isShowDeleteButton = self.options.showDeleteButton
         }
+        if (self.options.buttonGroup) { // 设置按钮是否以按钮组呈现
+          self.buttonGroup = self.options.buttonGroup
+        }
         console.log(request.defaults)
         console.log(`request.defaults.baseURL: ${request.defaults.baseURL}`)
       },
@@ -390,13 +416,13 @@
       formConfirm() {
         this.options.newData.formConfirm()
         this.dialogFormVisible = false
-        self.getList()
+        this.getList()
       },
       // 表单的取消
       formCancel() {
         this.options.newData.formCancel()
         this.dialogFormVisible = false
-        self.getList()
+        this.getList()
       },
       // 删除过滤条件为空的filter
       deleteFilter(filters) {
