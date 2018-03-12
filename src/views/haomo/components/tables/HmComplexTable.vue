@@ -14,10 +14,10 @@
       <!-- end 过滤条件 -->
 
       <el-button class="filter-item" type="primary" v-waves icon="el-icon-search" @click="handleFilter">搜索</el-button>
-      <el-button class="filter-item" type="primary" :loading="downloadLoading" v-waves icon="el-icon-download" @click="handleDownload">导出</el-button>
-      <el-button class="filter-item" type="primary" v-waves icon="el-icon-plus" @click="openDialog('newData')">新建</el-button>
-      <el-button class="filter-item" type="primary" v-waves icon="el-icon-refresh" @click="refreshList">刷新</el-button>
-      <el-button class="filter-item" type="primary" v-waves icon="el-icon-close" @click="BatchRemove" v-if="multipleSelection.length">批量删除</el-button>
+      <el-button class="filter-item" type="primary" :loading="downloadLoading" v-waves icon="el-icon-download" v-if="isShowExport" @click="handleDownload">导出</el-button>
+      <el-button class="filter-item" type="primary" v-waves icon="el-icon-plus" v-if="isShowNewButton" @click="openDialog('newData')">新建</el-button>
+      <el-button class="filter-item" type="primary" v-waves icon="el-icon-refresh" v-if="isShowRefresh" @click="refreshList">刷新</el-button>
+      <el-button class="filter-item" type="primary" v-waves icon="el-icon-close" v-if="multipleSelection.length" @click="BatchRemove">批量删除</el-button>
     </div>
     <!-- end 过滤 -->
 
@@ -34,7 +34,7 @@
       </el-table-column>
       <el-table-column fixed="right" label="操作" width="100">
         <template slot-scope="scope">
-          <el-button @click="openDialog('editData',scope.row)" type="text" size="small">编辑</el-button>
+          <el-button @click="openDialog('editData',scope.row)" v-if="isShowEditDataButton" type="text" size="small">编辑</el-button>
           <el-button @click="deleteData(scope.row)" type="text" size="small">删除</el-button>
         </template>
       </el-table-column>
@@ -53,15 +53,13 @@
     <!-- @TODO 补充弹窗 -->
 
     <el-dialog :title="dialogName" :visible.sync="dialogFormVisible" :close-on-click-modal="closeOnClickModal" width="dialogWidth">
-      <el-form>
-        <el-form-item :label="dialog.name" :label-width="formLabelWidth" v-for="dialog in dialogForm">
-          <el-input v-model="dialog.value" auto-complete="off"></el-input>
-        </el-form-item>
-      </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button @click="dialogFormVisible = false">取 消</el-button>
-        <el-button type="primary" @click="submitDialog">确 定</el-button>
-      </div>
+      <hm-complex-form :schema="formSchema"
+                       :columns="showUserColumns"
+                       :buttons="showUserButtons"
+                       :confirmFunction="formConfirm"
+                       :cancelFunction="formCancel"
+                       :tableId="tableId">
+      </hm-complex-form>
     </el-dialog>
 
     <!-- end 弹窗 -->
@@ -76,6 +74,7 @@
   import { parseTime, param } from '@/utils'
   import * as excel from '@/vendor/Export2Excel'
   import { Button, Table, TableColumn, Pagination, Loading } from 'element-ui'
+  import HmComplexForm from '../forms/HmComplexForm.vue'
 
   /**
    * 毫末科技的表格组件.
@@ -93,7 +92,8 @@
       'el-button': Button,
       'el-table': Table,
       'el-table-column': TableColumn,
-      'el-pagination': Pagination
+      'el-pagination': Pagination,
+      'hm-complex-form': HmComplexForm
     },
     // 混入公共对象
     mixins: [],
@@ -173,7 +173,15 @@
        *    "sortOrder": "desc",
        *    "changeValue": {      // 数据库字段转化显示，例如(0=否,1=是)
        *      username: {1: '是', 0: '否'}
-       *    }
+       *    },
+       *    "newData": {  // 新建按钮的配置
+       *      isShow: false,  // 默认不显示新建按钮
+       *      showUserColumns: [], // 新建表单的Columns配置
+       *      formSchema: {}, // 新建表单的schema配置
+       *      showUserButtons: ['提交', '取消'],  // 新建表单的显示按钮
+       *      formConfirm() {}, // 新建的提交回调
+       *      formCancel() {}  // 新建的取消回调
+       *    },
        *  }
        */
       options: {
@@ -199,13 +207,21 @@
         },
         downloadLoading: false,
         dialogFormVisible: false, // 是否显示弹窗
-        dialogForm: [], // 弹窗的数据
-        dialogType: '', // 弹窗的类型
         showColumns: [], // 要显示的列数据
         formLabelWidth: '120px',
         closeOnClickModal: false,
         multipleSelection: [], // 选择的数组
-        dialogName: ''
+        dialogName: '',
+
+        isShowNewButton: false, // 是否显示新建
+        isShowEditDataButton: false, // 是否显示编辑
+        isShowExport: false, // 是否显示导出按钮
+        formSchema: {}, // form弹窗的Schema定义
+        showUserColumns: [], // form弹窗的Columns定义
+        showUserButtons: [], // from弹窗显示按钮
+        tableId: '',
+
+        isShowRefresh: false
       }
     },
     computed: {
@@ -300,6 +316,18 @@
         if (!request.defaults.baseURL) {
           request.defaults.baseURL = '/org/api'
         }
+        if (self.options.newData && self.options.newData.isShow) { // 判断是否显示新建按钮
+          self.isShowNewButton = self.options.newData.isShow
+        }
+        if (self.options.editData && self.options.editData.isShow) { // 判断是否显示编辑按钮
+          self.isShowEditDataButton = self.options.editData.isShow
+        }
+        if (self.options.showRefresh) { // 判断是否显示刷新按钮
+          self.isShowRefresh = self.options.showRefresh
+        }
+        if (self.options.showExport) { // 判断是否显示刷新按钮
+          self.isShowExport = self.options.showExport
+        }
         console.log(request.defaults)
         console.log(`request.defaults.baseURL: ${request.defaults.baseURL}`)
       },
@@ -338,61 +366,44 @@
       // 添加一条数据
       openDialog(type, data) {
         const self = this
-        self.dialogType = type
         self.dialogFormVisible = true
-        self.dialogForm = _.cloneDeep(self.schema.columns)
 
         if (type === 'editData') {
           self.dialogName = '编辑'
-          _.map(self.dialogForm, function(item, index) {
-            item.value = data[item.code]
-            item.id = data.id
-          })
-        } else {
-          self.dialogName = '新建'
+          self.showUserColumns = self.options.editData.showUserColumns
+          self.formSchema = self.options.editData.formSchema
+          self.showUserButtons = self.options.editData.showUserButtons
+          self.tableId = data.id
         }
+        if (type === 'newData') {
+          self.dialogName = '新建'
+          self.showUserColumns = self.options.newData.showUserColumns
+          self.formSchema = self.options.newData.formSchema
+          self.showUserButtons = self.options.newData.showUserButtons
+        }
+      },
+      // 表单的提交
+      formConfirm() {
+        this.options.newData.formConfirm()
+        this.dialogFormVisible = false
+      },
+      // 表单的取消
+      formCancel() {
+        this.options.newData.formCancel()
+        this.dialogFormVisible = false
       },
       // 删除过滤条件为空的filter
       deleteFilter(filters) {
         const newFilters = filters
         _.forEach(newFilters, function(columns, columnsKey) {
           _.forEach(newFilters[columnsKey], function(column, columnKey) {
-            if (columns[columnKey][Object.keys(column)] === '%%' || columns[columnKey][Object.keys(column)] === '' || columns[columnKey][Object.keys(column)] === null) {
+            if (columns[columnKey][Object.keys(column)] === '%%' || columns[columnKey][Object.keys(column)] === '' ||
+              columns[columnKey][Object.keys(column)] === null || columns[columnKey][Object.keys(column)].length === 0) {
               delete (columns[columnKey])
             }
           })
         })
         return JSON.stringify(newFilters[Object.keys(newFilters)]) === '{}' ? null : newFilters
-      },
-      // 弹框提交数据
-      submitDialog() {
-        const self = this
-        const params = {}
-        let url = self.schema.modelUnderscorePlural
-        let paramsId = ''
-        self.dialogFormVisible = false
-        _.each(self.dialogForm, function(data, index) {
-          if (data.value) {
-            params[data.code] = data.value
-            paramsId = data.id
-          }
-        })
-        if (self.dialogType === 'newData') {
-          url = url + '/new'
-        } else if (self.dialogType === 'editData') {
-          url = url + '/' + paramsId + '/edit'
-        }
-
-        request(url, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
-          data: params,
-          transformRequest: param
-        }).then(data => {
-          if (data.data.id) {
-            self.getList()
-          }
-        })
       },
       // 删除一条数据
       deleteData(data) {

@@ -35,8 +35,33 @@
       this.userOptions = {
         changeValue: {
           username: { 1: '是', 0: '否' }
-        }
-
+        },
+        newData: {
+          isShow: true,
+          showUserColumns: [{ name: 'username', widgetType: 1 }],
+          formSchema: schema['HmUser'],
+          showUserButtons: ['提交', '取消'],
+          formConfirm() {
+            console.log('提交')
+          },
+          formCancel() {
+            console.log('取消')
+          }
+        },
+        editData: {
+          isShow: true,
+          showUserColumns: [{ name: 'username', widgetType: 1 }],
+          formSchema: schema['HmUser'],
+          showUserButtons: ['提交', '取消'],
+          formConfirm() {
+            console.log('提交')
+          },
+          formCancel() {
+            console.log('取消')
+          }
+        },
+        showRefresh: true,
+        showExport: true
       }
     },
     methods: {}
