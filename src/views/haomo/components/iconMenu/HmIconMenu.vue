@@ -1,9 +1,9 @@
 <template>
   <div class="app-container documentation-container">
     <el-collapse v-model="activeNames" @change="handleChange">
-      <el-collapse-item title="" name="1">
+      <el-collapse-item title="" name="1" style="width: 90%;margin:0 auto">
         <el-row :gutter="20">
-          <el-col :span="4" v-for="item in icons" style="margin-bottom: 20px;">
+          <el-col :span="4" v-for="(item,key) in icons" :key="key" style="margin-bottom: 20px;">
             <i :class="item.className" style="margin-left: 5px;"></i>
             <p>
               <i class="hm-icon-menu_i" :style="{backgroundColor: item.color}"></i>
