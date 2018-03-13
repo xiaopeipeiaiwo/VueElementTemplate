@@ -7,9 +7,15 @@
       <el-col :span="12">
         <div>
           <!--表单部分-->
-          <el-form ref="form" :model="formModel" :rules="rules" label-width="110px"
+          <el-form ref="form"
+                   :model="formModel"
+                   :rules="rules"
+                   label-width="110px"
                    style="width:80%;margin:0 auto">
-            <el-form-item v-for="column in showUserColumns" :key="column.id" :label="column.name" :prop="column.codeCamel">
+            <el-form-item v-for="column in showUserColumns"
+                          :key="column.id"
+                          :label="column.name"
+                          :prop="column.codeCamel">
               <!--el-input<el-input v-if="column.codeCamel==='password'" type="password"
                         v-model="formModel[column.codeCamel]"></el-input>-->
 
@@ -33,7 +39,8 @@
                 </el-option>
               </el-select>
               <!-- 4 文本域 -->
-              <el-input v-else-if="column.widgetType === 4" v-model="formModel[column.codeCamel]"
+              <el-input v-else-if="column.widgetType === 4"
+                        v-model="formModel[column.codeCamel]"
                         type="textarea"
                         :autosize="{ minRows: 2, maxRows: 5}"
                         :rows="2">
@@ -326,7 +333,6 @@
               // console.log(self.showUserColumns)
             }
           })
-          console.log(self.showUserColumns)
           // 提取v-model绑定的变量
           _.each(self.showUserColumns, function(item) {
             if (item.widgetType === 3 && item.options && item.options.length > 0) {
@@ -335,7 +341,7 @@
               self.$set(self.formModel, item.codeCamel, '')
             }
           })
-
+          console.log(self.formModel)
           if (!request.defaults.baseURL) {
             request.defaults.baseURL = '/org/api'
           }
