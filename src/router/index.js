@@ -118,6 +118,33 @@ export const asyncRouterMap = [
               title: '面板',
               icon: 'table'
             }
+          },
+          {
+            path: 'tab',
+            component: _import('haomo/components/tabs/index'),
+            name: 'haomo-tab',
+            meta: {
+              title: '选项卡',
+              icon: 'table'
+            }
+          },
+          {
+            path: 'calendar',
+            component: _import('haomo/components/calendar/index'),
+            name: '',
+            meta: {
+              title: 'calendar',
+              icon: 'table'
+            }
+          },
+          {
+            path: 'iconMenu',
+            component: _import('haomo/components/iconMenu/index'),
+            name: 'haomo-iconMenu',
+            meta: {
+              title: '图标菜单',
+              icon: 'table'
+            }
           }
         ]
       },

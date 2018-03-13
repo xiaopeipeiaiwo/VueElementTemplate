@@ -13,17 +13,41 @@
       </span>
       <!-- end 过滤条件 -->
 
-      <el-button class="filter-item" type="primary" v-waves icon="el-icon-search" @click="handleFilter">搜索</el-button>
-      <el-button class="filter-item" type="primary" :loading="downloadLoading" v-waves icon="el-icon-download" @click="handleDownload">导出</el-button>
+      <el-button-group v-if="buttonGroup">
+        <el-button class="filter-item" type="primary" v-waves icon="el-icon-search" @click="handleFilter">搜索</el-button>
+        <el-button class="filter-item" type="primary" :loading="downloadLoading" v-waves icon="el-icon-download" v-if="isShowExport" @click="handleDownload">导出</el-button>
+        <el-button class="filter-item" type="primary" v-waves icon="el-icon-plus" v-if="isShowNewButton" @click="openDialog('newData')">新建</el-button>
+        <el-button class="filter-item" type="primary" v-waves icon="el-icon-refresh" v-if="isShowRefresh" @click="refreshList">刷新</el-button>
+        <el-button class="filter-item" type="primary" v-waves icon="el-icon-close" v-if="multipleSelection.length" @click="BatchRemove">批量删除</el-button>
+      </el-button-group>
+      <span v-if="!buttonGroup">
+        <el-button class="filter-item" type="primary" v-waves icon="el-icon-search" @click="handleFilter">搜索</el-button>
+        <el-button class="filter-item" type="primary" :loading="downloadLoading" v-waves icon="el-icon-download" v-if="isShowExport" @click="handleDownload">导出</el-button>
+        <el-button class="filter-item" type="primary" v-waves icon="el-icon-plus" v-if="isShowNewButton" @click="openDialog('newData')">新建</el-button>
+        <el-button class="filter-item" type="primary" v-waves icon="el-icon-refresh" v-if="isShowRefresh" @click="refreshList">刷新</el-button>
+        <el-button class="filter-item" type="primary" v-waves icon="el-icon-close" v-if="multipleSelection.length" @click="BatchRemove">批量删除</el-button>
+      </span>
+
+
     </div>
     <!-- end 过滤 -->
 
     <!-- 表格 -->
     <el-table :data="list" v-loading="listLoading" element-loading-text="给我一点时间" border fit highlight-current-row
-              style="width: 100%">
+              style="width: 100%" @selection-change="handleSelectionChange">
+      <el-table-column type="index" :index="indexMethod" label="序号" width="50px"></el-table-column>
+      <el-table-column type="selection" width="55">
+      </el-table-column>
       <el-table-column v-for="(column,index) in showColumns" :key="index" align="center" :label="column.name">
         <template slot-scope="scope">
-          <span>{{ scope.row[column.code] }}</span>
+          <span>{{ scope.row[column.codeCamel] }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column fixed="right" label="操作" :width="operationWidth" v-if="isShowEditDataButton || isShowDeleteButton">
+        <template slot-scope="scope">
+          <el-button @click="openDialog('editData',scope.row)" v-if="isShowEditDataButton" type="text" size="small">编辑</el-button>
+          <el-button @click="deleteData(scope.row)" type="text" v-if="isShowDeleteButton" size="small">删除</el-button>
+          <el-button @click="openDialog('detail',scope.row)" type="text" v-if="isShowDetail" size="small">详情</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -31,14 +55,30 @@
 
     <!-- 翻页 -->
     <div class="pagination-container">
-      <el-pagination background @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page.sync="listQuery.page_no"
-                     :page-sizes="[10,20,50]" :page-size="listQuery.page_size" layout="total, sizes, prev, pager, next, jumper" :total="total">
+      <el-pagination background @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page.sync="listQuery.pageNo"
+                     :page-sizes="[10,20,50]" :page-size="listQuery.pageSize" layout="total, sizes, prev, pager, next, jumper" :total="total">
       </el-pagination>
     </div>
     <!-- end翻页 -->
 
     <!-- 弹窗 -->
     <!-- @TODO 补充弹窗 -->
+
+    <el-dialog :title="dialogName" :visible.sync="dialogFormVisible" :close-on-click-modal="closeOnClickModal" width="dialogWidth">
+      <el-form v-if="dialogName == '详情'">
+        <el-form-item :label="dialog.name" :label-width="formLabelWidth" v-for="dialog in dialogForm">
+          <el-input v-model="dialog.value" disabled auto-complete="off"></el-input>
+        </el-form-item>
+      </el-form>
+      <hm-complex-form :schema="formSchema"
+                       :columns="showUserColumns"
+                       :buttons="showUserButtons"
+                       :confirmFunction="formConfirm"
+                       :cancelFunction="formCancel"
+                       :tableId="tableId" v-if="dialogName != '详情'">
+      </hm-complex-form>
+    </el-dialog>
+
     <!-- end 弹窗 -->
 
   </div>
@@ -48,9 +88,10 @@
   import _ from 'lodash'
   import request from '@/utils/request'
   import waves from '@/directive/waves' // 水波纹指令
-  import { parseTime } from '@/utils'
+  import { parseTime, param } from '@/utils'
   import * as excel from '@/vendor/Export2Excel'
   import { Button, Table, TableColumn, Pagination, Loading } from 'element-ui'
+  import HmComplexForm from '../forms/HmComplexForm.vue'
 
   /**
    * 毫末科技的表格组件.
@@ -68,7 +109,8 @@
       'el-button': Button,
       'el-table': Table,
       'el-table-column': TableColumn,
-      'el-pagination': Pagination
+      'el-pagination': Pagination,
+      'hm-complex-form': HmComplexForm
     },
     // 混入公共对象
     mixins: [],
@@ -111,7 +153,7 @@
        *  [
        *    {
        *      "name": "姓名",
-       *      "code": "username",
+       *      "codeCamel": "username",
        *      "render": function(value){
        *        return "<a href='value'></a>"
        *      }
@@ -140,12 +182,35 @@
         required: false
       },
       /**
-       * 表格的选项，包括：page_size。完整的示例为：
+       * 表格的选项，包括：pageSize。完整的示例为：
        *  {
-       *    "page_size": 10, // 默认为10条数据/页
+       *    "pageSize": 10, // 默认为10条数据/页
        *    "showExport": false,  // 默认为不显示导出按钮
-       *    "sort_item": "create_time", // 默认为create_time字段的desc排序
-            "sort_order": "desc"
+       *    "sortItem": "create_time", // 默认为create_time字段的desc排序
+       *    "sortOrder": "desc",
+       *    "showRefresh": false, //默认不显示刷新按钮
+       *    "showDeleteButton": false,  //默认不显示删除按钮
+       *    "buttonGroup": false  //默认不以按钮组的方式呈现button
+       *    showDetail: false // 默认不显示详情
+       *    "changeValue": {      // 数据库字段转化显示，例如(0=否,1=是)
+       *      username: {1: '是', 0: '否'}
+       *    },
+       *    "newData": {  // 新建按钮的配置
+       *      isShow: false,  // 默认不显示新建按钮
+       *      showUserColumns: [], // 新建表单的Columns配置,详情参考Form组件
+       *      formSchema: {}, // 新建表单的schema配置
+       *      showUserButtons: ['提交', '取消'],  // 新建表单的显示按钮
+       *      formConfirm() {}, // 新建的提交回调
+       *      formCancel() {}  // 新建的取消回调
+       *    },
+       *    "editData": { // 编辑按钮的配置
+       *      isShow: false,  // 默认不显示编辑按钮
+       *      showUserColumns: [], // 编辑表单的Columns配置,详情参考Form组件
+       *      formSchema: {}, // 编辑表单的schema配置
+       *      showUserButtons: ['提交', '取消'], // 编辑表单的显示按钮
+       *      formConfirm() {}, // 编辑的提交回调
+       *      formCancel() {} // 编辑的取消回调
+       *    }
        *  }
        */
       options: {
@@ -163,15 +228,34 @@
         total: null,
         listLoading: true,
         listQuery: {
-          page_no: 1,
-          page_size: 20,
-          sort_item: 'create_time',
-          sort_order: 'desc',
+          pageNo: 1,
+          pageSize: 20,
+          sortItem: 'create_time',
+          sortOrder: 'desc',
           filters: {}
         },
         downloadLoading: false,
+        dialogFormVisible: false, // 是否显示弹窗
+        dialogForm: [], // 弹窗数据
+        showColumns: [], // 要显示的列数据
+        formLabelWidth: '120px',
+        closeOnClickModal: false,
+        multipleSelection: [], // 选择的数组
+        dialogName: '',
 
-        showColumns: [] // 要显示的列数据
+        isShowNewButton: false, // 是否显示新建
+        isShowEditDataButton: false, // 是否显示编辑
+        isShowDeleteButton: false, // 是否显示删除
+        isShowExport: false, // 是否显示导出按钮
+        formSchema: {}, // form弹窗的Schema定义
+        showUserColumns: [], // form弹窗的Columns定义
+        showUserButtons: [], // from弹窗显示按钮
+        tableId: '',
+
+        isShowRefresh: false,
+        buttonGroup: false,
+        operationWidth: 0, // 操作栏的宽度
+        isShowDetail: false // 是否显示详情按钮
       }
     },
     computed: {
@@ -204,6 +288,9 @@
       this.getList()
     },
     methods: {
+      indexMethod(index) {
+        return this.listQuery.pageSize * (this.listQuery.pageNo - 1) + index + 1
+      },
       validate() {
         const self = this
         // this.columns数组元素本身必须是string或者object. 且必须是schema中定义的列
@@ -234,24 +321,18 @@
             self.$set(tmp, 'code', tmp.code.toLowerCase())
             self.showColumns.push(tmp)
           })
-          console.log(self.showColumns)
         } else {
           self.showColumns = JSON.parse(JSON.stringify(self.columns))
-          console.log('1111111')
-          console.log(self.showColumns)
           // 将字符串对象进行替换处理
           _.each(self.showColumns, function(column, index) {
             if (typeof column === 'string') {
               // const tmp = _.keyBy(self.schema['columns'], 'code')[column.toUpperCase()]
               // 王康 修改 2018年02月25日22:58:23
               const tmp = _.keyBy(self.schema['columns'], 'codeCamel')[column]
-              console.log(tmp)
               self.$set(tmp, 'code', tmp.code.toLowerCase())
               self.$set(self.showColumns, index, tmp)
             }
           })
-          console.log('2222222')
-          console.log(self.showColumns)
         }
 
         // 处理过滤条件
@@ -259,7 +340,7 @@
           const tableName = self.schema['modelUnderscore']
           const filters = {}
           filters[tableName] = {}
-          _.each(self.filters, function(filter) {
+          _.each(_.cloneDeep(self.filters), function(filter) {
             filters[tableName] = Object.assign(filters[tableName], filter)
           })
           delete filters[tableName]['placeholder']
@@ -268,6 +349,30 @@
 
         if (!request.defaults.baseURL) {
           request.defaults.baseURL = '/org/api'
+        }
+        if (self.options.newData && self.options.newData.isShow) { // 判断是否显示新建按钮
+          self.isShowNewButton = self.options.newData.isShow
+        }
+        if (self.options.editData && self.options.editData.isShow) { // 判断是否显示编辑按钮
+          self.isShowEditDataButton = self.options.editData.isShow
+          self.operationWidth += 50
+        }
+        if (self.options.showRefresh) { // 判断是否显示刷新按钮
+          self.isShowRefresh = self.options.showRefresh
+        }
+        if (self.options.showExport) { // 判断是否显示导出按钮
+          self.isShowExport = self.options.showExport
+        }
+        if (self.options.showDeleteButton) { // 判断是否显示删除按钮
+          self.isShowDeleteButton = self.options.showDeleteButton
+          self.operationWidth += 50
+        }
+        if (self.options.buttonGroup) { // 设置按钮是否以按钮组呈现
+          self.buttonGroup = self.options.buttonGroup
+        }
+        if (self.options.showDetail && self.options.showDetail.isShow) { // 设置按钮是否以按钮组呈现
+          self.isShowDetail = self.options.showDetail.isShow
+          self.operationWidth += 50
         }
         console.log(request.defaults)
         console.log(`request.defaults.baseURL: ${request.defaults.baseURL}`)
@@ -279,24 +384,178 @@
         // 处理过滤条件
         const params = JSON.parse(JSON.stringify(self.listQuery))
         params.filters = self.filterParams
+        params.filters = this.deleteFilter(params.filters)
 
         request(self.schema.modelUnderscorePlural, {
           params: params
         }).then(resp => {
+          if (self.options.changeValue) {
+            resp.data = self.changeValue(resp.data)
+          }
           self.list = resp.data
           self.total = parseInt(resp.headers.total)
           self.listLoading = false
         })
       },
+      // 数据库字段转化显示，例如(0=否,1=是)
+      changeValue(data) {
+        const self = this
+        _.map(data, function(item, index) {
+          _.forEach(item, function(listValue, listKey) {
+            if (self.options.changeValue[listKey] && self.options.changeValue[listKey][listValue]) {
+              item[listKey] = self.options.changeValue[listKey][listValue]
+            }
+          })
+        })
+        return data
+      },
+      // 添加一条数据
+      openDialog(type, data) {
+        const self = this
+        self.dialogFormVisible = true
+        if (type === 'editData') {
+          self.dialogName = '编辑'
+          self.showUserColumns = self.options.editData.showUserColumns
+          self.formSchema = self.options.editData.formSchema
+          self.showUserButtons = self.options.editData.showUserButtons
+          self.tableId = data.id
+        }
+        if (type === 'newData') {
+          self.dialogName = '新建'
+          self.showUserColumns = self.options.newData.showUserColumns
+          self.formSchema = self.options.newData.formSchema
+          self.showUserButtons = self.options.newData.showUserButtons
+        }
+        if (type === 'detail') {
+          self.dialogName = '详情'
+          self.dialogForm = []
+          _.each(self.options.showDetail.showColumns, function(columns) {
+            _.each(self.schema.columns, function(item, index) {
+              if (columns === item.codeCamel) {
+                self.dialogForm.push(item)
+              }
+            })
+          })
+
+          _.map(self.dialogForm, function(item, index) {
+            item.value = data[item.code]
+            item.id = data.id
+          })
+        }
+      },
+      // 表单的提交
+      formConfirm() {
+        this.options.newData.formConfirm()
+        this.dialogFormVisible = false
+        this.getList()
+      },
+      // 表单的取消
+      formCancel() {
+        this.options.newData.formCancel()
+        this.dialogFormVisible = false
+        this.getList()
+      },
+      // 删除过滤条件为空的filter
+      deleteFilter(filters) {
+        const newFilters = filters
+        _.forEach(newFilters, function(columns, columnsKey) {
+          _.forEach(newFilters[columnsKey], function(column, columnKey) {
+            if (columns[columnKey][Object.keys(column)] === '%%' || columns[columnKey][Object.keys(column)] === '' ||
+              columns[columnKey][Object.keys(column)] === null || columns[columnKey][Object.keys(column)].length === 0) {
+              delete (columns[columnKey])
+            }
+          })
+        })
+        return JSON.stringify(newFilters[Object.keys(newFilters)]) === '{}' ? null : newFilters
+      },
+      // 删除一条数据
+      deleteData(data) {
+        const self = this
+        self.$confirm('此操作将永久删除该数据, 是否继续?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          request(self.schema.modelUnderscorePlural + '/' + data.id + '/delete', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' }
+          }).then(data => {
+            if (data.data.message === 'delete success') {
+              self.$message({
+                message: data.data.message,
+                type: 'success'
+              })
+              self.getList()
+            }
+          })
+        }).catch(() => {
+          self.$message({
+            message: '已取消删除',
+            type: 'success'
+          })
+        })
+      },
+      refreshList() {
+        this.listQuery = {
+          pageNo: 1,
+          pageSize: 20,
+          sortItem: 'create_time',
+          sortOrder: 'desc',
+          filters: {}
+        }
+        this.init()
+
+        this.getList()
+      },
+      // 批量删除
+      BatchRemove() {
+        const self = this
+        const datas = {
+          ids: []
+        }
+        if (!self.multipleSelection) return false
+        _.each(self.multipleSelection, function(item, index) {
+          datas.ids.push(item.id)
+        })
+        datas.ids = JSON.stringify(datas.ids)
+        self.$confirm('此操作将永久删除该数据, 是否继续?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          request(self.schema.modelUnderscorePlural + '/delete/batch', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+            data: datas,
+            transformRequest: param
+          }).then(data => {
+            if (data.data.message === 'delete success') {
+              self.$message({
+                message: data.data.message,
+                type: 'success'
+              })
+              self.getList()
+            }
+          })
+        }).catch(() => {
+          self.$message({
+            message: '已取消删除',
+            type: 'success'
+          })
+        })
+      },
+      handleSelectionChange(val) {
+        this.multipleSelection = val
+      },
       handleFilter() {
         this.getList()
       },
       handleSizeChange(val) {
-        this.listQuery.page_size = val
+        this.listQuery.pageSize = val
         this.getList()
       },
       handleCurrentChange(val) {
-        this.listQuery.page_no = val
+        this.listQuery.pageNo = val
         this.getList()
       },
       handleDelete(row) {
@@ -350,5 +609,8 @@
 <style>
   .hm-complex-table__filter-span {
     margin-right: 5px;
+  }
+  .el-table__body tr.current-row>td{
+    background-color: #ecf5ff;
   }
 </style>

@@ -14,6 +14,12 @@
 </template>
 
 <script>
+  /**
+   * 毫末科技的面板组件.
+   *
+   *   demo地址: factory.haomo-studio.com/vue-element/#/haomo/components/panel
+   * @author 高天阳 gty@haomo-studio.com
+   */
   export default {
     name: 'HmPanel',
     // 继承其他组件
