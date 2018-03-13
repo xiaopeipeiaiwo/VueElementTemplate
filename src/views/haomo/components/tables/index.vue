@@ -63,7 +63,11 @@
         showRefresh: true,
         showExport: true,
         showDeleteButton: true,
-        buttonGroup: false
+        buttonGroup: false,
+        showDetail: {
+          isShow: true,
+          showColumns: ['mobile', 'loginid', 'username', 'email']
+        }
       }
     },
     methods: {}

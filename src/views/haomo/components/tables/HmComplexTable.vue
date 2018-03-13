@@ -43,10 +43,11 @@
           <span>{{ scope.row[column.codeCamel] }}</span>
         </template>
       </el-table-column>
-      <el-table-column fixed="right" label="操作" width="100" v-if="isShowEditDataButton || isShowDeleteButton">
+      <el-table-column fixed="right" label="操作" :width="operationWidth" v-if="isShowEditDataButton || isShowDeleteButton">
         <template slot-scope="scope">
           <el-button @click="openDialog('editData',scope.row)" v-if="isShowEditDataButton" type="text" size="small">编辑</el-button>
           <el-button @click="deleteData(scope.row)" type="text" v-if="isShowDeleteButton" size="small">删除</el-button>
+          <el-button @click="openDialog('detail',scope.row)" type="text" v-if="isShowDetail" size="small">详情</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -64,12 +65,17 @@
     <!-- @TODO 补充弹窗 -->
 
     <el-dialog :title="dialogName" :visible.sync="dialogFormVisible" :close-on-click-modal="closeOnClickModal" width="dialogWidth">
+      <el-form v-if="dialogName == '详情'">
+        <el-form-item :label="dialog.name" :label-width="formLabelWidth" v-for="dialog in dialogForm">
+          <el-input v-model="dialog.value" disabled auto-complete="off"></el-input>
+        </el-form-item>
+      </el-form>
       <hm-complex-form :schema="formSchema"
                        :columns="showUserColumns"
                        :buttons="showUserButtons"
                        :confirmFunction="formConfirm"
                        :cancelFunction="formCancel"
-                       :tableId="tableId">
+                       :tableId="tableId" v-if="dialogName != '详情'">
       </hm-complex-form>
     </el-dialog>
 
@@ -182,6 +188,10 @@
        *    "showExport": false,  // 默认为不显示导出按钮
        *    "sortItem": "create_time", // 默认为create_time字段的desc排序
        *    "sortOrder": "desc",
+       *    "showRefresh": false, //默认不显示刷新按钮
+       *    "showDeleteButton": false,  //默认不显示删除按钮
+       *    "buttonGroup": false  //默认不以按钮组的方式呈现button
+       *    showDetail: false // 默认不显示详情
        *    "changeValue": {      // 数据库字段转化显示，例如(0=否,1=是)
        *      username: {1: '是', 0: '否'}
        *    },
@@ -200,10 +210,7 @@
        *      showUserButtons: ['提交', '取消'], // 编辑表单的显示按钮
        *      formConfirm() {}, // 编辑的提交回调
        *      formCancel() {} // 编辑的取消回调
-       *    },
-       *    showRefresh: false, //默认不显示刷新按钮
-       *    showDeleteButton: false,  //默认不显示删除按钮
-       *    buttonGroup: false  //默认不以按钮组的方式呈现button
+       *    }
        *  }
        */
       options: {
@@ -229,6 +236,7 @@
         },
         downloadLoading: false,
         dialogFormVisible: false, // 是否显示弹窗
+        dialogForm: [], // 弹窗数据
         showColumns: [], // 要显示的列数据
         formLabelWidth: '120px',
         closeOnClickModal: false,
@@ -245,7 +253,9 @@
         tableId: '',
 
         isShowRefresh: false,
-        buttonGroup: false
+        buttonGroup: false,
+        operationWidth: 0, // 操作栏的宽度
+        isShowDetail: false // 是否显示详情按钮
       }
     },
     computed: {
@@ -345,18 +355,24 @@
         }
         if (self.options.editData && self.options.editData.isShow) { // 判断是否显示编辑按钮
           self.isShowEditDataButton = self.options.editData.isShow
+          self.operationWidth += 50
         }
         if (self.options.showRefresh) { // 判断是否显示刷新按钮
           self.isShowRefresh = self.options.showRefresh
         }
-        if (self.options.showExport) { // 判断是否显示刷新按钮
+        if (self.options.showExport) { // 判断是否显示导出按钮
           self.isShowExport = self.options.showExport
         }
-        if (self.options.showDeleteButton) { // 判断是否显示刷新按钮
+        if (self.options.showDeleteButton) { // 判断是否显示删除按钮
           self.isShowDeleteButton = self.options.showDeleteButton
+          self.operationWidth += 50
         }
         if (self.options.buttonGroup) { // 设置按钮是否以按钮组呈现
           self.buttonGroup = self.options.buttonGroup
+        }
+        if (self.options.showDetail && self.options.showDetail.isShow) { // 设置按钮是否以按钮组呈现
+          self.isShowDetail = self.options.showDetail.isShow
+          self.operationWidth += 50
         }
         console.log(request.defaults)
         console.log(`request.defaults.baseURL: ${request.defaults.baseURL}`)
@@ -397,7 +413,6 @@
       openDialog(type, data) {
         const self = this
         self.dialogFormVisible = true
-
         if (type === 'editData') {
           self.dialogName = '编辑'
           self.showUserColumns = self.options.editData.showUserColumns
@@ -410,6 +425,22 @@
           self.showUserColumns = self.options.newData.showUserColumns
           self.formSchema = self.options.newData.formSchema
           self.showUserButtons = self.options.newData.showUserButtons
+        }
+        if (type === 'detail') {
+          self.dialogName = '详情'
+          self.dialogForm = []
+          _.each(self.options.showDetail.showColumns, function(columns) {
+            _.each(self.schema.columns, function(item, index) {
+              if (columns === item.code) {
+                self.dialogForm.push(item)
+              }
+            })
+          })
+
+          _.map(self.dialogForm, function(item, index) {
+            item.value = data[item.code]
+            item.id = data.id
+          })
         }
       },
       // 表单的提交
