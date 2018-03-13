@@ -431,7 +431,7 @@
           self.dialogForm = []
           _.each(self.options.showDetail.showColumns, function(columns) {
             _.each(self.schema.columns, function(item, index) {
-              if (columns === item.code) {
+              if (columns === item.codeCamel) {
                 self.dialogForm.push(item)
               }
             })
