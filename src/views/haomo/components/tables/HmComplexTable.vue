@@ -8,6 +8,7 @@
                   style="width: 200px;"
                   class="filter-item"
                   :placeholder="filter.placeholder"
+                  v-if="filter.isShow"
                   v-model="listQuery.filters[schema['modelUnderscore']][getFilterColumn(filter)][getFilterOper(filter)]">
         </el-input>
       </span>
@@ -344,6 +345,7 @@
             filters[tableName] = Object.assign(filters[tableName], filter)
           })
           delete filters[tableName]['placeholder']
+          delete filters[tableName]['isShow']
           self.$set(self.listQuery, 'filters', filters)
         }
 
@@ -461,7 +463,7 @@
         _.forEach(newFilters, function(columns, columnsKey) {
           _.forEach(newFilters[columnsKey], function(column, columnKey) {
             if (columns[columnKey][Object.keys(column)] === '%%' || columns[columnKey][Object.keys(column)] === '' ||
-              columns[columnKey][Object.keys(column)] === null || columns[columnKey][Object.keys(column)].length === 0) {
+              columns[columnKey][Object.keys(column)] === null) {
               delete (columns[columnKey])
             }
           })
@@ -591,7 +593,7 @@
         const keys = Object.keys(filter)
         let column = null
         _.each(keys, function(key) {
-          if (key !== 'placeholder') {
+          if (key !== 'placeholder' && key !== 'isShow') {
             column = key
             return 0
           }

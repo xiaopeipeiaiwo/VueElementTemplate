@@ -21,10 +21,10 @@
     },
     data() {
       return {
-        showUserColumns: ['mobile', 'loginid', 'username', 'email'],
+        showUserColumns: ['mobile', 'loginid', 'username', 'email', 'securityLevel'],
         userFilters: [
-          { placeholder: '过滤手机号', 'mobile': { 'like': '' }},
-          { placeholder: '过滤用户名', 'username': { 'equalTo': '' }}
+          { placeholder: '过滤手机号', 'mobile': { 'like': '' }, isShow: true },
+          { placeholder: '过滤用户名', 'username': { 'equalTo': '' }, isShow: true }
         ]
       }
     },
