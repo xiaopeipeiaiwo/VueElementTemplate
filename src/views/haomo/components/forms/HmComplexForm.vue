@@ -64,6 +64,7 @@
                 <el-radio v-for="(option,key) in column.options" :key="key" :label="key">{{option}}</el-radio>
               </el-radio-group>
             </el-form-item>
+            <!--按钮-->
             <el-form-item v-if="buttons && buttons.length > 0">
               <el-col :span="12" v-for="(btn,key) in buttons" :key="key">
                 <el-button v-if="btn === '确定' || btn === '提交' || btn === '保存' || btn === '发布'" type="primary" @click="onSubmit()">{{btn}}</el-button>
@@ -115,8 +116,10 @@
        *        { name: 'username', widgetType: 1 },
        *        { name: 'securityLevel', widgetType: 5 },
        *        { name: 'type', widgetType: 2, options: ['企业', '代理商'] },
-       *        { name: 'avatar', widgetType: 3 }, { name: 'departmentId', widgetType: 4 },
-       *        { name: 'createTime', widgetType: 6 }
+       *        { name: 'avatar', widgetType: 3 },
+       *        { name: 'departmentId', widgetType: 4 },
+       *        { name: 'createTime', widgetType: 6 },
+       *        { name: 'identity', widgetType: 7, options: ['会员', '访客'] },
        *      ]
        */
       columns: {
