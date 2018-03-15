@@ -136,6 +136,15 @@ export const asyncRouterMap = [
               title: 'calendar',
               icon: 'table'
             }
+          },
+          {
+            path: 'iconMenu',
+            component: _import('haomo/components/iconMenu/index'),
+            name: 'haomo-iconMenu',
+            meta: {
+              title: '图标菜单',
+              icon: 'table'
+            }
           }
         ]
       },

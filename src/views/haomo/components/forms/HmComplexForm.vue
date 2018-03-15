@@ -1,74 +1,85 @@
 <template>
-  <el-row type="flex" class="hm-form" style="margin-top: 50px">
-    <el-col :span="6">
-      <div></div>
-    </el-col>
-    <el-col :span="12">
-      <div>
-        <!--表单部分-->
-        <el-form ref="form" :model="formModel" :rules="rules" label-width="110px"
-                 style="width:80%;margin:0 auto">
-          <el-form-item v-for="column in showUserColumns" :key="column.id" :label="column.name" :prop="column.codeCamel">
-            <!--el-input<el-input v-if="column.codeCamel==='password'" type="password"
-                      v-model="formModel[column.codeCamel]"></el-input>-->
+  <div class="app-container documentation-container">
+    <el-row type="flex" class="hm-form" style="margin-top: 50px">
+      <el-col :span="6">
+        <div></div>
+      </el-col>
+      <el-col :span="12">
+        <div>
+          <!--表单部分-->
+          <el-form ref="form"
+                   :model="formModel"
+                   :rules="rules"
+                   label-width="110px"
+                   style="width:80%;margin:0 auto">
+            <el-form-item v-for="column in showUserColumns"
+                          :key="column.id"
+                          :label="column.name"
+                          :prop="column.codeCamel">
+              <!--el-input<el-input v-if="column.codeCamel==='password'" type="password"
+                        v-model="formModel[column.codeCamel]"></el-input>-->
 
-            <!-- 1 普通input -->
-            <el-input v-if="column.widgetType === 1" v-model="formModel[column.codeCamel]"></el-input>
-            <!-- 2 日期选择 -->
-            <el-date-picker v-else-if="column.widgetType === 6 || column.type === 'datetime' || column.type === 'date'"
+              <!-- 1 普通input -->
+              <el-input v-if="column.widgetType === 1" v-model="formModel[column.codeCamel]"></el-input>
+              <!-- 2 日期选择 -->
+              <el-date-picker v-else-if="column.widgetType === 6 || column.type === 'datetime' || column.type === 'date'"
+                              v-model="formModel[column.codeCamel]"
+                              type="datetime"
+                              align="right"
+                              @change="logTimeChange"
+                              value-format="yyyy-MM-dd HH:mm:ss"
+                              :picker-options="pickerOptions">
+              </el-date-picker>
+              <!-- 3 下拉框 -->
+              <el-select v-else-if="column.widgetType === 2" v-model="formModel[column.codeCamel]" clearable>
+                <el-option v-for="(item,key) in column.options"
+                           :key="key"
+                           :label="item"
+                           :value="key">
+                </el-option>
+              </el-select>
+              <!-- 4 文本域 -->
+              <el-input v-else-if="column.widgetType === 4"
+                        v-model="formModel[column.codeCamel]"
+                        type="textarea"
+                        :autosize="{ minRows: 2, maxRows: 5}"
+                        :rows="2">
+              </el-input>
+              <!-- 5 复选框 -->
+              <el-checkbox v-else-if="column.widgetType === 3 && !column.options" v-model="formModel[column.codeCamel]" true-label="1" false-label="0"></el-checkbox>
+              <el-checkbox-group v-else-if="column.widgetType === 3 && column.options" v-model="formModel[column.codeCamel]">
+                <el-checkbox v-for="option in column.options" :label="option" :key="option">{{option}}</el-checkbox>
+              </el-checkbox-group>
+              <!-- 6 富文本 -->
+              <quill-editor v-else-if="column.widgetType === 5"
+                            ref="textEditor"
                             v-model="formModel[column.codeCamel]"
-                            type="datetime"
-                            align="right"
-                            @change="logTimeChange"
-                            value-format="yyyy-MM-dd HH:mm:ss"
-                            :picker-options="pickerOptions">
-            </el-date-picker>
-            <!-- 3 下拉框 -->
-            <el-select v-else-if="column.widgetType === 2" v-model="formModel[column.codeCamel]" clearable>
-              <el-option v-for="(item,key) in column.options"
-                        :key="key"
-                        :label="item"
-                        :value="key">
-              </el-option>
-            </el-select>
-            <!-- 4 文本域 -->
-            <el-input v-else-if="column.widgetType === 4" v-model="formModel[column.codeCamel]"
-                      type="textarea"
-                      :autosize="{ minRows: 2, maxRows: 5}"
-                      :rows="2">
-            </el-input>
-            <!-- 5 复选框 -->
-            <el-checkbox v-else-if="column.widgetType === 3 && !column.options" v-model="formModel[column.codeCamel]" true-label="1" false-label="0"></el-checkbox>
-            <el-checkbox-group v-else-if="column.widgetType === 3 && column.options" v-model="formModel[column.codeCamel]">
-              <el-checkbox v-for="option in column.options" :label="option" :key="option">{{option}}</el-checkbox>
-            </el-checkbox-group>
-            <!-- 6 富文本 -->
-            <quill-editor v-else-if="column.widgetType === 5"
-                          ref="textEditor"
-                          v-model="formModel[column.codeCamel]"
-                          :options="editorOption"
-                          @blur="onEditorBlur($event)"
-                          @focus="onEditorFocus($event)"
-                          @ready="onEditorReady($event)">
-            </quill-editor>
-            <!-- 7 单选框 -->
-            <el-radio-group v-else-if="column.widgetType === 7" v-model="formModel[column.codeCamel]">
-              <el-radio v-for="(option,key) in column.options" :key="key" :label="key">{{option}}</el-radio>
-            </el-radio-group>
-          </el-form-item>
-          <el-form-item v-if="buttons && buttons.length > 0">
-            <el-col :span="12" v-for="(btn,key) in buttons" :key="key">
-              <el-button v-if="btn === '确定' || btn === '提交'" type="primary" @click="onSubmit()">{{btn}}</el-button>
-              <el-button v-if="btn === '取消' || btn === '重置'" type="primary" @click="resetForm()">{{btn}}</el-button>
-            </el-col>
-          </el-form-item>
-        </el-form>
-      </div>
-    </el-col>
-    <el-col :span="6">
-      <div></div>
-    </el-col>
-  </el-row>
+                            :options="editorOption"
+                            @blur="onEditorBlur($event)"
+                            @focus="onEditorFocus($event)"
+                            @ready="onEditorReady($event)">
+              </quill-editor>
+              <!-- 7 单选框 -->
+              <el-radio-group v-else-if="column.widgetType === 7" v-model="formModel[column.codeCamel]">
+                <el-radio v-for="(option,key) in column.options" :key="key" :label="key">{{option}}</el-radio>
+              </el-radio-group>
+            </el-form-item>
+            <!--按钮-->
+            <el-form-item v-if="buttons && buttons.length > 0">
+              <el-col :span="12" v-for="(btn,key) in buttons" :key="key">
+                <el-button v-if="btn === '确定' || btn === '提交' || btn === '保存' || btn === '发布'" type="primary" @click="onSubmit()">{{btn}}</el-button>
+                <el-button v-if="btn === '重置'" type="primary" @click="resetForm()">{{btn}}</el-button>
+                <el-button v-if="btn === '取消'" type="primary" @click="cancelFunction?cancelFunction():''">{{btn}}</el-button>
+              </el-col>
+            </el-form-item>
+          </el-form>
+        </div>
+      </el-col>
+      <el-col :span="6">
+        <div></div>
+      </el-col>
+    </el-row>
+  </div>
 </template>
 
 <script>
@@ -105,8 +116,10 @@
        *        { name: 'username', widgetType: 1 },
        *        { name: 'securityLevel', widgetType: 5 },
        *        { name: 'type', widgetType: 2, options: ['企业', '代理商'] },
-       *        { name: 'avatar', widgetType: 3 }, { name: 'departmentId', widgetType: 4 },
-       *        { name: 'createTime', widgetType: 6 }
+       *        { name: 'avatar', widgetType: 3 },
+       *        { name: 'departmentId', widgetType: 4 },
+       *        { name: 'createTime', widgetType: 6 },
+       *        { name: 'identity', widgetType: 7, options: ['会员', '访客'] },
        *      ]
        */
       columns: {
@@ -122,7 +135,9 @@
         }
       },
       /**
-       * 非必传，指定要显示的按钮(确定、保存、取消、提交、重置)。默认不显示。示例：['确定', '取消']
+       * 非必传，指定要显示的按钮(确定、保存、取消、提交、重置)，默认不显示。
+       * 如果要传入了确定/取消的回调函数，请先传入对应的按钮
+       * 示例：['确定', '取消']
        */
       buttons: {
         type: Array,
@@ -133,6 +148,22 @@
        */
       tableId: {
         type: String,
+        required: false
+      },
+      /**
+       * 非必传，传入点击'确定'后的回调函数，该回调函数会在form组件onSubmit函数的成功回调中调用
+       * 如果要传入该函数，请先传入对应的按钮
+       */
+      confirmFunction: {
+        type: Function,
+        required: false
+      },
+      /**
+       * 非必传，传入点击'取消'后的回调函数，该回调函数会在点击'取消'后直接调用
+       * 如果要传入该函数，请先传入对应的按钮
+       */
+      cancelFunction: {
+        type: Function,
         required: false
       }
     },
@@ -305,7 +336,6 @@
               // console.log(self.showUserColumns)
             }
           })
-          console.log(self.showUserColumns)
           // 提取v-model绑定的变量
           _.each(self.showUserColumns, function(item) {
             if (item.widgetType === 3 && item.options && item.options.length > 0) {
@@ -314,7 +344,7 @@
               self.$set(self.formModel, item.codeCamel, '')
             }
           })
-
+          console.log(self.formModel)
           if (!request.defaults.baseURL) {
             request.defaults.baseURL = '/org/api'
           }
@@ -358,6 +388,7 @@
               }).then(resp => {
                 console.log('修改成功')
                 self.resetForm()
+                self.confirmFunction && self.confirmFunction()
               })
             } else { // 不存在tableId 则创建一条数据
               request(self.schema.modelUnderscorePlural + '/new', {
@@ -375,6 +406,7 @@
               }).then(resp => {
                 console.log('创建成功')
                 self.resetForm()
+                self.confirmFunction && self.confirmFunction()
               })
             }
           } else {
@@ -394,7 +426,7 @@
        * 清空所有输入及提示信息。
        */
       resetForm() {
-        console.log('chongzhi')
+        console.log('重置')
         this.$refs.form.resetFields()
       }
     }
