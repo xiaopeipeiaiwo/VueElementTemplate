@@ -150,6 +150,32 @@
         required: false
       },
       /**
+       * 用来将本表的外链字段(table_id类似的字段)指向的外链表相关联, 格式为:
+       *  {
+       *    "hm_user": {    //外链表 表名 本表所对应的主键表）
+       *      includes:['user_id'] // 与主表所对应的外键
+       *    }
+       *  }
+       *
+       */
+      includes: {
+        type: Object,
+        required: false
+      },
+      /**
+       * 用来将其他表的外链字段指向本表关联，同时返回数据, 格式为:
+       *  {
+       *    'auth_token': {          //主键id所对应的外键表 表名1 （本表所对应的外键表）
+       *      includes: ['user_id']   //外键表的外键字段
+       *    }
+       *  }
+       */
+      refers: {
+        type: Object,
+        required: false
+      },
+
+      /**
        * 指定要显示的列。默认为根据schema得到的所有列。完整示例为：
        *  [
        *    {
@@ -192,7 +218,11 @@
        *    "showRefresh": false, //默认不显示刷新按钮
        *    "showDeleteButton": false,  //默认不显示删除按钮
        *    "buttonGroup": false  //默认不以按钮组的方式呈现button
-       *    showDetail: false // 默认不显示详情
+       *    showDetail: {
+       *      isShow: false,      // 默认不显示详情
+       *      showColumns: ['mobile', 'loginid', 'username', 'email']
+       *    },
+       *    dataProcessing(value){}  // 对接口返回数据进行处理
        *    "changeValue": {      // 数据库字段转化显示，例如(0=否,1=是)
        *      username: {1: '是', 0: '否'}
        *    },
@@ -341,7 +371,10 @@
           const tableName = self.schema['modelUnderscore']
           const filters = {}
           filters[tableName] = {}
-          _.each(_.cloneDeep(self.filters), function(filter) {
+          _.each(_.cloneDeep(self.filters), function(filter, index) {
+            if (filter.isShow === undefined) {
+              self.filters[index].isShow = true
+            }
             filters[tableName] = Object.assign(filters[tableName], filter)
           })
           delete filters[tableName]['placeholder']
@@ -388,13 +421,34 @@
         params.filters = self.filterParams
         params.filters = this.deleteFilter(params.filters)
 
+        if (self.includes) {
+          params.includes = self.includes
+        }
+        if (self.refers) {
+          params.refers = self.refers
+        }
+
         request(self.schema.modelUnderscorePlural, {
           params: params
         }).then(resp => {
+          // 数据库字段转化显示
           if (self.options.changeValue) {
             resp.data = self.changeValue(resp.data)
           }
-          self.list = resp.data
+          if (resp.data[0].superior !== undefined && resp.data[0].includes !== undefined &&
+            resp.data[0].refers !== undefined && resp.data[0].relates !== undefined) {
+            self.list = []
+            _.each(resp.data, function(item, index) {
+              self.list.push(item.superior)
+            })
+          } else {
+            self.list = resp.data
+          }
+
+          // 数据处理
+          if (self.options.dataProcessing) {
+            self.list = self.options.dataProcessing(resp.data)
+          }
           self.total = parseInt(resp.headers.total)
           self.listLoading = false
         })

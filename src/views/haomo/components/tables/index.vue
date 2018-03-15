@@ -3,6 +3,8 @@
     <hm-complex-table :schema="schema['HmUser']"
                       :columns="showUserColumns"
                       :filters="userFilters"
+                      :includes="userIncludes"
+                      :refers="userRefers"
                       :options="userOptions"></hm-complex-table>
   </div>
 </template>
@@ -10,6 +12,7 @@
 <script>
   import HmComplexTable from './HmComplexTable.vue'
   import schema from '../../schemas/hm_org_schema'
+  import _ from 'lodash'
 
   export default {
     name: 'HmComplexTableIndex',
@@ -21,11 +24,21 @@
     },
     data() {
       return {
-        showUserColumns: ['mobile', 'loginid', 'username', 'email', 'securityLevel'],
+        showUserColumns: ['mobile', 'loginid', 'username', 'email'],
         userFilters: [
           { placeholder: '过滤手机号', 'mobile': { 'like': '' }, isShow: true },
           { placeholder: '过滤用户名', 'username': { 'equalTo': '' }, isShow: true }
-        ]
+        ],
+        userIncludes: {
+          'hm_user': {
+            includes: ['user_id']
+          }
+        },
+        userRefers: {
+          'auth_token': {
+            includes: ['userId']
+          }
+        }
       }
     },
     filters: {
@@ -67,6 +80,18 @@
         showDetail: {
           isShow: true,
           showColumns: ['mobile', 'loginid', 'username', 'email']
+        },
+        dataProcessing(value) {
+          let list = []
+          if (value[0].superior !== undefined && value[0].includes !== undefined &&
+            value[0].refers !== undefined && value[0].relates !== undefined) {
+            _.each(value, function(item, index) {
+              list.push(item.superior)
+            })
+          } else {
+            list = value
+          }
+          return list
         }
       }
     },

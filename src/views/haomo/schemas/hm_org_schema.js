@@ -3487,7 +3487,7 @@ const ModelSchema = {
     ]
   },
   'HmUser': {
-    'model': 'HmUser3',
+    'model': 'HmUser',
     'modelPlural': 'HmUsers',
     'modelCamel': 'hmUser',
     'modelCamelPlural': 'hmUsers',
@@ -3505,6 +3505,13 @@ const ModelSchema = {
         'modifier': 'yide',
         'dataType': 'varchar(256)',
         'length': '256',
+        'foreignTable': {
+          'model': 'authToken',
+          'modelCamel': 'authToken',
+          'modelCamelPlural': 'authTokens',
+          'modelUnderscore': 'auth_token',
+          'modelUnderscorePlural': 'auth_tokens'
+        },
         'codeCamel': 'username',
         'codeCamelPlural': 'usernames',
         'codeUnderscore': 'username',
