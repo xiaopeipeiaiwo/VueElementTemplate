@@ -90,7 +90,7 @@
    * 毫末科技的表单组件.
    *
    *   demo地址: factory.haomo-studio.com/vue-element/#/haomo/components/forms
-   * @author 王康
+   * @author 王康 wk@lingdao-tech.com
    */
   export default {
     name: 'HmComplexForm',
