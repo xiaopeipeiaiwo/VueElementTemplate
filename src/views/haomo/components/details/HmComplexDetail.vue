@@ -14,6 +14,13 @@
   import _ from 'lodash'
   import request from '@/utils/request'
 
+  /**
+   * 毫末科技的详情组件.
+   *
+   * demo地址: factory.haomo-studio.com/vue-element/#/haomo/components/detail
+   * @author 赵帅 zhaoshuai@haomo-studio.com
+   */
+
   export default {
     name: 'HmComplexDetail',
     // 继承其他组件
