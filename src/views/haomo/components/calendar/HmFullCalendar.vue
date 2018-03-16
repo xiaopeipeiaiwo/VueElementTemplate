@@ -1,4 +1,4 @@
-7<template>
+<template>
 	<div class="calender">
     <i class="el-icon-date" @click="dialogTableVisible = true"></i>
     <el-dialog :visible.sync="dialogTableVisible">
