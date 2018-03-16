@@ -1,4 +1,4 @@
-<template>
+7<template>
 	<div class="calender">
     <i class="el-icon-date" @click="dialogTableVisible = true"></i>
     <el-dialog :visible.sync="dialogTableVisible">
@@ -53,6 +53,9 @@
           _.each(resp.data, function(item, index) {
             const test = _.cloneDeep(self.demoEvents)
             test.title = item[self.demoEvents.title]
+            if (item[self.demoEvents.end] == null) {
+              item[self.demoEvents.end] = item[self.demoEvents.start]
+            }
             test.start = moment(item[self.demoEvents.start]).format('YYYY-MM-DD')
             test.end = moment(item[self.demoEvents.end]).format('YYYY-MM-DD')
             self.fcEvents.push(test)
