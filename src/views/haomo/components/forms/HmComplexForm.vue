@@ -111,15 +111,15 @@
         required: true
       },
       /**
-       * 必传，指定要显示的表单字段及类型。数组的每个元素须有name和widgetType两个字段，name表示要显示的表单字段，widgetType表示该字段要显示的表单类型(普通输入框、文本域、富文本、下拉框...)，取值1-7(1表示普通输入框,2表示下拉框,3表示复选框,4表示文本域,5表示富文本,6表示日期格式，7表示单选框)，若表单类型为下拉框/复选框/单选框，还需传入options字段，值为数组(数组元素是下拉框/复选框/单选框的选项），对于复选框，如果只有一个备选项则不必传options
+       * 必传，指定要显示的表单字段及类型。数组的每个元素包含name、codeCamel和widgetType三个字段，codeCamel表示要显示的表单字段,name表示自定义的字段名，如果不传，默认为数据库中的字段名，widgetType表示该字段要显示的表单类型(普通输入框、文本域、富文本、下拉框...)，取值1-7(1表示普通输入框,2表示下拉框,3表示复选框,4表示文本域,5表示富文本,6表示日期格式，7表示单选框)，若表单类型为下拉框/复选框/单选框，还需传入options字段，值为数组(数组元素是下拉框/复选框/单选框的选项），对于复选框，如果只有一个备选项则不必传options
        * 示例：[
-       *        { name: 'username', widgetType: 1 },
-       *        { name: 'securityLevel', widgetType: 5 },
-       *        { name: 'type', widgetType: 2, options: ['企业', '代理商'] },
-       *        { name: 'avatar', widgetType: 3 },
-       *        { name: 'departmentId', widgetType: 4 },
-       *        { name: 'createTime', widgetType: 6 },
-       *        { name: 'identity', widgetType: 7, options: ['会员', '访客'] },
+       *        { name: '姓名', codeCamel: 'username', widgetType: 1 },
+       *        { name: '安全级别', codeCamel: 'securityLevel', widgetType: 5 },
+       *        { name: '选择类型', codeCamel: 'type', widgetType: 2, options: ['选项1', '选项2'] },
+       *        { name: '选择头像', codeCamel: 'avatar', widgetType: 3, options: ['美女', '帅哥'] },
+       *        { name: '部门', codeCamel: 'departmentId', widgetType: 4 },
+       *        { name: '新建时间', codeCamel: 'createTime', widgetType: 6 },
+       *        { name: '登陆地址', codeCamel: 'loginid', widgetType: 7, options: ['会员', '访客'] },
        *      ]
        */
       columns: {
@@ -327,9 +327,10 @@
           _.each(self.showUserColumns, function(column, index) {
             if (typeof column === 'object') {
               // 生成一个新对象
-              const tmp = _.keyBy(self.schema['columns'], 'codeCamel')[column.name]
+              const tmp = _.keyBy(self.schema['columns'], 'codeCamel')[column.codeCamel]
               // console.log(tmp)
-              self.$set(tmp, 'code', tmp.code.toLowerCase())
+              // self.$set(tmp, 'code', tmp.code.toLowerCase())
+              column.name && self.$set(tmp, 'name', column.name) // 自定义字段名
               self.$set(tmp, 'widgetType', column.widgetType || 1)
               column.options && self.$set(tmp, 'options', column.options)
               self.$set(self.showUserColumns, index, tmp) // 顺序
