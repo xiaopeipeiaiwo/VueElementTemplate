@@ -62,12 +62,6 @@
       },
       method3() {
         console.log('method3')
-      },
-      confirm() {
-        console.log('确定')
-      },
-      cancel() {
-        console.log('取消')
       }
     }
   }
