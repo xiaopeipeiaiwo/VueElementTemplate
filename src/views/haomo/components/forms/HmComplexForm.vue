@@ -1,7 +1,7 @@
 <template>
   <div class="app-container documentation-container">
-    <!---->
-    <el-row type="flex" class="hm-form" style="margin-top: 20px" v-loading="Loading">
+    <!--v-loading="Loading"-->
+    <el-row type="flex" class="hm-form" style="margin-top: 20px" >
       <el-col :span="layout.left">
         <div></div>
       </el-col>
@@ -48,9 +48,13 @@
                         :rows="2">
               </el-input>
               <!-- 5 复选框 -->
-              <el-checkbox v-else-if="column.widgetType === 3 && !column.options" v-model="formModel[column.codeCamel]" true-label="1" false-label="0"></el-checkbox>
-              <el-checkbox-group v-else-if="column.widgetType === 3 && column.options" v-model="formModel[column.codeCamel]">
-                <el-checkbox v-for="option in column.options" :label="option" :key="option">{{option}}</el-checkbox>
+              <el-checkbox v-else-if="column.widgetType === 3 && !column.options"
+                           v-model="formModel[column.codeCamel]"
+                           true-label="1" false-label="0"></el-checkbox>
+              <el-checkbox-group v-else-if="column.widgetType === 3 && column.options"
+                                 v-model="formModel[column.codeCamel]">
+                <el-checkbox v-for="option in column.options"
+                             :label="option" :key="option">{{option}}</el-checkbox>
               </el-checkbox-group>
               <!-- 6 富文本 -->
               <quill-editor v-else-if="column.widgetType === 5"
@@ -62,16 +66,24 @@
                             @ready="onEditorReady($event)">
               </quill-editor>
               <!-- 7 单选框 -->
-              <el-radio-group v-else-if="column.widgetType === 7" v-model="formModel[column.codeCamel]">
-                <el-radio v-for="(option,key) in column.options" :key="key" :label="key">{{option}}</el-radio>
+              <el-radio-group v-else-if="column.widgetType === 7"
+                              v-model="formModel[column.codeCamel]">
+                <el-radio v-for="(option,key) in column.options"
+                          :key="key" :label="key">{{option}}</el-radio>
               </el-radio-group>
             </el-form-item>
             <!--按钮-->
             <el-form-item v-if="buttons && buttons.length > 0">
-              <el-col :span="12" v-for="(btn,key) in buttons" :key="key">
-                <el-button v-if="btn === '确定' || btn === '提交' || btn === '保存' || btn === '发布'" type="primary" @click="onSubmit()">{{btn}}</el-button>
-                <el-button v-if="btn === '重置'" type="primary" @click="resetForm()">{{btn}}</el-button>
-                <el-button v-if="btn === '取消'" type="primary" @click="cancelFunction?cancelFunction():''">{{btn}}</el-button>
+              <el-col :span="24/buttons.length" v-for="(btn,key) in buttons" :key="key">
+                <el-button v-if="btn.type === 1"
+                           type="primary"
+                           @click="onSubmit(btn.method)">{{btn.text}}</el-button>
+                <el-button v-if="btn.type === 2"
+                           type="primary"
+                           @click="resetForm(btn.method)">{{btn.text}}</el-button>
+                <el-button v-if="btn.type === 3"
+                           type="primary"
+                           @click="btn.method">{{btn.text}}</el-button>
               </el-col>
             </el-form-item>
           </el-form>
@@ -143,9 +155,16 @@
         }
       },
       /**
-       * 非必传，指定要显示的按钮(确定、保存、取消、提交、重置)，默认不显示。
+       * 非必传，指定要显示的按钮及类型，默认不显示。
+       * 类型（type）关系到按钮要执行的方法，type=1，执行组件的提交方法，用户传入的方法method会作为提交方法的回调函数执行
+       * type=2，执行组件的重置方法,用户传入的方法method会作为重置方法的回调函数执行
+       * type=3，直接执行用户传入的方法
        * 如果要传入了确定/取消的回调函数，请先传入对应的按钮
-       * 示例：['确定', '取消']
+       * 示例：[
+       *        {text: '确定', type: '1', method: method1},
+       *        {text: '重置', type: '2', method: method2},
+       *        {text: '取消', type: '3', method: method3}
+       *      ]
        */
       buttons: {
         type: Array,
@@ -156,22 +175,6 @@
        */
       tableId: {
         type: String,
-        required: false
-      },
-      /**
-       * 非必传，传入点击'确定'后的回调函数，该回调函数会在form组件onSubmit函数的成功回调中调用
-       * 如果要传入该函数，请先传入对应的按钮
-       */
-      confirmFunction: {
-        type: Function,
-        required: false
-      },
-      /**
-       * 非必传，传入点击'取消'后的回调函数，该回调函数会在点击'取消'后直接调用
-       * 如果要传入该函数，请先传入对应的按钮
-       */
-      cancelFunction: {
-        type: Function,
         required: false
       },
       /**
@@ -402,7 +405,7 @@
        * 所有选项输入并验证通过，正确提交
        * 验证失败，禁止提交并给出提示
        */
-      onSubmit() {
+      onSubmit(callback) {
         const self = this
         console.log('点击了提交函数')
         console.log(self.formModel)
@@ -431,7 +434,9 @@
               }).then(resp => {
                 console.log('修改成功')
                 self.resetForm()
-                self.confirmFunction && self.confirmFunction()
+                if (typeof (callback) === 'function') {
+                  callback()
+                }
               })
             } else { // 不存在tableId 则创建一条数据
               request(self.schema.modelUnderscorePlural + '/new', {
@@ -449,7 +454,9 @@
               }).then(resp => {
                 console.log('创建成功')
                 self.resetForm()
-                self.confirmFunction && self.confirmFunction()
+                if (typeof (callback) === 'function') {
+                  callback()
+                }
               })
             }
           } else {
@@ -468,9 +475,12 @@
        *
        * 清空所有输入及提示信息。
        */
-      resetForm() {
+      resetForm(callback) {
         console.log('重置')
         this.$refs.form.resetFields()
+        if (typeof (callback) === 'function') {
+          callback()
+        }
       }
     }
 
