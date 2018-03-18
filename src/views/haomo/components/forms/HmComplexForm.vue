@@ -1,13 +1,15 @@
 <template>
   <div class="app-container documentation-container">
-    <el-row type="flex" class="hm-form" style="margin-top: 50px">
-      <el-col :span="6">
+    <!---->
+    <el-row type="flex" class="hm-form" style="margin-top: 20px" v-loading="Loading">
+      <el-col :span="layout.left">
         <div></div>
       </el-col>
-      <el-col :span="12">
+      <el-col :span="layout.middle">
         <div>
           <!--表单部分-->
           <el-form ref="form"
+                   element-loading-text="加载中"
                    :model="formModel"
                    :rules="rules"
                    label-width="110px"
@@ -75,7 +77,7 @@
           </el-form>
         </div>
       </el-col>
-      <el-col :span="6">
+      <el-col :span="layout.right">
         <div></div>
       </el-col>
     </el-row>
@@ -171,6 +173,15 @@
       cancelFunction: {
         type: Function,
         required: false
+      },
+      /**
+       * 非必传，布局方式，form组件布局分三栏，左右为留白，中间是form，
+       * 通过传参可以控制各部分所占份数，遵循elementUi24分栏，默认居中布局(left：6，middle：12，right：6)
+       * 示例：{ left: 0, middle: 12, right: 12 }
+       */
+      layout: {
+        type: Object,
+        required: false
       }
     },
     data() {
@@ -208,6 +219,7 @@
       //   }
       // }
       return {
+        Loading: true,
         form: null,
         formModel: {}, // 双向绑定的数据变量
         showUserColumns: [], // 要显示的字段
@@ -274,6 +286,7 @@
     created() {
       // this.validate()
       this.init()
+      this.getList()
       console.log(this.buttons)
     },
     methods: {
@@ -316,6 +329,24 @@
       onEditorReady(editor) {
         // console.log('editor ready!')
       },
+      // 存在tableId，修改数据前先获取数据
+      getList() {
+        const self = this
+
+        // 获取数据
+        request(self.schema.modelUnderscorePlural + '/' + self.tableId).then(resp => {
+          // 数据库字段转化显示
+          /* if (self.options.changeValue) {
+            resp.data = self.changeValue(resp.data)
+          } */
+          self.Loading = false
+          // console.log(self.formModel)
+          var formArray = _.keys(self.formModel)
+          // console.log(formArray)
+          self.formModel = _.pick(resp.data, formArray)
+          // console.log(self.formModel)
+        })
+      },
       init() {
         const self = this
         // 如果没有传columns，则全部显示
@@ -340,9 +371,9 @@
               self.$set(tmp, 'widgetType', column.widgetType || 1)
               column.options && self.$set(tmp, 'options', column.options)
               self.$set(self.showUserColumns, index, tmp) // 顺序
-              // console.log(self.showUserColumns)
             }
           })
+          console.log(self.showUserColumns)
           // 提取v-model绑定的变量
           _.each(self.showUserColumns, function(item) {
             if (item.widgetType === 3 && item.options && item.options.length > 0) {
@@ -351,9 +382,14 @@
               self.$set(self.formModel, item.codeCamel, '')
             }
           })
-          console.log(self.formModel)
           if (!request.defaults.baseURL) {
             request.defaults.baseURL = '/org/api'
+          }
+          // 加载等待
+          if (self.tableId) {
+            self.Loading = true
+          } else {
+            self.Loading = false
           }
         } else {
           console.log('columns为必传字段!!')
