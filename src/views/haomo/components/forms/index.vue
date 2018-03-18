@@ -38,6 +38,7 @@
         // 要显示按钮 暂只支持确定、保存、取消、提交、重置
         showUserButtons: ['确定', '取消'],
         // showUserButtons: []
+        // 布局方式
         layout: { left: 0, middle: 12, right: 12 }
       }
     },

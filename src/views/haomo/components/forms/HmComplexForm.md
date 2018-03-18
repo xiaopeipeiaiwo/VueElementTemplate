@@ -212,9 +212,10 @@
 ```vue
 <template>
     <hm-complex-form :schema="schema['HmUser']"
-                      :columns="showUserColumns"
-                      :tableId="tableId"
-                      :buttons="showUserButtons">
+                     :columns="showUserColumns"
+                     :tableId="tableId"
+                     :layout="layout"
+                     :buttons="showUserButtons">
                       
     </hm-complex-form>
 </template>
@@ -424,7 +425,8 @@
         },
         showUserColumns: [{ name: 'username', widgetType: 1 }, { name: 'securityLevel', widgetType: 5 }, { name: 'type', widgetType: 2, options: ['企业', '代理商'] }, { name: 'avatar', widgetType: 3 }, { name: 'departmentId', widgetType: 4 }, { name: 'createTime', widgetType: 6 }],
                 // 要显示按钮 暂只支持确定、保存、取消、提交、重置
-                showUserButtons: ['确定', '取消']
+        showUserButtons: ['确定', '取消'],
+        layout: { left: 0, middle: 12, right: 12 }
       }
     },
     created() {
