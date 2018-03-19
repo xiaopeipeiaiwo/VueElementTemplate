@@ -12,7 +12,6 @@
 <script>
   import HmComplexTable from './HmComplexTable.vue'
   import schema from '../../schemas/hm_org_schema'
-  import _ from 'lodash'
 
   export default {
     name: 'HmComplexTableIndex',
@@ -24,10 +23,11 @@
     },
     data() {
       return {
-        showUserColumns: ['mobile', 'loginid', 'username', 'email'],
+        showUserColumns: ['mobile', 'loginid', 'username', 'email', 'createTime'],
         userFilters: [
           { placeholder: '过滤手机号', 'mobile': { 'like': '' }, isShow: true },
-          { placeholder: '过滤用户名', 'username': { 'equalTo': '' }, isShow: true }
+          { placeholder: '过滤用户名', 'username': { 'equalTo': '' }, isShow: true },
+          { placeholder: ['安全级别大于', '安全级别小于'], 'create_time': { 'greaterThanOrEqualTo': '', 'lessThanOrEqualTo': '' }, isShow: true }
         ],
         userIncludes: {
           'hm_user': {
@@ -80,19 +80,8 @@
         showDetail: {
           isShow: true,
           showColumns: ['mobile', 'loginid', 'username', 'email']
-        },
-        dataProcessing(value) {
-          let list = []
-          if (value[0].superior !== undefined && value[0].includes !== undefined &&
-            value[0].refers !== undefined && value[0].relates !== undefined) {
-            _.each(value, function(item, index) {
-              list.push(item.superior)
-            })
-          } else {
-            list = value
-          }
-          return list
         }
+        // dataProcessing(value) {}
       }
     },
     methods: {}

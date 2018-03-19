@@ -8,9 +8,43 @@
                   style="width: 200px;"
                   class="filter-item"
                   :placeholder="filter.placeholder"
-                  v-if="filter.isShow"
+                  v-if="filter.isShow && isShowFilter(filter)"
                   v-model="listQuery.filters[schema['modelUnderscore']][getFilterColumn(filter)][getFilterOper(filter)]">
         </el-input>
+
+        <el-input @keyup.enter.native="handleFilter"
+                  style="width: 200px;"
+                  class="filter-item"
+                  :placeholder="filter.placeholder[0]"
+                  v-if="filter.isShow && !isShowFilter(filter) && !isDatetimeFilter(filter)"
+                  v-model="listQuery.filters[schema['modelUnderscore']][getFilterColumn(filter)][getFilterOper(filter)]">
+        </el-input>
+        <el-input @keyup.enter.native="handleFilter"
+                  style="width: 200px;"
+                  class="filter-item"
+                  :placeholder="filter.placeholder[1]"
+                  v-if="filter.isShow && !isShowFilter(filter) && !isDatetimeFilter(filter)"
+                  v-model="listQuery.filters[schema['modelUnderscore']][getFilterColumn(filter)][getFilterOperTwin(filter)]">
+        </el-input>
+
+        <el-date-picker @keyup.enter.native="handleFilter"
+                        v-if="filter.isShow && !isShowFilter(filter) && isDatetimeFilter(filter)"
+                        v-model="listQuery.filters[schema['modelUnderscore']][getFilterColumn(filter)][getFilterOper(filter)]"
+                        type="datetime"
+                        align="right"
+                        class="filter-item"
+                        value-format="yyyy-MM-dd HH:mm:ss"
+                        :picker-options="pickerOptions">
+        </el-date-picker>
+        <el-date-picker @keyup.enter.native="handleFilter"
+                        v-if="filter.isShow && !isShowFilter(filter) && isDatetimeFilter(filter)"
+                        v-model="listQuery.filters[schema['modelUnderscore']][getFilterColumn(filter)][getFilterOperTwin(filter)]"
+                        type="datetime"
+                        align="right"
+                        class="filter-item"
+                        value-format="yyyy-MM-dd HH:mm:ss"
+                        :picker-options="pickerOptions">
+        </el-date-picker>
       </span>
       <!-- end 过滤条件 -->
 
@@ -286,7 +320,33 @@
         isShowRefresh: false,
         buttonGroup: false,
         operationWidth: 0, // 操作栏的宽度
-        isShowDetail: false // 是否显示详情按钮
+        isShowDetail: false, // 是否显示详情按钮
+
+        pickerOptions: { // 日期选项配置
+          disabledDate(time) {
+            return time.getTime() > Date.now()
+          },
+          shortcuts: [{
+            text: '今天',
+            onClick(picker) {
+              picker.$emit('pick', new Date())
+            }
+          }, {
+            text: '昨天',
+            onClick(picker) {
+              const date = new Date()
+              date.setTime(date.getTime() - 3600 * 1000 * 24)
+              picker.$emit('pick', date)
+            }
+          }, {
+            text: '一周前',
+            onClick(picker) {
+              const date = new Date()
+              date.setTime(date.getTime() - 3600 * 1000 * 24 * 7)
+              picker.$emit('pick', date)
+            }
+          }]
+        }
       }
     },
     computed: {
@@ -435,7 +495,7 @@
           if (self.options.changeValue) {
             resp.data = self.changeValue(resp.data)
           }
-          if (resp.data[0].superior !== undefined && resp.data[0].includes !== undefined &&
+          if (resp.data.length !== 0 && resp.data[0].superior !== undefined && resp.data[0].includes !== undefined &&
             resp.data[0].refers !== undefined && resp.data[0].relates !== undefined) {
             self.list = []
             _.each(resp.data, function(item, index) {
@@ -464,6 +524,19 @@
           })
         })
         return data
+      },
+      isShowFilter(filter) {
+        return Array.prototype.isPrototypeOf(filter.placeholder) === false
+      },
+      isDatetimeFilter(filter) {
+        const self = this
+        let BooleanValue = false
+        _.each(self.schema.columns, function(date) {
+          if (date.code === self.getFilterColumn(filter) && date.dataType === 'datetime') {
+            BooleanValue = true
+          }
+        })
+        return BooleanValue
       },
       // 添加一条数据
       openDialog(type, data) {
@@ -517,7 +590,7 @@
         _.forEach(newFilters, function(columns, columnsKey) {
           _.forEach(newFilters[columnsKey], function(column, columnKey) {
             if (columns[columnKey][Object.keys(column)] === '%%' || columns[columnKey][Object.keys(column)] === '' ||
-              columns[columnKey][Object.keys(column)] === null) {
+              columns[columnKey][Object.keys(column)] === null || (columns[columnKey][Object.keys(column)[0]] === '' && columns[columnKey][Object.keys(column)[1]]) === '') {
               delete (columns[columnKey])
             }
           })
@@ -657,6 +730,9 @@
 
       getFilterOper(filter) {
         return Object.keys(filter[this.getFilterColumn(filter)])[0]
+      },
+      getFilterOperTwin(filter) {
+        return Object.keys(filter[this.getFilterColumn(filter)])[1]
       }
     }
   }
