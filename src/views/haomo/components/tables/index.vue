@@ -46,32 +46,27 @@
     created() {
       this.schema = schema
       this.userOptions = {
+        pageSize: 10,
+        sortItem: 'create_time',
+        sortOrder: 'desc',
         changeValue: {
           username: { 1: '是', 0: '否' }
         },
         newData: {
           isShow: true,
-          showUserColumns: [{ name: 'username', widgetType: 1 }, { name: 'loginid', widgetType: 1 }, { name: 'type', widgetType: 1 }],
+          showUserColumns: [
+            { name: '姓名', codeCamel: 'username', widgetType: 1 },
+            { name: '登录ID', codeCamel: 'loginid', widgetType: 1 },
+            { name: '类型', codeCamel: 'type', widgetType: 1 }
+          ],
           formSchema: schema['HmUser'],
-          showUserButtons: ['提交', '取消'],
-          formConfirm() {
-            console.log('提交')
-          },
-          formCancel() {
-            console.log('取消')
-          }
+          layout: { left: 0, middle: 24, right: 0 }
         },
         editData: {
           isShow: true,
-          showUserColumns: [{ name: 'username', widgetType: 1 }],
+          showUserColumns: [{ name: '姓名', codeCamel: 'username', widgetType: 1 }],
           formSchema: schema['HmUser'],
-          showUserButtons: ['提交', '取消'],
-          formConfirm() {
-            console.log('提交')
-          },
-          formCancel() {
-            console.log('取消')
-          }
+          layout: { left: 0, middle: 24, right: 0 }
         },
         showRefresh: true,
         showExport: true,
@@ -84,6 +79,11 @@
         // dataProcessing(value) {}
       }
     },
-    methods: {}
+    methods: {
+      method1() {
+        this.dialogFormVisible = false
+        console.log('method1')
+      }
+    }
   }
 </script>

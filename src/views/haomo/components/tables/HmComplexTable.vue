@@ -27,23 +27,25 @@
                   v-model="listQuery.filters[schema['modelUnderscore']][getFilterColumn(filter)][getFilterOperTwin(filter)]">
         </el-input>
 
-        <el-date-picker @keyup.enter.native="handleFilter"
-                        v-if="filter.isShow && !isShowFilter(filter) && isDatetimeFilter(filter)"
-                        v-model="listQuery.filters[schema['modelUnderscore']][getFilterColumn(filter)][getFilterOper(filter)]"
-                        type="datetime"
+        <el-date-picker type="datetime"
                         align="right"
                         class="filter-item"
+                        @keyup.enter.native="handleFilter"
                         value-format="yyyy-MM-dd HH:mm:ss"
-                        :picker-options="pickerOptions">
+                        :picker-options="pickerOptions"
+                        :placeholder="filter.placeholder[0]"
+                        v-if="filter.isShow && !isShowFilter(filter) && isDatetimeFilter(filter)"
+                        v-model="listQuery.filters[schema['modelUnderscore']][getFilterColumn(filter)][getFilterOper(filter)]">
         </el-date-picker>
-        <el-date-picker @keyup.enter.native="handleFilter"
-                        v-if="filter.isShow && !isShowFilter(filter) && isDatetimeFilter(filter)"
-                        v-model="listQuery.filters[schema['modelUnderscore']][getFilterColumn(filter)][getFilterOperTwin(filter)]"
-                        type="datetime"
+        <el-date-picker type="datetime"
                         align="right"
                         class="filter-item"
+                        @keyup.enter.native="handleFilter"
                         value-format="yyyy-MM-dd HH:mm:ss"
-                        :picker-options="pickerOptions">
+                        :picker-options="pickerOptions"
+                        :placeholder="filter.placeholder[1]"
+                        v-if="filter.isShow && !isShowFilter(filter) && isDatetimeFilter(filter)"
+                        v-model="listQuery.filters[schema['modelUnderscore']][getFilterColumn(filter)][getFilterOperTwin(filter)]">
         </el-date-picker>
       </span>
       <!-- end 过滤条件 -->
@@ -108,8 +110,7 @@
       <hm-complex-form :schema="formSchema"
                        :columns="showUserColumns"
                        :buttons="showUserButtons"
-                       :confirmFunction="formConfirm"
-                       :cancelFunction="formCancel"
+                       :layout="layout"
                        :tableId="tableId" v-if="dialogName != '详情'">
       </hm-complex-form>
     </el-dialog>
@@ -264,17 +265,13 @@
        *      isShow: false,  // 默认不显示新建按钮
        *      showUserColumns: [], // 新建表单的Columns配置,详情参考Form组件
        *      formSchema: {}, // 新建表单的schema配置
-       *      showUserButtons: ['提交', '取消'],  // 新建表单的显示按钮
-       *      formConfirm() {}, // 新建的提交回调
-       *      formCancel() {}  // 新建的取消回调
+       *      layout: {} // 布局方式
        *    },
        *    "editData": { // 编辑按钮的配置
        *      isShow: false,  // 默认不显示编辑按钮
        *      showUserColumns: [], // 编辑表单的Columns配置,详情参考Form组件
        *      formSchema: {}, // 编辑表单的schema配置
-       *      showUserButtons: ['提交', '取消'], // 编辑表单的显示按钮
-       *      formConfirm() {}, // 编辑的提交回调
-       *      formCancel() {} // 编辑的取消回调
+       *      layout: {} // 布局方式
        *    }
        *  }
        */
@@ -294,7 +291,7 @@
         listLoading: true,
         listQuery: {
           pageNo: 1,
-          pageSize: 20,
+          pageSize: 10,
           sortItem: 'create_time',
           sortOrder: 'desc',
           filters: {}
@@ -314,7 +311,11 @@
         isShowExport: false, // 是否显示导出按钮
         formSchema: {}, // form弹窗的Schema定义
         showUserColumns: [], // form弹窗的Columns定义
-        showUserButtons: [], // from弹窗显示按钮
+        showUserButtons: [ // from弹窗显示按钮
+          { text: '确定', type: 1, method: this.formConfirm },
+          { text: '取消', type: 2, method: this.formCancel }
+        ],
+        layout: { left: 0, middle: 24, right: 0 }, // form弹窗的布局方式
         tableId: '',
 
         isShowRefresh: false,
@@ -445,6 +446,12 @@
         if (!request.defaults.baseURL) {
           request.defaults.baseURL = '/org/api'
         }
+        if (!self.options) {
+          return false
+        }
+        self.options.pageSize ? this.listQuery.pageSize = self.options.pageSize : this.listQuery.pageSize // 配置pageSize
+        self.options.sortItem ? this.listQuery.sortItem = self.options.sortItem : this.listQuery.sortItem // sortItem
+        self.options.sortOrder ? this.listQuery.sortOrder = self.options.sortOrder : this.listQuery.sortOrder // sortOrder
         if (self.options.newData && self.options.newData.isShow) { // 判断是否显示新建按钮
           self.isShowNewButton = self.options.newData.isShow
         }
@@ -492,7 +499,7 @@
           params: params
         }).then(resp => {
           // 数据库字段转化显示
-          if (self.options.changeValue) {
+          if (self.options && self.options.changeValue) {
             resp.data = self.changeValue(resp.data)
           }
           if (resp.data.length !== 0 && resp.data[0].superior !== undefined && resp.data[0].includes !== undefined &&
@@ -506,7 +513,7 @@
           }
 
           // 数据处理
-          if (self.options.dataProcessing) {
+          if (self.options && self.options.dataProcessing) {
             self.list = self.options.dataProcessing(resp.data)
           }
           self.total = parseInt(resp.headers.total)
@@ -546,14 +553,14 @@
           self.dialogName = '编辑'
           self.showUserColumns = self.options.editData.showUserColumns
           self.formSchema = self.options.editData.formSchema
-          self.showUserButtons = self.options.editData.showUserButtons
+          self.layout = self.options.editData.layout
           self.tableId = data.id
         }
         if (type === 'newData') {
           self.dialogName = '新建'
           self.showUserColumns = self.options.newData.showUserColumns
           self.formSchema = self.options.newData.formSchema
-          self.showUserButtons = self.options.newData.showUserButtons
+          self.layout = self.options.newData.layout
         }
         if (type === 'detail') {
           self.dialogName = '详情'
@@ -574,15 +581,12 @@
       },
       // 表单的提交
       formConfirm() {
-        this.options.newData.formConfirm()
         this.dialogFormVisible = false
         this.getList()
       },
       // 表单的取消
       formCancel() {
-        this.options.newData.formCancel()
         this.dialogFormVisible = false
-        this.getList()
       },
       // 删除过滤条件为空的filter
       deleteFilter(filters) {
@@ -627,7 +631,7 @@
       refreshList() {
         this.listQuery = {
           pageNo: 1,
-          pageSize: 20,
+          pageSize: 10,
           sortItem: 'create_time',
           sortOrder: 'desc',
           filters: {}
@@ -700,8 +704,8 @@
       handleDownload() {
         this.downloadLoading = true
         // @TODO 修改下载excel的功能，请求所有的数据
-        const tHeader = ['timestamp', 'title', 'type', 'importance', 'status']
-        const filterVal = ['timestamp', 'title', 'type', 'importance', 'status']
+        const tHeader = this.columns
+        const filterVal = this.columns
         const data = this.formatJson(filterVal, this.list)
         excel.export_json_to_excel(tHeader, data, 'table-list')
         this.downloadLoading = false
