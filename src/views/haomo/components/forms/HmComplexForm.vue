@@ -2,10 +2,10 @@
   <div class="app-container documentation-container">
     <!--v-loading="Loading"-->
     <el-row type="flex" class="hm-form" style="margin-top: 20px" >
-      <el-col :span="layout.left">
+      <el-col :span="layout ? layout.left : 6">
         <div></div>
       </el-col>
-      <el-col :span="layout.middle">
+      <el-col :span="layout ? layout.middle : 12">
         <div>
           <!--表单部分-->
           <el-form ref="form"
@@ -89,7 +89,7 @@
           </el-form>
         </div>
       </el-col>
-      <el-col :span="layout.right">
+      <el-col :span="layout ? layout.left : 6">
         <div></div>
       </el-col>
     </el-row>
