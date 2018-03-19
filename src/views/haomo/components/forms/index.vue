@@ -4,7 +4,7 @@
                      :columns="showUserColumns"
                      :buttons="showUserButtons"
                      :layout="layout"
-                     :tableId="tableId">
+                     >
     </hm-complex-form>
   </div>
 </template>

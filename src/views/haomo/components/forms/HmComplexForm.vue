@@ -335,7 +335,7 @@
       // 存在tableId，修改数据前先获取数据
       getList() {
         const self = this
-
+        if (!self.tableId) return
         // 获取数据
         request(self.schema.modelUnderscorePlural + '/' + self.tableId).then(resp => {
           // 数据库字段转化显示
