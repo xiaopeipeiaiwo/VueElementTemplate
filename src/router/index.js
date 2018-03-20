@@ -138,6 +138,15 @@ export const asyncRouterMap = [
             }
           },
           {
+            path: 'transfer',
+            component: _import('haomo/components/transfer/index'),
+            name: '',
+            meta: {
+              title: 'transfer',
+              icon: 'table'
+            }
+          },
+          {
             path: 'iconMenu',
             component: _import('haomo/components/iconMenu/index'),
             name: 'haomo-iconMenu',
