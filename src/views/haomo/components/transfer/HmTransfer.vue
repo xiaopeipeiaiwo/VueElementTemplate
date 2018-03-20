@@ -14,6 +14,12 @@
   import request from '@/utils/request'
   import _ from 'lodash'
 
+  /**
+   * 毫末科技的穿梭框组件.
+   *
+   *   demo地址: factory.haomo-studio.com/vue-element/#/haomo/components/transfer
+   * @author 索光旭
+   */
   export default {
     name: 'HmTransfer',
     props: {
