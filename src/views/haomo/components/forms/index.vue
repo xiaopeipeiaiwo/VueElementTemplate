@@ -25,12 +25,12 @@
       return {
         // widgetType值 1：普通input 2：下拉框 (如果是下拉框 再传一个options表示下拉框选项)3：复选框 4：文本域 5：富文本 6：日期 7：单选框
         showUserColumns: [
-          { name: '姓名', codeCamel: 'username', widgetType: 1 },
-          { name: '邮箱', codeCamel: 'email', widgetType: 5 },
+          { name: '用户名称', codeCamel: 'username', widgetType: 1 },
+          { name: '电子邮件', codeCamel: 'email', widgetType: 5 },
           { name: '选择类型', codeCamel: 'type', widgetType: 2, options: ['选项1', '选项2'] },
           { name: '选择头像', codeCamel: 'avatar', widgetType: 3, options: ['美女', '帅哥'] },
           { codeCamel: 'password', widgetType: 4 },
-          { name: '新建时间', codeCamel: 'createTime', widgetType: 6 },
+          { name: '新建时间', codeCamel: 'createTime', widgetType: 6, dateType: 'datetime', dateFormate: 'yyyy-MM-dd HH:mm:ss' },
           { name: '登陆id', codeCamel: 'loginid', widgetType: 7, options: ['会员', '访客'] }
         ],
         // 要显示按钮
@@ -41,7 +41,7 @@
         ],
         // showUserButtons: []
         // 布局方式
-        layout: { left: 0, middle: 12, right: 12 }
+        layout: { left: 6, middle: 12, right: 6 }
       }
     },
     computed: {

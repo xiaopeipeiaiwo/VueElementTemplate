@@ -12,7 +12,7 @@
                    element-loading-text="加载中"
                    :model="formModel"
                    :rules="rules"
-                   label-width="110px"
+                   label-width="200px"
                    style="width:80%;margin:0 auto">
             <el-form-item v-for="column in showUserColumns"
                           :key="column.id"
@@ -26,10 +26,10 @@
               <!-- 2 日期选择 -->
               <el-date-picker v-else-if="column.widgetType === 6 || column.type === 'datetime' || column.type === 'date'"
                               v-model="formModel[column.codeCamel]"
-                              type="datetime"
+                              :type="column.dateType || 'date'"
                               align="right"
                               @change="logTimeChange"
-                              value-format="yyyy-MM-dd HH:mm:ss"
+                              :value-format="column.dateFormate || 'yyyy-MM-dd'"
                               :picker-options="pickerOptions">
               </el-date-picker>
               <!-- 3 下拉框 -->
@@ -129,16 +129,19 @@
        * codeCamel表示要显示的表单字段,
        * name表示自定义的字段名，如果不传，默认为数据库中的字段名，
        * widgetType表示该字段要显示的表单类型(普通输入框、文本域、富文本、下拉框...)，
-       * 取值1-7(1表示普通输入框,2表示下拉框,3表示复选框,4表示文本域,5表示富文本,6表示日期格式，7表示单选框)，
+       * 取值1-7(1表示普通输入框,2表示下拉框,3表示复选框,4表示文本域,5表示富文本,6表示日期，7表示单选框)，
        * 若表单类型为下拉框/复选框/单选框，还需传入options字段，值为数组(数组元素是下拉框/复选框/单选框的选项），
-       * 对于复选框，如果只有一个备选项则不必传options
+       * 对于复选框，如果只有一个备选项则不必传options,
+       * 若表单类型为时间日期，可传入dateType字段，值为date（只显示日期）或datetime（显示日期和时间），如果不传，
+       * 默认只显示日期; 可传入dateFormate字段，为日期格式，取值遵循elementUI DatePicker组件中的日期格式，
+       * 比如 只显示日期取值'yyyy-MM-dd'，显示日期和时间取值'yyyy-MM-dd HH:mm:ss'，如果不传默认为只显示日期取值'yyyy-MM-dd'，date字段和dateFormate字段取值须对应
        * 示例：[
        *        { name: '姓名', codeCamel: 'username', widgetType: 1 },
        *        { name: '安全级别', codeCamel: 'securityLevel', widgetType: 5 },
        *        { name: '选择类型', codeCamel: 'type', widgetType: 2, options: ['选项1', '选项2'] },
        *        { name: '选择头像', codeCamel: 'avatar', widgetType: 3, options: ['美女', '帅哥'] },
        *        { name: '部门', codeCamel: 'departmentId', widgetType: 4 },
-       *        { name: '新建时间', codeCamel: 'createTime', widgetType: 6 },
+       *        { name: '新建时间', codeCamel: 'createTime', widgetType: 6, dateType: 'datetime', dateFormate: 'yyyy-MM-dd HH:mm:ss' },
        *        { name: '登陆地址', codeCamel: 'loginid', widgetType: 7, options: ['会员', '访客'] },
        *      ]
        */
@@ -372,7 +375,9 @@
               // self.$set(tmp, 'code', tmp.code.toLowerCase())
               column.name && self.$set(tmp, 'name', column.name) // 自定义字段名
               self.$set(tmp, 'widgetType', column.widgetType || 1)
-              column.options && self.$set(tmp, 'options', column.options)
+              column.options && self.$set(tmp, 'options', column.options) // 设置下拉框/多选选项
+              column.dateType && self.$set(tmp, 'dateType', column.dateType) // 设置日期表单显示类型
+              column.dateFormate && self.$set(tmp, 'dateFormate', column.dateFormate) // 设置日期格式
               self.$set(self.showUserColumns, index, tmp) // 顺序
             }
           })

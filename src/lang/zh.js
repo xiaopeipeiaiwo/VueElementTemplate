@@ -32,6 +32,8 @@ export default {
     customTreeTable: '自定义树表',
     tab: 'Tab',
     form: '表单',
+    calendar: '日历事项',
+    transfer: '穿梭框',
     createForm: '创建表单',
     editForm: '编辑表单',
     errorPages: '错误页面',
