@@ -34,6 +34,7 @@ export default {
     form: '表单',
     calendar: '日历事项',
     transfer: '穿梭框',
+    tabsTable: '分类表格',
     createForm: '创建表单',
     editForm: '编辑表单',
     errorPages: '错误页面',

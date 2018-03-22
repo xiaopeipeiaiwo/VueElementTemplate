@@ -147,6 +147,15 @@ export const asyncRouterMap = [
             }
           },
           {
+            path: 'tabsTable',
+            component: _import('haomo/components/tabsTable/index'),
+            name: 'haomo-HmTabsTable',
+            meta: {
+              title: 'tabsTable',
+              icon: 'table'
+            }
+          },
+          {
             path: 'iconMenu',
             component: _import('haomo/components/iconMenu/index'),
             name: 'haomo-iconMenu',
