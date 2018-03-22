@@ -2,6 +2,7 @@
   <div class="app-container calendar-list-container">
     <!-- 过滤 -->
     <div class="filter-container">
+      <el-form :inline="true">
       <!-- 过滤条件 -->
       <span v-for="filter in filters" class="hm-complex-table__filter-span">
         <el-input @keyup.enter.native="handleFilter"
@@ -29,7 +30,7 @@
 
         <el-date-picker type="datetime"
                         align="right"
-                        class="filter-item"
+                        class="filter-item hm-complex-table__filter-span"
                         @keyup.enter.native="handleFilter"
                         value-format="yyyy-MM-dd HH:mm:ss"
                         :picker-options="pickerOptions"
@@ -50,6 +51,7 @@
       </span>
       <!-- end 过滤条件 -->
 
+      <!--预定义按钮-->
       <el-button-group v-if="buttonGroup">
         <el-button class="filter-item" type="primary" v-waves icon="el-icon-search" @click="handleFilter">搜索</el-button>
         <el-button class="filter-item" type="primary" :loading="downloadLoading" v-waves icon="el-icon-download" v-if="isShowExport" @click="handleDownload">导出</el-button>
@@ -65,7 +67,42 @@
         <el-button class="filter-item" type="primary" v-waves icon="el-icon-close" v-if="multipleSelection.length" @click="BatchRemove">批量删除</el-button>
       </span>
 
+      <!--自定义-->
+      <span v-if="definedOperate.length" v-for="operate in definedOperate">
+        <!--自定义按钮-->
+        <el-button v-if="operate.type == 'button'" class="filter-item" type="primary" v-waves :icon="operate.icon" @click="operate.func">{{operate.label}}</el-button>
+        <!--自定义下拉选择-->
+        <el-form-item v-if="operate.type == 'select'" :label="operate.label">
+          <el-select v-model="operate.value" :placeholder="operate.placeholder">
+            <el-option v-for="o in operate.options" :label="o.label" :value="o.code"></el-option>
+          </el-select>
+        </el-form-item>
+        <!--自定义输入框-->
+        <el-form-item v-if="operate.type == 'input'" :label="operate.label">
+          <el-input @keyup.enter.native="handleFilter"
+                    style="width: 200px;"
+                    class="filter-item"
+                    :placeholder="operate.placeholder"
+                    v-model="operate.value">
+          </el-input>
+        </el-form-item>
+        <!--自定义时间选择-->
+        <el-form-item v-if="operate.type == 'datetime'" :label="operate.label">
+          <el-date-picker type="datetime"
+                          align="right"
+                          class="filter-item"
+                          @keyup.enter.native="handleFilter"
+                          value-format="yyyy-MM-dd HH:mm:ss"
+                          :picker-options="pickerOptions"
+                          :placeholder="operate.placeholder"
+                          v-model="operate.value">
+          </el-date-picker>
+        </el-form-item>
+      </span>
 
+
+
+      </el-form>
     </div>
     <!-- end 过滤 -->
 
@@ -99,7 +136,7 @@
     <!-- end翻页 -->
 
     <!-- 弹窗 -->
-    <!-- @TODO 补充弹窗 -->
+    <!-- @TODO 补充详情弹窗 -->
 
     <el-dialog :title="dialogName" :visible.sync="dialogFormVisible" :close-on-click-modal="closeOnClickModal" width="dialogWidth">
       <el-form v-if="dialogName == '详情'">
@@ -244,7 +281,8 @@
         required: false
       },
       /**
-       * 表格的选项，包括：pageSize。完整的示例为：
+       * 表格的选项，包括：pageSize、showExport、sortItem、sortOrder、showRefresh、showDeleteButton、
+       * buttonGroup、showDetail、dataProcessing、changeValue、newData、editData完整的示例为：
        *  {
        *    "pageSize": 10, // 默认为10条数据/页
        *    "showExport": false,  // 默认为不显示导出按钮
@@ -276,6 +314,21 @@
        *  }
        */
       options: {
+        type: Object,
+        required: false
+      },
+      /**
+       * 自定义表格选项，包括：definedParams、definedOperate、完整的示例为：
+       *  {
+       *    definedParams(params, operate){return params} // 自定义查询数据时的Params
+       *    definedOperate: [         // 自定义table顶部的操作，如果要根据多选框、输入框、时间选择器的值查询，需在自定义definedParams()方法中添加
+       *      { type: 'select', label:'', placeholder: '', options:[{label: '', code: ''}], value:''}, // 自定义多选框
+       *      { type: 'input', label:'', placeholder: '', code:'', value:''}, // 自定义输入框
+       *      { type: 'datetime', label:'', placeholder: '', code:'', value:''},  // 自定义时间选择器
+       *      { type: 'button', label:'', icon:'', func: this.dropDown}] // 自定义按钮
+       *    }
+       */
+      userDefined: {
         type: Object,
         required: false
       }
@@ -322,6 +375,8 @@
         buttonGroup: false,
         operationWidth: 0, // 操作栏的宽度
         isShowDetail: false, // 是否显示详情按钮
+
+        definedOperate: [], // 自定义操作
 
         pickerOptions: { // 日期选项配置
           disabledDate(time) {
@@ -446,45 +501,28 @@
         if (!request.defaults.baseURL) {
           request.defaults.baseURL = '/org/api'
         }
-        if (!self.options) {
-          return false
+        if (self.options) {
+          self.setOptions()
         }
-        self.options.pageSize ? this.listQuery.pageSize = self.options.pageSize : this.listQuery.pageSize // 配置pageSize
-        self.options.sortItem ? this.listQuery.sortItem = self.options.sortItem : this.listQuery.sortItem // sortItem
-        self.options.sortOrder ? this.listQuery.sortOrder = self.options.sortOrder : this.listQuery.sortOrder // sortOrder
-        if (self.options.newData && self.options.newData.isShow) { // 判断是否显示新建按钮
-          self.isShowNewButton = self.options.newData.isShow
+        if (self.userDefined) {
+          self.setDefinedOperate()
         }
-        if (self.options.editData && self.options.editData.isShow) { // 判断是否显示编辑按钮
-          self.isShowEditDataButton = self.options.editData.isShow
-          self.operationWidth += 50
-        }
-        if (self.options.showRefresh) { // 判断是否显示刷新按钮
-          self.isShowRefresh = self.options.showRefresh
-        }
-        if (self.options.showExport) { // 判断是否显示导出按钮
-          self.isShowExport = self.options.showExport
-        }
-        if (self.options.showDeleteButton) { // 判断是否显示删除按钮
-          self.isShowDeleteButton = self.options.showDeleteButton
-          self.operationWidth += 50
-        }
-        if (self.options.buttonGroup) { // 设置按钮是否以按钮组呈现
-          self.buttonGroup = self.options.buttonGroup
-        }
-        if (self.options.showDetail && self.options.showDetail.isShow) { // 设置按钮是否以按钮组呈现
-          self.isShowDetail = self.options.showDetail.isShow
-          self.operationWidth += 50
-        }
+
         console.log(request.defaults)
         console.log(`request.defaults.baseURL: ${request.defaults.baseURL}`)
+      },
+      setDefinedOperate() {
+        const self = this
+        if (self.userDefined.definedOperate) {
+          self.definedOperate = self.userDefined.definedOperate
+        }
       },
       getList() {
         const self = this
         self.listLoading = true
 
         // 处理过滤条件
-        const params = JSON.parse(JSON.stringify(self.listQuery))
+        let params = JSON.parse(JSON.stringify(self.listQuery))
         params.filters = self.filterParams
         params.filters = this.deleteFilter(params.filters)
 
@@ -493,6 +531,10 @@
         }
         if (self.refers) {
           params.refers = self.refers
+        }
+
+        if (self.userDefined && self.userDefined.definedParams) {
+          params = self.userDefined.definedParams(params, self.definedOperate)
         }
 
         request(self.schema.modelUnderscorePlural, {
@@ -676,6 +718,36 @@
             type: 'success'
           })
         })
+      },
+      setOptions() {
+        const self = this
+        self.options.pageSize ? this.listQuery.pageSize = self.options.pageSize : this.listQuery.pageSize // 配置pageSize
+        self.options.sortItem ? this.listQuery.sortItem = self.options.sortItem : this.listQuery.sortItem // sortItem
+        self.options.sortOrder ? this.listQuery.sortOrder = self.options.sortOrder : this.listQuery.sortOrder // sortOrder
+        if (self.options.newData && self.options.newData.isShow) { // 判断是否显示新建按钮
+          self.isShowNewButton = self.options.newData.isShow
+        }
+        if (self.options.editData && self.options.editData.isShow) { // 判断是否显示编辑按钮
+          self.isShowEditDataButton = self.options.editData.isShow
+          self.operationWidth += 50
+        }
+        if (self.options.showRefresh) { // 判断是否显示刷新按钮
+          self.isShowRefresh = self.options.showRefresh
+        }
+        if (self.options.showExport) { // 判断是否显示导出按钮
+          self.isShowExport = self.options.showExport
+        }
+        if (self.options.showDeleteButton) { // 判断是否显示删除按钮
+          self.isShowDeleteButton = self.options.showDeleteButton
+          self.operationWidth += 50
+        }
+        if (self.options.buttonGroup) { // 设置按钮是否以按钮组呈现
+          self.buttonGroup = self.options.buttonGroup
+        }
+        if (self.options.showDetail && self.options.showDetail.isShow) { // 设置按钮是否以按钮组呈现
+          self.isShowDetail = self.options.showDetail.isShow
+          self.operationWidth += 50
+        }
       },
       handleSelectionChange(val) {
         this.multipleSelection = val
