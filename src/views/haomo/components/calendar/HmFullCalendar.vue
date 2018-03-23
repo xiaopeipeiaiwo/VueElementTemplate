@@ -2,9 +2,14 @@
 	<div class="calender">
     <i class="el-icon-date" @click="dialogTableVisible = true"></i>
     <el-dialog :visible.sync="dialogTableVisible">
-      <full-calendar :events="fcEvents" locale="en"></full-calendar>
+      <full-calendar 
+      :events="fcEvents" 
+      lang="zh"
+      @change-month="changeMonth"
+      @event-click="eventClick"
+      @day-click="dayClick"
+      ></full-calendar>
     </el-dialog>
-
 	</div>
 </template>
 
@@ -30,6 +35,11 @@
         type: Object,
         required: false
       }
+    },
+    zh: {
+      weekNames: ['周日', '周一', '周二', '周三', '周四', '周五', '周六'],
+      monthNames: ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'],
+      titleFormat: 'yyyy年MM月'
     },
     data() {
       return {
@@ -62,6 +72,15 @@
           })
           console.log(self.fcEvents)
         })
+      },
+      changeMonth(start, end, current) {
+        console.log('changeMonth', start.format(), end.format(), current.format())
+      },
+      eventClick(event, jsEvent, pos) {
+        console.log('eventClick', event, jsEvent, pos)
+      },
+      dayClick(day, jsEvent) {
+        console.log('dayClick', day, jsEvent)
       }
     }
   }
