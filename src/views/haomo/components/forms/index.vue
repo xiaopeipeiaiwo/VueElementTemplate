@@ -27,8 +27,15 @@
       return {
         // widgetType值 1：普通input 2：下拉框 (如果是下拉框 再传一个options表示下拉框选项)3：复选框 4：文本域 5：富文本 6：日期 7：单选框
         showUserColumns: [
-          { name: '用户名称', codeCamel: 'username', widgetType: 1, disabled: true },
-          { name: '电子邮件', codeCamel: 'email', widgetType: 5, disabled: false },
+          { name: '用户名称', codeCamel: 'username', widgetType: 1, disabled: false,
+            rule: { required: true, message: '用户名不能为空', trigger: 'blur' }
+          },
+          { name: '电子邮件', codeCamel: 'email', widgetType: 5, disabled: false,
+            rule: [
+              { required: true, message: '请输入邮箱地址', trigger: 'blur' },
+              { type: 'email', message: '请输入正确的邮箱地址', trigger: 'blur,change' }
+            ]
+          },
           { name: '选择类型', codeCamel: 'type', widgetType: 2, multiple: false,
             options: [
               { value: 0, label: '选项1' },

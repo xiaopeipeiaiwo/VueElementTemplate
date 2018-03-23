@@ -17,6 +17,7 @@
             <el-form-item v-for="column in showUserColumns"
                           :key="column.id"
                           :label="column.name"
+                          :rules="column.rule?column.rule:null"
                           :prop="column.codeCamel">
               <!--el-input<el-input v-if="column.codeCamel==='password'" type="password"
                         v-model="formModel[column.codeCamel]"></el-input>-->
@@ -155,14 +156,22 @@
        * 取值1-7(1表示普通输入框,2表示下拉框,3表示复选框,4表示文本域,5表示富文本,6表示日期，7表示单选框)，
        * 若表单类型为下拉框/复选框/单选框，还需传入options字段，值为数组(数组元素是下拉框/复选框/单选框的选项），
        * 对于复选框，如果只有一个备选项则不必传options,
-       * 若表单类型为下拉框，还可传入multiple字段，取值true/false，表示是否多选，默认false
+       * 若表单类型为下拉框，还可传入multiple字段，取值bolean类型，true/false，表示是否多选，默认false
        * 若表单类型为时间日期，可传入dateType字段，值为date（只显示日期）或datetime（显示日期和时间），如果不传，
        * 默认只显示日期; 可传入dateFormate字段，为日期格式，取值遵循elementUI DatePicker组件中的日期格式，
        * 比如 只显示日期取值'yyyy-MM-dd'，显示日期和时间取值'yyyy-MM-dd HH:mm:ss'，如果不传默认为只显示日期取值'yyyy-MM-dd'，date字段和dateFormate字段取值须对应
-       * 所有的表单类型都可传入disabled字段，取值true/false，表示是否禁用，默认不禁用
+       * 所有的表单类型都可传入disabled字段，取值bolean类型,true/false，表示是否禁用，默认不禁用
+       * input类表单还可传入rule字段来进行自定义验证规则，rule取值规范参照elementUI，下面有简单示例
        * 示例：[
-                { name: '用户名称', codeCamel: 'username', widgetType: 1, disabled: true },
-                { name: '电子邮件', codeCamel: 'email', widgetType: 5, disabled: false },
+                { name: '用户名称', codeCamel: 'username', widgetType: 1, disabled: true,
+                  rule: { required: true, message: '用户名不能为空', trigger: 'blur' }
+                },
+                { name: '电子邮件', codeCamel: 'email', widgetType: 5, disabled: false,
+                  rule: [
+                    { required: true, message: '请输入邮箱地址', trigger: 'blur' },
+                    { type: 'email', message: '请输入正确的邮箱地址', trigger: 'blur,change' }
+                  ]
+                },
                 { name: '选择类型', codeCamel: 'type', widgetType: 2, multiple: false,
                   options: [
                               { value: 0, label: '选项1' },
@@ -227,16 +236,16 @@
       }
     },
     data() {
-      var validateUsername = (rule, value, callback) => {
-        // console.log(value.length)
-        if (!value) {
-          callback(new Error('请输入用户名'))
-        } else if ((value.length < 2 || value.length > 10)) {
-          callback(new Error('用户名长度在 2 到 10 个字符'))
-        } else {
-          callback()
-        }
-      }
+      // var validateUsername = (rule, value, callback) => {
+      //   // console.log(value.length)
+      //   if (!value) {
+      //     callback(new Error('请输入用户名'))
+      //   } else if ((value.length < 2 || value.length > 10)) {
+      //     callback(new Error('用户名长度在 2 到 10 个字符'))
+      //   } else {
+      //     callback()
+      //   }
+      // }
       var validatePassword = (rule, value, callback) => {
         if (value.length > 0 && !(/^(?![0-9]+$)(?![a-zA-Z]+$)[0-9A-Za-z]{6,20}$/.test(value))) {
           callback(new Error('密码必须同时包含数字和字母 6-20位'))
@@ -266,11 +275,11 @@
         formModel: {}, // 双向绑定的数据变量
         showUserColumns: [], // 要显示的字段
         rules: {
-          username: [
-            { validator: validateUsername, trigger: 'change' }
+          // username: [
+          //   { validator: validateUsername, trigger: 'change' }
           // { required: true, message: '请输入用户名', trigger: 'blur' },
           // { min: 2, max: 10, message: '长度在 2 到 10 个字符', trigger: 'blur' }
-          ],
+          // ],
           loginid: [
             // { required: true, message: '请输入登陆ID', trigger: 'blur' }
           ],
@@ -281,11 +290,11 @@
           mobile: [
             { validator: validateMobile, trigger: 'change' }
             // { pattern: /^((0\d{2,3}-\d{7,8})|(1[3584]\d{9}))$/, message: '请输入正确的电话号码', trigger: 'change' }
-          ],
-          email: [
-            // { validator: validateEmail, trigger: 'change' }
-            { type: 'email', message: '请输入正确的邮箱', trigger: 'change' }
           ]
+          // email: [
+          // { validator: validateEmail, trigger: 'change' }
+          // { type: 'email', message: '请输入正确的邮箱', trigger: 'change' }
+          // ]
         },
         editorOption: { // 富文本选项配置
           placeholder: '',
@@ -421,8 +430,8 @@
               // console.log(tmp)
               // self.$set(tmp, 'code', tmp.code.toLowerCase())
               column.name && self.$set(tmp, 'name', column.name) // 自定义字段名
-              self.$set(tmp, 'widgetType', column.widgetType || 1)
-              // column.validate && self.$set(tmp, 'validate', column.validate)
+              self.$set(tmp, 'widgetType', column.widgetType || 1) // 设置表单类型
+              column.rule && self.$set(tmp, 'rule', column.rule) // 设置表单校验规则
               column.disabled && self.$set(tmp, 'disabled', column.disabled) // 设置是否禁用
               column.options && self.$set(tmp, 'options', column.options) // 设置下拉框或者多选的选项
               column.multiple && self.$set(tmp, 'multiple', column.multiple) // 设置下拉框是否多选
