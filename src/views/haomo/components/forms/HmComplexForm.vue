@@ -26,20 +26,20 @@
               <el-input v-if="column.widgetType === 1"
                         v-model="formModel[column.codeCamel]"
                         :disabled="column.disabled"
-                        @change="useralidate(formModel[column.codeCamel])"></el-input>
+                        @change="column.change && column.change($event)"></el-input>
               <!-- 2 日期选择 -->
               <el-date-picker v-else-if="column.widgetType === 6 || column.type === 'datetime' || column.type === 'date'"
                               v-model="formModel[column.codeCamel]"
                               :type="column.dateType || 'date'"
                               align="right" :disabled="column.disabled"
-                              @change="logTimeChange"
+                              @change="column.change && column.change($event)"
                               :value-format="column.dateFormate || 'yyyy-MM-dd'"
                               :picker-options="pickerOptions">
               </el-date-picker>
               <!-- 3 下拉框 -->
               <el-select v-else-if="column.widgetType === 2"
                          v-model="formModel[column.codeCamel]"
-                         @change="selectChange"
+                         @change="column.change && column.change($event)"
                          :multiple="column.multiple"
                          :disabled="column.disabled"
                          clearable>
@@ -54,17 +54,18 @@
                         v-model="formModel[column.codeCamel]"
                         type="textarea" :disabled="column.disabled"
                         :autosize="{ minRows: 2, maxRows: 5}"
-                        :rows="2">
+                        :rows="2" @change="column.change && column.change($event)">
               </el-input>
               <!-- 5 复选框 -->
               <el-checkbox v-else-if="column.widgetType === 3 && !column.options"
                            v-model="formModel[column.codeCamel]"
                            :disabled="column.disabled"
+                           @change="column.change && column.change($event)"
                            true-label="1" false-label="0"></el-checkbox>
               <el-checkbox-group v-else-if="column.widgetType === 3 && column.options"
                                  v-model="formModel[column.codeCamel]"
                                  :disabled="column.disabled"
-                                  @change="checkboxsChange">
+                                 @change="column.change && column.change($event)">
                 <el-checkbox v-for="option in column.options"
                              :label="option" :key="option">{{option}}</el-checkbox>
               </el-checkbox-group>
@@ -75,11 +76,13 @@
                             :options="editorOption"
                             @blur="onEditorBlur($event)"
                             @focus="onEditorFocus($event)"
+                            @change="column.change && column.change($event)"
                             @ready="onEditorReady($event)">
               </quill-editor>
               <!-- 7 单选框 -->
               <el-radio-group v-else-if="column.widgetType === 7"
                               :disabled="column.disabled"
+                              @change="column.change && column.change($event)"
                               v-model="formModel[column.codeCamel]">
                 <el-radio v-for="(option,key) in column.options"
                           :key="key" :label="key">{{option}}</el-radio>
@@ -150,18 +153,19 @@
       /**
        * 必传，指定要显示的表单字段及类型。数组的元素为对象类型，对象的属性有name、codeCamel、widgetType、disabled、
        * options、multiple、dateType等，不同的表单类型需配置的属性不同，
-       * codeCamel必须有，表示要显示的表单字段,
-       * name表示自定义的字段名，如果不传，默认为数据库中的字段名，
-       * widgetType表示该字段要显示的表单类型(普通输入框、文本域、富文本、下拉框...)，不传默认为普通input
+       * codeCamel属性必须有，表示要显示的表单字段,
+       * name属性表示自定义的字段名，如果不传，默认为数据库中的字段名，
+       * widgetType属性表示该字段要显示的表单类型(普通输入框、文本域、富文本、下拉框...)，不传默认为普通input
+       * change属性，值为函数类型，表示input的change事件的执行方法，参数即为input输入内容
        * 取值1-7(1表示普通输入框,2表示下拉框,3表示复选框,4表示文本域,5表示富文本,6表示日期，7表示单选框)，
        * 若表单类型为下拉框/复选框/单选框，还需传入options字段，值为数组(数组元素是下拉框/复选框/单选框的选项），
        * 对于复选框，如果只有一个备选项则不必传options,
        * 若表单类型为下拉框，还可传入multiple字段，取值bolean类型，true/false，表示是否多选，默认false
-       * 若表单类型为时间日期，可传入dateType字段，值为date（只显示日期）或datetime（显示日期和时间），如果不传，
+       * 若表单类型为时间日期，可传入dateType字段，值为'date'（只显示日期）或'datetime'（显示日期和时间），如果不传，
        * 默认只显示日期; 可传入dateFormate字段，为日期格式，取值遵循elementUI DatePicker组件中的日期格式，
        * 比如 只显示日期取值'yyyy-MM-dd'，显示日期和时间取值'yyyy-MM-dd HH:mm:ss'，如果不传默认为只显示日期取值'yyyy-MM-dd'，date字段和dateFormate字段取值须对应
-       * 所有的表单类型都可传入disabled字段，取值bolean类型,true/false，表示是否禁用，默认不禁用
-       * input类表单还可传入rule字段来进行自定义验证规则，rule取值规范参照elementUI，下面有简单示例
+       * 所有的表单类型都可传入disabled属性，取值bolean类型,true/false，表示是否禁用，默认不禁用
+       * input类表单还可传入rule属性来进行自定义验证规则，rule取值规范参照elementUI，下面有简单示例
        * 示例：[
                 { name: '用户名称', codeCamel: 'username', widgetType: 1, disabled: true,
                   rule: { required: true, message: '用户名不能为空', trigger: 'blur' }
@@ -338,15 +342,45 @@
       // this.validate()
       this.init()
       this.getList()
-      console.log(this.buttons)
+      // console.log(this.buttons)
     },
     methods: {
-      createRule() {
-        _.each()
+      // inputChange(val) {
+      //   // console.log(event)
+      //   // console.log(val)
+      // },
+      // checkboxChange(val) {
+      //   console.log(val)
+      // },
+      // checkboxsChange(val) {
+      //   console.log(val)
+      // },
+      // selectChange(val) {
+      //   console.log(val)
+      // },
+      // radioChange(val) {
+      //   console.log(val)
+      // },
+      // logTimeChange(val) {
+      //   console.log(val)
+      // },
+      // textareaChange(val) {
+      //   console.log(val)
+      // },
+      // onEditorChange({ quill, html, text }) {
+      //   console.log(quill)
+      //   console.log(html)
+      //   console.log(text)
+      //   // this.content = html
+      // },
+      onEditorBlur(val) {
+        // console.log(val)
       },
-      useralidate(value) {
-        // console.log(event)
-        console.log(value)
+      onEditorFocus(val) {
+        // console.log('editor focus!')
+      },
+      onEditorReady(val) {
+        // console.log('editor ready!')
       },
       handleRemove(file, fileList) {
         console.log(file, fileList)
@@ -354,21 +388,12 @@
       handleExceed(files, fileList) {
         this.$message.warning(`当前限制选择 3 个文件，本次选择了 ${files.length} 个文件，共选择了 ${files.length + fileList.length} 个文件`)
       },
-      checkboxsChange(val) {
-        console.log(val)
-      },
-      selectChange(val) {
-        console.log(val)
-      },
       // 判断是否一个对象的所有属性都为空
       isEmpty(obj) {
         _.forEach(obj, function(val) {
           if (val) return false
         })
         return true
-      },
-      logTimeChange(value) {
-        console.log(value)
       },
       validate() {
         const self = this
@@ -390,15 +415,6 @@
           }
         })
       },
-      onEditorBlur(editor) {
-        // console.log('editor blur!')
-      },
-      onEditorFocus(editor) {
-        // console.log('editor focus!')
-      },
-      onEditorReady(editor) {
-        // console.log('editor ready!')
-      },
       // 存在tableId，修改数据前先获取数据
       getList() {
         const self = this
@@ -411,17 +427,17 @@
           } */
           self.Loading = false
           // console.log(self.formModel)
-          var formArray = _.keys(self.formModel)
+          var formArray = _.keys(self.formModel) // 提取formModel的属性到数组
           // console.log(formArray)
-          self.formModel = _.pick(resp.data, formArray)
+          self.formModel = _.pick(resp.data, formArray) // 根据数组中的属性提取出data中对应的数据
           // console.log(self.formModel)
         })
       },
       init() {
         const self = this
+        console.log(self.columns)
         if (self.columns && self.columns.length) {
-          self.showUserColumns = JSON.parse(JSON.stringify(self.columns))
-          // console.log(self.showUserColumns)
+          self.showUserColumns = _.cloneDeep(self.columns)
           // 将字符串对象进行替换处理
           _.each(self.showUserColumns, function(column, index) {
             if (typeof column === 'object') {
@@ -437,6 +453,7 @@
               column.multiple && self.$set(tmp, 'multiple', column.multiple) // 设置下拉框是否多选
               column.dateType && self.$set(tmp, 'dateType', column.dateType) // 设置日期表单显示类型
               column.dateFormate && self.$set(tmp, 'dateFormate', column.dateFormate) // 设置日期格式
+              column.change && self.$set(tmp, 'change', column.change) // 设置change函数
               self.$set(self.showUserColumns, index, tmp) // 顺序
             }
           })
@@ -451,9 +468,8 @@
           })
           if (!request.defaults.baseURL) {
             request.defaults.baseURL = '/org/api'
-            console.log('没有')
           }
-          console.log(request.defaults.baseURL)
+          // console.log(request.defaults.baseURL)
           // 加载等待
           if (self.tableId) {
             self.Loading = true
