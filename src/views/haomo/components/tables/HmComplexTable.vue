@@ -3,104 +3,102 @@
     <!-- 过滤 -->
     <div class="filter-container">
       <el-form :inline="true">
-      <!-- 过滤条件 -->
-      <span v-for="filter in filters" class="hm-complex-table__filter-span">
-        <el-input @keyup.enter.native="handleFilter"
-                  style="width: 200px;"
-                  class="filter-item"
-                  :placeholder="filter.placeholder"
-                  v-if="filter.isShow && isShowFilter(filter)"
-                  v-model="listQuery.filters[schema['modelUnderscore']][getFilterColumn(filter)][getFilterOper(filter)]">
-        </el-input>
-
-        <el-input @keyup.enter.native="handleFilter"
-                  style="width: 200px;"
-                  class="filter-item"
-                  :placeholder="filter.placeholder[0]"
-                  v-if="filter.isShow && !isShowFilter(filter) && !isDatetimeFilter(filter)"
-                  v-model="listQuery.filters[schema['modelUnderscore']][getFilterColumn(filter)][getFilterOper(filter)]">
-        </el-input>
-        <el-input @keyup.enter.native="handleFilter"
-                  style="width: 200px;"
-                  class="filter-item"
-                  :placeholder="filter.placeholder[1]"
-                  v-if="filter.isShow && !isShowFilter(filter) && !isDatetimeFilter(filter)"
-                  v-model="listQuery.filters[schema['modelUnderscore']][getFilterColumn(filter)][getFilterOperTwin(filter)]">
-        </el-input>
-
-        <el-date-picker type="datetime"
-                        align="right"
-                        class="filter-item hm-complex-table__filter-span"
-                        @keyup.enter.native="handleFilter"
-                        value-format="yyyy-MM-dd HH:mm:ss"
-                        :picker-options="pickerOptions"
-                        :placeholder="filter.placeholder[0]"
-                        v-if="filter.isShow && !isShowFilter(filter) && isDatetimeFilter(filter)"
-                        v-model="listQuery.filters[schema['modelUnderscore']][getFilterColumn(filter)][getFilterOper(filter)]">
-        </el-date-picker>
-        <el-date-picker type="datetime"
-                        align="right"
-                        class="filter-item"
-                        @keyup.enter.native="handleFilter"
-                        value-format="yyyy-MM-dd HH:mm:ss"
-                        :picker-options="pickerOptions"
-                        :placeholder="filter.placeholder[1]"
-                        v-if="filter.isShow && !isShowFilter(filter) && isDatetimeFilter(filter)"
-                        v-model="listQuery.filters[schema['modelUnderscore']][getFilterColumn(filter)][getFilterOperTwin(filter)]">
-        </el-date-picker>
-      </span>
-      <!-- end 过滤条件 -->
-
-      <!--预定义按钮-->
-      <el-button-group v-if="buttonGroup">
-        <el-button class="filter-item" type="primary" v-waves icon="el-icon-search" @click="handleFilter">搜索</el-button>
-        <el-button class="filter-item" type="primary" :loading="downloadLoading" v-waves icon="el-icon-download" v-if="isShowExport" @click="handleDownload">导出</el-button>
-        <el-button class="filter-item" type="primary" v-waves icon="el-icon-plus" v-if="isShowNewButton" @click="openDialog('newData')">新建</el-button>
-        <el-button class="filter-item" type="primary" v-waves icon="el-icon-refresh" v-if="isShowRefresh" @click="refreshList">刷新</el-button>
-        <el-button class="filter-item" type="primary" v-waves icon="el-icon-close" v-if="multipleSelection.length" @click="BatchRemove">批量删除</el-button>
-      </el-button-group>
-      <span v-if="!buttonGroup">
-        <el-button class="filter-item" type="primary" v-waves icon="el-icon-search" @click="handleFilter">搜索</el-button>
-        <el-button class="filter-item" type="primary" :loading="downloadLoading" v-waves icon="el-icon-download" v-if="isShowExport" @click="handleDownload">导出</el-button>
-        <el-button class="filter-item" type="primary" v-waves icon="el-icon-plus" v-if="isShowNewButton" @click="openDialog('newData')">新建</el-button>
-        <el-button class="filter-item" type="primary" v-waves icon="el-icon-refresh" v-if="isShowRefresh" @click="refreshList">刷新</el-button>
-        <el-button class="filter-item" type="primary" v-waves icon="el-icon-close" v-if="multipleSelection.length" @click="BatchRemove">批量删除</el-button>
-      </span>
-
-      <!--自定义-->
-      <span v-if="definedOperate.length" v-for="operate in definedOperate">
-        <!--自定义按钮-->
-        <el-button v-if="operate.type == 'button'" class="filter-item" type="primary" v-waves :icon="operate.icon" @click="operate.func">{{operate.label}}</el-button>
-        <!--自定义下拉选择-->
-        <el-form-item v-if="operate.type == 'select'" :label="operate.label">
-          <el-select v-model="operate.value" :placeholder="operate.placeholder">
-            <el-option v-for="o in operate.options" :label="o.label" :value="o.code"></el-option>
-          </el-select>
-        </el-form-item>
-        <!--自定义输入框-->
-        <el-form-item v-if="operate.type == 'input'" :label="operate.label">
+        <!-- 过滤条件 -->
+        <span v-for="filter in filters" class="hm-complex-table__filter-span">
           <el-input @keyup.enter.native="handleFilter"
                     style="width: 200px;"
                     class="filter-item"
-                    :placeholder="operate.placeholder"
-                    v-model="operate.value">
+                    :placeholder="filter.placeholder"
+                    v-if="filter.isShow && isShowFilter(filter)"
+                    v-model="listQuery.filters[schema['modelUnderscore']][getFilterColumn(filter)][getFilterOper(filter)]">
           </el-input>
-        </el-form-item>
-        <!--自定义时间选择-->
-        <el-form-item v-if="operate.type == 'datetime'" :label="operate.label">
+
+          <el-input @keyup.enter.native="handleFilter"
+                    style="width: 200px;"
+                    class="filter-item"
+                    :placeholder="filter.placeholder[0]"
+                    v-if="filter.isShow && !isShowFilter(filter) && !isDatetimeFilter(filter)"
+                    v-model="listQuery.filters[schema['modelUnderscore']][getFilterColumn(filter)][getFilterOper(filter)]">
+          </el-input>
+          <el-input @keyup.enter.native="handleFilter"
+                    style="width: 200px;"
+                    class="filter-item"
+                    :placeholder="filter.placeholder[1]"
+                    v-if="filter.isShow && !isShowFilter(filter) && !isDatetimeFilter(filter)"
+                    v-model="listQuery.filters[schema['modelUnderscore']][getFilterColumn(filter)][getFilterOperTwin(filter)]">
+          </el-input>
+
+          <el-date-picker type="datetime"
+                          align="right"
+                          class="filter-item hm-complex-table__filter-span"
+                          @keyup.enter.native="handleFilter"
+                          value-format="yyyy-MM-dd HH:mm:ss"
+                          :picker-options="pickerOptions"
+                          :placeholder="filter.placeholder[0]"
+                          v-if="filter.isShow && !isShowFilter(filter) && isDatetimeFilter(filter)"
+                          v-model="listQuery.filters[schema['modelUnderscore']][getFilterColumn(filter)][getFilterOper(filter)]">
+          </el-date-picker>
           <el-date-picker type="datetime"
                           align="right"
                           class="filter-item"
                           @keyup.enter.native="handleFilter"
                           value-format="yyyy-MM-dd HH:mm:ss"
                           :picker-options="pickerOptions"
-                          :placeholder="operate.placeholder"
-                          v-model="operate.value">
+                          :placeholder="filter.placeholder[1]"
+                          v-if="filter.isShow && !isShowFilter(filter) && isDatetimeFilter(filter)"
+                          v-model="listQuery.filters[schema['modelUnderscore']][getFilterColumn(filter)][getFilterOperTwin(filter)]">
           </el-date-picker>
-        </el-form-item>
-      </span>
+        </span>
+        <!-- end 过滤条件 -->
+        <!--自定义-->
+        <span v-if="definedOperate.length" v-for="operate in definedOperate">
+          <!--自定义按钮-->
+          <el-button v-if="operate.type == 'button'" class="filter-item" type="primary" v-waves :icon="operate.icon" @click="operate.func">{{operate.label}}</el-button>
+            <!--自定义下拉选择-->
+          <el-form-item v-if="operate.type == 'select'" :label="operate.label">
+            <el-select v-model="operate.value" :placeholder="operate.placeholder">
+              <el-option v-for="o in operate.options" :label="o.label" :value="o.code"></el-option>
+            </el-select>
+          </el-form-item>
+            <!--自定义输入框-->
+          <el-form-item v-if="operate.type == 'input'" :label="operate.label">
+            <el-input @keyup.enter.native="handleFilter"
+                      style="width: 200px;"
+                      class="filter-item"
+                      :placeholder="operate.placeholder"
+                      v-model="operate.value">
+            </el-input>
+          </el-form-item>
+            <!--自定义时间选择-->
+          <el-form-item v-if="operate.type == 'datetime'" :label="operate.label">
+            <el-date-picker type="datetime"
+                            align="right"
+                            class="filter-item"
+                            @keyup.enter.native="handleFilter"
+                            value-format="yyyy-MM-dd HH:mm:ss"
+                            :picker-options="pickerOptions"
+                            :placeholder="operate.placeholder"
+                            v-model="operate.value">
+            </el-date-picker>
+          </el-form-item>
+        </span>
 
+        <!--预定义按钮-->
+        <el-button-group v-if="buttonGroup">
+          <el-button class="filter-item" type="primary" v-waves icon="el-icon-search" @click="handleFilter">搜索</el-button>
+          <el-button class="filter-item" type="primary" :loading="downloadLoading" v-waves icon="el-icon-download" v-if="isShowExport" @click="handleDownload">导出</el-button>
+          <el-button class="filter-item" type="primary" v-waves icon="el-icon-plus" v-if="isShowNewButton" @click="openDialog('newData')">新建</el-button>
+          <el-button class="filter-item" type="primary" v-waves icon="el-icon-refresh" v-if="isShowRefresh" @click="refreshList">刷新</el-button>
+          <el-button class="filter-item" type="primary" v-waves icon="el-icon-close" v-if="multipleSelection.length" @click="BatchRemove">批量删除</el-button>
+        </el-button-group>
 
+        <span v-if="!buttonGroup">
+          <el-button class="filter-item" type="primary" v-waves icon="el-icon-search" @click="handleFilter">搜索</el-button>
+          <el-button class="filter-item" type="primary" :loading="downloadLoading" v-waves icon="el-icon-download" v-if="isShowExport" @click="handleDownload">导出</el-button>
+          <el-button class="filter-item" type="primary" v-waves icon="el-icon-plus" v-if="isShowNewButton" @click="openDialog('newData')">新建</el-button>
+          <el-button class="filter-item" type="primary" v-waves icon="el-icon-refresh" v-if="isShowRefresh" @click="refreshList">刷新</el-button>
+          <el-button class="filter-item" type="primary" v-waves icon="el-icon-close" v-if="multipleSelection.length" @click="BatchRemove">批量删除</el-button>
+        </span>
 
       </el-form>
     </div>
@@ -108,13 +106,13 @@
 
     <!-- 表格 -->
     <el-table :data="list" v-loading="listLoading" element-loading-text="给我一点时间" border fit highlight-current-row
-              style="width: 100%" @selection-change="handleSelectionChange">
+              style="width: 100%" @selection-change="handleSelectionChange" @sort-change="sortChange">
       <el-table-column type="index" :index="indexMethod" label="序号" width="50px"></el-table-column>
-      <el-table-column type="selection" width="55">
-      </el-table-column>
-      <el-table-column v-for="(column,index) in showColumns" :key="index" align="center" :label="column.name">
+      <el-table-column type="selection" width="55" v-if="isShowSelection"></el-table-column>
+      <el-table-column v-for="(column,index) in showColumns" :key="index" align="center" :label="column.name" :prop="column.codeCamel" :sortable="column.isSort">
         <template slot-scope="scope">
           <span>{{ scope.row[column.codeCamel] }}</span>
+          <!--<el-checkbox v-model="listLoading"></el-checkbox>-->
         </template>
       </el-table-column>
       <el-table-column fixed="right" label="操作" :width="operationWidth" v-if="isShowEditDataButton || isShowDeleteButton">
@@ -321,7 +319,7 @@
        * 自定义表格选项，包括：definedParams、definedOperate、完整的示例为：
        *  {
        *    definedParams(params, operate){return params} // 自定义查询数据时的Params
-       *    definedOperate: [         // 自定义table顶部的操作，如果要根据多选框、输入框、时间选择器的值查询，需在自定义definedParams()方法中添加
+       *    definedOperate: [         // 自定义table顶部的操作，如果要根据下拉选择、输入框、时间选择器的值查询，需在自定义definedParams()方法中添加
        *      { type: 'select', label:'', placeholder: '', options:[{label: '', code: ''}], value:''}, // 自定义多选框
        *      { type: 'input', label:'', placeholder: '', code:'', value:''}, // 自定义输入框
        *      { type: 'datetime', label:'', placeholder: '', code:'', value:''},  // 自定义时间选择器
@@ -358,6 +356,7 @@
         multipleSelection: [], // 选择的数组
         dialogName: '',
 
+        isShowSelection: false, // 是否显示多选
         isShowNewButton: false, // 是否显示新建
         isShowEditDataButton: false, // 是否显示编辑
         isShowDeleteButton: false, // 是否显示删除
@@ -481,6 +480,11 @@
             }
           })
         }
+        if (self.showColumns) {
+          _.map(self.showColumns, function(item, index) {
+            item.isSort = item.isSort === undefined ? false : item.isSort === true ? 'custom' : false
+          })
+        }
 
         // 处理过滤条件
         if (self.filters) {
@@ -511,11 +515,18 @@
         console.log(request.defaults)
         console.log(`request.defaults.baseURL: ${request.defaults.baseURL}`)
       },
+      // 设置自定义组件
       setDefinedOperate() {
         const self = this
         if (self.userDefined.definedOperate) {
           self.definedOperate = self.userDefined.definedOperate
         }
+      },
+      // 排序
+      sortChange(row) {
+        this.listQuery.sortItem = row.prop
+        this.listQuery.sortOrder = row.order === 'descending' ? 'desc' : 'asc'
+        this.getList()
       },
       getList() {
         const self = this
@@ -747,6 +758,9 @@
         if (self.options.showDetail && self.options.showDetail.isShow) { // 设置按钮是否以按钮组呈现
           self.isShowDetail = self.options.showDetail.isShow
           self.operationWidth += 50
+        }
+        if (self.options.showSelection) { // 设置是否显示多选
+          self.isShowSelection = self.options.showSelection
         }
       },
       handleSelectionChange(val) {

@@ -24,7 +24,7 @@
     },
     data() {
       return {
-        showUserColumns: ['mobile', 'loginid', 'username', 'email', 'createTime'],
+        showUserColumns: [{ name: '手机号', codeCamel: 'mobile', isSort: true }, { name: '登录ID', codeCamel: 'loginid', isSort: true }, 'username', 'email', 'createTime'],
         userFilters: [
           { placeholder: '过滤手机号', 'mobile': { 'like': '' }, isShow: true },
           { placeholder: '过滤用户名', 'username': { 'equalTo': '' }, isShow: true },
@@ -73,6 +73,7 @@
         showExport: true,
         showDeleteButton: true,
         buttonGroup: false,
+        showSelection: false,
         showDetail: {
           isShow: true,
           showColumns: ['mobile', 'loginid', 'username', 'email']
@@ -86,8 +87,8 @@
         definedOperate: [
           { type: 'select', label: '', placeholder: '类型', options: [{ label: '姓名', code: 'username' }, { label: '登录ID', code: 'loginid' }], value: '' },
           { type: 'input', label: '', placeholder: '邮箱', code: 'email', value: '' },
-          { type: 'datetime', label: '', placeholder: '创建时间', code: 'createTime', value: '' },
-          { type: 'button', label: '搜索', icon: 'el-icon-search', func: this.dropDown }]
+          { type: 'datetime', label: '', placeholder: '创建时间', code: 'createTime', value: '' }
+        ]
       }
     },
     methods: {
