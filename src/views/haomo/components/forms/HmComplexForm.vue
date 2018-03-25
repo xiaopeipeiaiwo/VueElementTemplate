@@ -17,67 +17,93 @@
             <el-form-item v-for="column in showUserColumns"
                           :key="column.id"
                           :label="column.name"
+                          :rules="column.rule?column.rule:null"
                           :prop="column.codeCamel">
               <!--el-input<el-input v-if="column.codeCamel==='password'" type="password"
                         v-model="formModel[column.codeCamel]"></el-input>-->
 
               <!-- 1 普通input -->
-              <el-input v-if="column.widgetType === 1" v-model="formModel[column.codeCamel]"></el-input>
+              <el-input v-if="column.widgetType === 1"
+                        v-model="formModel[column.codeCamel]"
+                        :disabled="column.disabled"
+                        @change="column.change && column.change($event)"></el-input>
               <!-- 2 日期选择 -->
               <el-date-picker v-else-if="column.widgetType === 6 || column.type === 'datetime' || column.type === 'date'"
                               v-model="formModel[column.codeCamel]"
                               :type="column.dateType || 'date'"
-                              align="right"
-                              @change="logTimeChange"
+                              align="right" :disabled="column.disabled"
+                              @change="column.change && column.change($event)"
                               :value-format="column.dateFormate || 'yyyy-MM-dd'"
                               :picker-options="pickerOptions">
               </el-date-picker>
               <!-- 3 下拉框 -->
-              <el-select v-else-if="column.widgetType === 2" v-model="formModel[column.codeCamel]" clearable>
-                <el-option v-for="(item,key) in column.options"
-                           :key="key"
-                           :label="item"
-                           :value="key">
+              <el-select v-else-if="column.widgetType === 2"
+                         v-model="formModel[column.codeCamel]"
+                         @change="column.change && column.change($event)"
+                         :multiple="column.multiple"
+                         :disabled="column.disabled"
+                         clearable>
+                <el-option v-for="item in column.options"
+                           :key="item.value"
+                           :label="item.label"
+                           :value="item.value">
                 </el-option>
               </el-select>
               <!-- 4 文本域 -->
               <el-input v-else-if="column.widgetType === 4"
                         v-model="formModel[column.codeCamel]"
-                        type="textarea"
+                        type="textarea" :disabled="column.disabled"
                         :autosize="{ minRows: 2, maxRows: 5}"
-                        :rows="2">
+                        :rows="2" @change="column.change && column.change($event)">
               </el-input>
               <!-- 5 复选框 -->
               <el-checkbox v-else-if="column.widgetType === 3 && !column.options"
                            v-model="formModel[column.codeCamel]"
+                           :disabled="column.disabled"
+                           @change="column.change && column.change($event)"
                            true-label="1" false-label="0"></el-checkbox>
               <el-checkbox-group v-else-if="column.widgetType === 3 && column.options"
-                                 v-model="formModel[column.codeCamel]">
+                                 v-model="formModel[column.codeCamel]"
+                                 :disabled="column.disabled"
+                                 @change="column.change && column.change($event)">
                 <el-checkbox v-for="option in column.options"
                              :label="option" :key="option">{{option}}</el-checkbox>
               </el-checkbox-group>
               <!-- 6 富文本 -->
               <quill-editor v-else-if="column.widgetType === 5"
-                            ref="textEditor"
+                            ref="textEditor" :disabled="column.disabled"
                             v-model="formModel[column.codeCamel]"
                             :options="editorOption"
                             @blur="onEditorBlur($event)"
                             @focus="onEditorFocus($event)"
+                            @change="column.change && column.change($event)"
                             @ready="onEditorReady($event)">
               </quill-editor>
               <!-- 7 单选框 -->
               <el-radio-group v-else-if="column.widgetType === 7"
+                              :disabled="column.disabled"
+                              @change="column.change && column.change($event)"
                               v-model="formModel[column.codeCamel]">
                 <el-radio v-for="(option,key) in column.options"
                           :key="key" :label="key">{{option}}</el-radio>
               </el-radio-group>
+              <!-- 8 文件 -->
+              <el-upload v-else-if="column.widgetType === 8"
+                class="upload-demo"
+                action="/api/upload"
+                :on-remove="handleRemove"
+                multiple
+                :on-exceed="handleExceed">
+                <el-button slot="trigger" size="small" type="primary"
+                           :disabled="column.disabled">选取文件</el-button>
+              </el-upload>
             </el-form-item>
             <!--按钮-->
             <el-form-item v-if="buttons && buttons.length > 0">
               <el-col :span="24/buttons.length" v-for="(btn,key) in buttons" :key="key">
                 <el-button v-if="btn.type === 1"
                            type="primary"
-                           @click="onSubmit(btn.method)">{{btn.text}}</el-button>
+                           @click="onSubmit(btn.method,btn.beforeSubmit)">{{btn.text}}</el-button>
                 <el-button v-if="btn.type === 2"
                            type="primary"
                            @click="resetForm(btn.method)">{{btn.text}}</el-button>
@@ -125,25 +151,46 @@
         required: true
       },
       /**
-       * 必传，指定要显示的表单字段及类型。数组的每个元素包含name、codeCamel和widgetType三个字段，
-       * codeCamel表示要显示的表单字段,
-       * name表示自定义的字段名，如果不传，默认为数据库中的字段名，
-       * widgetType表示该字段要显示的表单类型(普通输入框、文本域、富文本、下拉框...)，
+       * 必传，指定要显示的表单字段及类型。数组的元素为对象类型，对象的属性有name、codeCamel、widgetType、disabled、
+       * options、multiple、dateType等，不同的表单类型需配置的属性不同，
+       * codeCamel属性必须有，表示要显示的表单字段,
+       * name属性表示自定义的字段名，如果不传，默认为数据库中的字段名，
+       * widgetType属性表示该字段要显示的表单类型(普通输入框、文本域、富文本、下拉框...)，不传默认为普通input
+       * change属性，值为函数类型，表示input的change事件的执行方法，参数即为input输入内容
        * 取值1-7(1表示普通输入框,2表示下拉框,3表示复选框,4表示文本域,5表示富文本,6表示日期，7表示单选框)，
        * 若表单类型为下拉框/复选框/单选框，还需传入options字段，值为数组(数组元素是下拉框/复选框/单选框的选项），
        * 对于复选框，如果只有一个备选项则不必传options,
-       * 若表单类型为时间日期，可传入dateType字段，值为date（只显示日期）或datetime（显示日期和时间），如果不传，
+       * 若表单类型为下拉框，还可传入multiple字段，取值bolean类型，true/false，表示是否多选，默认false
+       * 若表单类型为时间日期，可传入dateType字段，值为'date'（只显示日期）或'datetime'（显示日期和时间），如果不传，
        * 默认只显示日期; 可传入dateFormate字段，为日期格式，取值遵循elementUI DatePicker组件中的日期格式，
        * 比如 只显示日期取值'yyyy-MM-dd'，显示日期和时间取值'yyyy-MM-dd HH:mm:ss'，如果不传默认为只显示日期取值'yyyy-MM-dd'，date字段和dateFormate字段取值须对应
+       * 所有的表单类型都可传入disabled属性，取值bolean类型,true/false，表示是否禁用，默认不禁用
+       * input类表单还可传入rule属性来进行自定义验证规则，rule取值规范参照elementUI，下面有简单示例
        * 示例：[
-       *        { name: '姓名', codeCamel: 'username', widgetType: 1 },
-       *        { name: '安全级别', codeCamel: 'securityLevel', widgetType: 5 },
-       *        { name: '选择类型', codeCamel: 'type', widgetType: 2, options: ['选项1', '选项2'] },
-       *        { name: '选择头像', codeCamel: 'avatar', widgetType: 3, options: ['美女', '帅哥'] },
-       *        { name: '部门', codeCamel: 'departmentId', widgetType: 4 },
-       *        { name: '新建时间', codeCamel: 'createTime', widgetType: 6, dateType: 'datetime', dateFormate: 'yyyy-MM-dd HH:mm:ss' },
-       *        { name: '登陆地址', codeCamel: 'loginid', widgetType: 7, options: ['会员', '访客'] },
-       *      ]
+                { name: '用户名称', codeCamel: 'username', widgetType: 1, disabled: true,
+                  rule: { required: true, message: '用户名不能为空', trigger: 'blur' }
+                },
+                { name: '电子邮件', codeCamel: 'email', widgetType: 5, disabled: false,
+                  rule: [
+                    { required: true, message: '请输入邮箱地址', trigger: 'blur' },
+                    { type: 'email', message: '请输入正确的邮箱地址', trigger: 'blur,change' }
+                  ]
+                },
+                { name: '选择类型', codeCamel: 'type', widgetType: 2, multiple: false,
+                  options: [
+                              { value: 0, label: '选项1' },
+                              { value: 1, label: '选项2' },
+                              { value: 2, label: '选项3' },
+                              { value: 3, label: '选项4' },
+                              { value: 4, label: '选项5' }
+                            ]
+                },
+                { name: '部门ID', codeCamel: 'departmentId', widgetType: 3, options: ['美女', '帅哥'] },
+                { codeCamel: 'password', widgetType: 4 },
+                { name: '新建时间', codeCamel: 'createTime', widgetType: 6, dateType: 'datetime', dateFormate: 'yyyy-MM-dd HH:mm:ss' },
+                { name: '登陆id', codeCamel: 'loginid', widgetType: 7, options: ['会员', '访客'] },
+                { name: '选择头像', codeCamel: 'avatar', widgetType: 8 }
+       ]
        */
       columns: {
         type: Array,
@@ -153,13 +200,15 @@
             console.warn(`传入的columns不符合要求，必须是数组`)
             return false
           }
-
           return true
         }
       },
       /**
        * 非必传，指定要显示的按钮及类型，默认不显示。
-       * 类型（type）关系到按钮要执行的方法，type=1，执行组件的提交方法，如果用户传入了method，会作为提交方法的回调函数执行
+       * 类型（type）关系到按钮要执行的方法，type=1，执行组件的提交方法，还可以传入了method字段，值为函数，
+       * 该函数会作为提交方法的回调函数执行,同时还可以传入beforeSubmit字段，值为函数，函数接受一个包含表单数据的Object
+       * 类型参数，该函数可以在提交之前对表单数据进行处理，参数类似{username: 'name', loginid: 'id'},其中键为
+       * 调用者传入的codeCamel
        * type=2，执行组件的重置方法,如果用户传入了method，会作为重置方法的回调函数执行
        * type=3，直接执行用户传入的方法
        * 如果要传入了确定/取消的回调函数，请先传入对应的按钮
@@ -191,16 +240,16 @@
       }
     },
     data() {
-      var validateUsername = (rule, value, callback) => {
-        // console.log(value.length)
-        if (!value) {
-          callback(new Error('请输入用户名'))
-        } else if ((value.length < 2 || value.length > 10)) {
-          callback(new Error('用户名长度在 2 到 10 个字符'))
-        } else {
-          callback()
-        }
-      }
+      // var validateUsername = (rule, value, callback) => {
+      //   // console.log(value.length)
+      //   if (!value) {
+      //     callback(new Error('请输入用户名'))
+      //   } else if ((value.length < 2 || value.length > 10)) {
+      //     callback(new Error('用户名长度在 2 到 10 个字符'))
+      //   } else {
+      //     callback()
+      //   }
+      // }
       var validatePassword = (rule, value, callback) => {
         if (value.length > 0 && !(/^(?![0-9]+$)(?![a-zA-Z]+$)[0-9A-Za-z]{6,20}$/.test(value))) {
           callback(new Error('密码必须同时包含数字和字母 6-20位'))
@@ -230,11 +279,11 @@
         formModel: {}, // 双向绑定的数据变量
         showUserColumns: [], // 要显示的字段
         rules: {
-          username: [
-            { validator: validateUsername, trigger: 'change' }
-            // { required: true, message: '请输入用户名', trigger: 'blur' },
-            // { min: 2, max: 10, message: '长度在 2 到 10 个字符', trigger: 'blur' }
-          ],
+          // username: [
+          //   { validator: validateUsername, trigger: 'change' }
+          // { required: true, message: '请输入用户名', trigger: 'blur' },
+          // { min: 2, max: 10, message: '长度在 2 到 10 个字符', trigger: 'blur' }
+          // ],
           loginid: [
             // { required: true, message: '请输入登陆ID', trigger: 'blur' }
           ],
@@ -245,11 +294,11 @@
           mobile: [
             { validator: validateMobile, trigger: 'change' }
             // { pattern: /^((0\d{2,3}-\d{7,8})|(1[3584]\d{9}))$/, message: '请输入正确的电话号码', trigger: 'change' }
-          ],
-          email: [
-            // { validator: validateEmail, trigger: 'change' }
-            { type: 'email', message: '请输入正确的邮箱', trigger: 'change' }
           ]
+          // email: [
+          // { validator: validateEmail, trigger: 'change' }
+          // { type: 'email', message: '请输入正确的邮箱', trigger: 'change' }
+          // ]
         },
         editorOption: { // 富文本选项配置
           placeholder: '',
@@ -293,18 +342,58 @@
       // this.validate()
       this.init()
       this.getList()
-      console.log(this.buttons)
+      // console.log(this.buttons)
     },
     methods: {
+      // inputChange(val) {
+      //   // console.log(event)
+      //   // console.log(val)
+      // },
+      // checkboxChange(val) {
+      //   console.log(val)
+      // },
+      // checkboxsChange(val) {
+      //   console.log(val)
+      // },
+      // selectChange(val) {
+      //   console.log(val)
+      // },
+      // radioChange(val) {
+      //   console.log(val)
+      // },
+      // logTimeChange(val) {
+      //   console.log(val)
+      // },
+      // textareaChange(val) {
+      //   console.log(val)
+      // },
+      // onEditorChange({ quill, html, text }) {
+      //   console.log(quill)
+      //   console.log(html)
+      //   console.log(text)
+      //   // this.content = html
+      // },
+      onEditorBlur(val) {
+        // console.log(val)
+      },
+      onEditorFocus(val) {
+        // console.log('editor focus!')
+      },
+      onEditorReady(val) {
+        // console.log('editor ready!')
+      },
+      handleRemove(file, fileList) {
+        console.log(file, fileList)
+      },
+      handleExceed(files, fileList) {
+        this.$message.warning(`当前限制选择 3 个文件，本次选择了 ${files.length} 个文件，共选择了 ${files.length + fileList.length} 个文件`)
+      },
       // 判断是否一个对象的所有属性都为空
       isEmpty(obj) {
         _.forEach(obj, function(val) {
           if (val) return false
         })
         return true
-      },
-      logTimeChange(value) {
-        console.log(value)
       },
       validate() {
         const self = this
@@ -326,15 +415,6 @@
           }
         })
       },
-      onEditorBlur(editor) {
-        // console.log('editor blur!')
-      },
-      onEditorFocus(editor) {
-        // console.log('editor focus!')
-      },
-      onEditorReady(editor) {
-        // console.log('editor ready!')
-      },
       // 存在tableId，修改数据前先获取数据
       getList() {
         const self = this
@@ -347,25 +427,17 @@
           } */
           self.Loading = false
           // console.log(self.formModel)
-          var formArray = _.keys(self.formModel)
+          var formArray = _.keys(self.formModel) // 提取formModel的属性到数组
           // console.log(formArray)
-          self.formModel = _.pick(resp.data, formArray)
+          self.formModel = _.pick(resp.data, formArray) // 根据数组中的属性提取出data中对应的数据
           // console.log(self.formModel)
         })
       },
       init() {
         const self = this
-        // 如果没有传columns，则全部显示
-        // if (!self.columns || !self.columns.length) {
-        //   _.each(self.schema['columns'], function(column) {
-        //     const tmp = JSON.parse(JSON.stringify(column))
-        //     self.$set(tmp, 'code', tmp.code.toLowerCase())
-        //     self.showUserColumns.push(tmp)
-        //   })
-        // } else
+        console.log(self.columns)
         if (self.columns && self.columns.length) {
-          self.showUserColumns = JSON.parse(JSON.stringify(self.columns))
-          // console.log(self.showUserColumns)
+          self.showUserColumns = _.cloneDeep(self.columns)
           // 将字符串对象进行替换处理
           _.each(self.showUserColumns, function(column, index) {
             if (typeof column === 'object') {
@@ -374,10 +446,14 @@
               // console.log(tmp)
               // self.$set(tmp, 'code', tmp.code.toLowerCase())
               column.name && self.$set(tmp, 'name', column.name) // 自定义字段名
-              self.$set(tmp, 'widgetType', column.widgetType || 1)
-              column.options && self.$set(tmp, 'options', column.options) // 设置下拉框/多选选项
+              self.$set(tmp, 'widgetType', column.widgetType || 1) // 设置表单类型
+              column.rule && self.$set(tmp, 'rule', column.rule) // 设置表单校验规则
+              column.disabled && self.$set(tmp, 'disabled', column.disabled) // 设置是否禁用
+              column.options && self.$set(tmp, 'options', column.options) // 设置下拉框或者多选的选项
+              column.multiple && self.$set(tmp, 'multiple', column.multiple) // 设置下拉框是否多选
               column.dateType && self.$set(tmp, 'dateType', column.dateType) // 设置日期表单显示类型
               column.dateFormate && self.$set(tmp, 'dateFormate', column.dateFormate) // 设置日期格式
+              column.change && self.$set(tmp, 'change', column.change) // 设置change函数
               self.$set(self.showUserColumns, index, tmp) // 顺序
             }
           })
@@ -393,6 +469,7 @@
           if (!request.defaults.baseURL) {
             request.defaults.baseURL = '/org/api'
           }
+          // console.log(request.defaults.baseURL)
           // 加载等待
           if (self.tableId) {
             self.Loading = true
@@ -410,9 +487,11 @@
        * 所有选项输入并验证通过，正确提交
        * 验证失败，禁止提交并给出提示
        */
-      onSubmit(callback) {
+      onSubmit(callback, processData) {
         const self = this
         console.log('点击了提交函数')
+        // console.log(self.formModel)
+        self.formModel = processData ? processData(self.formModel) : self.formModel // 对表单数据进行处理
         console.log(self.formModel)
         // if (self.isEmpty(self.formModel)) return
         self.$refs.form.validate((valid) => {
@@ -458,7 +537,7 @@
                   }
               }).then(resp => {
                 console.log('创建成功')
-                self.resetForm()
+                // self.resetForm()
                 if (typeof (callback) === 'function') {
                   callback()
                 }
