@@ -54,13 +54,13 @@
         <span v-if="definedOperate.length" v-for="operate in definedOperate">
           <!--自定义按钮-->
           <el-button v-if="operate.type == 'button'" class="filter-item" type="primary" v-waves :icon="operate.icon" @click="operate.func">{{operate.label}}</el-button>
-            <!--自定义下拉选择-->
+          <!--自定义下拉选择-->
           <el-form-item v-if="operate.type == 'select'" :label="operate.label">
             <el-select v-model="operate.value" :placeholder="operate.placeholder">
               <el-option v-for="o in operate.options" :label="o.label" :value="o.code"></el-option>
             </el-select>
           </el-form-item>
-            <!--自定义输入框-->
+          <!--自定义输入框-->
           <el-form-item v-if="operate.type == 'input'" :label="operate.label">
             <el-input @keyup.enter.native="handleFilter"
                       style="width: 200px;"
@@ -69,7 +69,7 @@
                       v-model="operate.value">
             </el-input>
           </el-form-item>
-            <!--自定义时间选择-->
+          <!--自定义时间选择-->
           <el-form-item v-if="operate.type == 'datetime'" :label="operate.label">
             <el-date-picker type="datetime"
                             align="right"
@@ -293,9 +293,10 @@
        *      isShow: false,      // 默认不显示详情
        *      showColumns: ['mobile', 'loginid', 'username', 'email']
        *    },
-       *    dataProcessing(value){}  // 对接口返回数据进行处理
+       *    dataProcessing(value){}  // 对接口返回数据进行处理（必须有返回值,返回值需为 [{}] 的形式，支持放回Promise对象）
        *    "changeValue": {      // 数据库字段转化显示，例如(0=否,1=是)
-       *      username: {1: '是', 0: '否'}
+       *      username: {1: '是', 0: '否'},
+       *      type: { 1: 'Hm-isChecked', 0: 'Hm-noChecked' } // 以多选框的形式展示Hm-isChecked(选择状态)、Hm-noChecked(未选择状态)
        *    },
        *    "newData": {  // 新建按钮的配置
        *      isShow: false,  // 默认不显示新建按钮
@@ -567,7 +568,15 @@
 
           // 数据处理
           if (self.options && self.options.dataProcessing) {
-            self.list = self.options.dataProcessing(resp.data)
+            if (Object.prototype.toString.apply(self.options.dataProcessing(resp.data)) === '[object Promise]') {
+              console.log('IS-[object Promise]')
+              self.options.dataProcessing(resp.data).then(function(dataList) {
+                self.list = dataList
+              })
+            } else {
+              console.log('NO-[object Promise]')
+              self.list = self.options.dataProcessing(resp.data)
+            }
           }
           self.total = parseInt(resp.headers.total)
           self.listLoading = false
