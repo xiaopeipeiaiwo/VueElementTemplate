@@ -92,7 +92,7 @@
                 class="upload-demo"
                 action="/api/upload"
                 :on-remove="handleRemove"
-                multiple
+                multiple :file-list="fileList"
                 :on-exceed="handleExceed">
                 <el-button slot="trigger" size="small" type="primary"
                            :disabled="column.disabled">选取文件</el-button>
@@ -335,7 +335,9 @@
               picker.$emit('pick', date)
             }
           }]
-        }
+        },
+        fileList: []
+
       }
     },
     created() {
@@ -345,6 +347,18 @@
       // console.log(this.buttons)
     },
     methods: {
+      handleRemove(file, fileList) {
+        console.log(file, fileList)
+      },
+      handlePreview(file) {
+        console.log(file)
+      },
+      handleExceed(files, fileList) {
+        console.log(`当前限制选择 3 个文件，本次选择了 ${files.length} 个文件，共选择了 ${files.length + fileList.length} 个文件`)
+      },
+      beforeRemove(file, fileList) {
+        console.log(this.$confirm(`确定移除$ { file.name } ？`))
+      },
       // inputChange(val) {
       //   // console.log(event)
       //   // console.log(val)
@@ -381,12 +395,6 @@
       },
       onEditorReady(val) {
         // console.log('editor ready!')
-      },
-      handleRemove(file, fileList) {
-        console.log(file, fileList)
-      },
-      handleExceed(files, fileList) {
-        this.$message.warning(`当前限制选择 3 个文件，本次选择了 ${files.length} 个文件，共选择了 ${files.length + fileList.length} 个文件`)
       },
       // 判断是否一个对象的所有属性都为空
       isEmpty(obj) {
