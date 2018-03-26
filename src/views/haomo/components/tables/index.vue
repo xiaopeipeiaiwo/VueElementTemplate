@@ -24,7 +24,7 @@
     },
     data() {
       return {
-        showUserColumns: [{ name: '手机号', codeCamel: 'mobile', isSort: true }, { name: '登录ID', codeCamel: 'loginid', isSort: true }, 'username', 'email', 'createTime'],
+        showUserColumns: [{ name: '手机号', codeCamel: 'mobile', isSort: true }, { name: '登录ID', codeCamel: 'loginid', isSort: true }, 'username', 'email', { name: '创建时间', codeCamel: 'createTime', isSort: true }],
         userFilters: [
           { placeholder: '过滤手机号', 'mobile': { 'like': '' }, isShow: true },
           { placeholder: '过滤用户名', 'username': { 'equalTo': '' }, isShow: true },
@@ -51,7 +51,7 @@
         sortItem: 'create_time',
         sortOrder: 'desc',
         changeValue: {
-          username: { 1: '是', 0: '否' }
+          username: { 1: 'Hm-isChecked', 0: 'Hm-noChecked' }
         },
         newData: {
           isShow: true,

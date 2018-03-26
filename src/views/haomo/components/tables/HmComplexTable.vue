@@ -111,8 +111,8 @@
       <el-table-column type="selection" width="55" v-if="isShowSelection"></el-table-column>
       <el-table-column v-for="(column,index) in showColumns" :key="index" align="center" :label="column.name" :prop="column.codeCamel" :sortable="column.isSort">
         <template slot-scope="scope">
-          <span>{{ scope.row[column.codeCamel] }}</span>
-          <!--<el-checkbox v-model="listLoading"></el-checkbox>-->
+          <span v-if="scope.row[column.codeCamel] !== false && scope.row[column.codeCamel] !== true">{{ scope.row[column.codeCamel] }}</span>
+          <el-checkbox v-if="scope.row[column.codeCamel] === false || scope.row[column.codeCamel] === true" v-model="scope.row[column.codeCamel]"></el-checkbox>
         </template>
       </el-table-column>
       <el-table-column fixed="right" label="操作" :width="operationWidth" v-if="isShowEditDataButton || isShowDeleteButton">
@@ -524,7 +524,7 @@
       },
       // 排序
       sortChange(row) {
-        this.listQuery.sortItem = row.prop
+        this.listQuery.sortItem = row.prop.replace(/([A-Z])/g, '_$1').toLowerCase()
         this.listQuery.sortOrder = row.order === 'descending' ? 'desc' : 'asc'
         this.getList()
       },
@@ -551,10 +551,6 @@
         request(self.schema.modelUnderscorePlural, {
           params: params
         }).then(resp => {
-          // 数据库字段转化显示
-          if (self.options && self.options.changeValue) {
-            resp.data = self.changeValue(resp.data)
-          }
           if (resp.data.length !== 0 && resp.data[0].superior !== undefined && resp.data[0].includes !== undefined &&
             resp.data[0].refers !== undefined && resp.data[0].relates !== undefined) {
             self.list = []
@@ -563,6 +559,10 @@
             })
           } else {
             self.list = resp.data
+          }
+          // 数据库字段转化显示
+          if (self.options && self.options.changeValue) {
+            resp.data = self.changeValue(self.list)
           }
 
           // 数据处理
@@ -579,7 +579,7 @@
         _.map(data, function(item, index) {
           _.forEach(item, function(listValue, listKey) {
             if (self.options.changeValue[listKey] && self.options.changeValue[listKey][listValue]) {
-              item[listKey] = self.options.changeValue[listKey][listValue]
+              item[listKey] = self.options.changeValue[listKey][listValue] === 'Hm-isChecked' ? true : self.options.changeValue[listKey][listValue] === 'Hm-noChecked' ? false : self.options.changeValue[listKey][listValue]
             }
           })
         })
