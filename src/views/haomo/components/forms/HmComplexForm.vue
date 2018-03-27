@@ -89,11 +89,14 @@
               </el-radio-group>
               <!-- 8 文件 -->
               <el-upload v-else-if="column.widgetType === 8"
-                class="upload-demo"
-                action="/api/upload"
-                :on-remove="handleRemove"
-                multiple :file-list="fileList"
-                :on-exceed="handleExceed">
+                         name="picture"
+                         action="/api/upload"
+                         :on-remove="handleRemove"
+                         :file-list="fileList"
+                         multiple
+                         ref="upload"
+                         :data-code="column.codeCamel"
+                         :on-success="uploadSuccess">
                 <el-button slot="trigger" size="small" type="primary"
                            :disabled="column.disabled">选取文件</el-button>
               </el-upload>
@@ -336,7 +339,8 @@
             }
           }]
         },
-        fileList: []
+        fileList: [], // 上传文件列表
+        fileCode: '' // 上传组件对应的数据库字段
 
       }
     },
@@ -353,11 +357,13 @@
       handlePreview(file) {
         console.log(file)
       },
-      handleExceed(files, fileList) {
-        console.log(`当前限制选择 3 个文件，本次选择了 ${files.length} 个文件，共选择了 ${files.length + fileList.length} 个文件`)
-      },
-      beforeRemove(file, fileList) {
-        console.log(this.$confirm(`确定移除$ { file.name } ？`))
+      uploadSuccess(response, file, fileList) {
+        console.log('上传成功')
+        console.log(response)
+        // console.log(file)
+        // console.log(fileList)
+        this.fileList = fileList
+        this.formModel[this.fileCode] = fileList
       },
       // inputChange(val) {
       //   // console.log(event)
@@ -465,7 +471,7 @@
               self.$set(self.showUserColumns, index, tmp) // 顺序
             }
           })
-          console.log(self.showUserColumns)
+          // console.log(self.showUserColumns)
           // 提取v-model绑定的变量
           _.each(self.showUserColumns, function(item) {
             if (item.widgetType === 3 && item.options && item.options.length > 0) {
@@ -500,6 +506,7 @@
         console.log('点击了提交函数')
         // console.log(self.formModel)
         self.formModel = processData ? processData(self.formModel) : self.formModel // 对表单数据进行处理
+        _.each()
         console.log(self.formModel)
         // if (self.isEmpty(self.formModel)) return
         self.$refs.form.validate((valid) => {
