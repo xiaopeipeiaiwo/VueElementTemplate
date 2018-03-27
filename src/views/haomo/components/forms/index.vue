@@ -24,7 +24,7 @@
     },
     data() {
       return {
-        // widgetType值 1：普通input 2：下拉框 (如果是下拉框 再传一个options表示下拉框选项)3：复选框 4：文本域 5：富文本 6：日期 7：单选框
+        // widgetType值 1：普通input 2：下拉框 (如果是下拉框 再传一个options表示下拉框选项)3：复选框 4：文本域 5：富文本 6：日期 7：单选框 8: 文件上传
         showUserColumns: [
           { name: '用户名称', codeCamel: 'username', widgetType: 1, disabled: false,
             change: this.inputChange
@@ -48,7 +48,7 @@
           { codeCamel: 'password', widgetType: 4, change: this.inputChange },
           { name: '新建时间', codeCamel: 'createTime', widgetType: 6, dateType: 'datetime', dateFormate: 'yyyy-MM-dd HH:mm:ss', change: this.inputChange },
           { name: '登陆id', codeCamel: 'loginid', widgetType: 7, options: ['会员', '访客'], change: this.inputChange },
-          { name: '选择头像', codeCamel: 'avatar', widgetType: 8, change: this.inputChange }
+          { name: '选择头像', codeCamel: 'avatar', widgetType: 8 }
         ],
         // 要显示按钮
         showUserButtons: [
