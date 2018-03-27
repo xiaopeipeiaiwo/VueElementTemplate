@@ -33,7 +33,6 @@
                           class="filter-item hm-complex-table__filter-span"
                           @keyup.enter.native="handleFilter"
                           value-format="yyyy-MM-dd HH:mm:ss"
-                          :picker-options="pickerOptions"
                           :placeholder="filter.placeholder[0]"
                           v-if="filter.isShow && !isShowFilter(filter) && isDatetimeFilter(filter)"
                           v-model="listQuery.filters[schema['modelUnderscore']][getFilterColumn(filter)][getFilterOper(filter)]">
@@ -43,7 +42,6 @@
                           class="filter-item"
                           @keyup.enter.native="handleFilter"
                           value-format="yyyy-MM-dd HH:mm:ss"
-                          :picker-options="pickerOptions"
                           :placeholder="filter.placeholder[1]"
                           v-if="filter.isShow && !isShowFilter(filter) && isDatetimeFilter(filter)"
                           v-model="listQuery.filters[schema['modelUnderscore']][getFilterColumn(filter)][getFilterOperTwin(filter)]">
@@ -72,11 +70,9 @@
           <!--自定义时间选择-->
           <el-form-item v-if="operate.type == 'datetime'" :label="operate.label">
             <el-date-picker type="datetime"
-                            align="right"
                             class="filter-item"
                             @keyup.enter.native="handleFilter"
                             value-format="yyyy-MM-dd HH:mm:ss"
-                            :picker-options="pickerOptions"
                             :placeholder="operate.placeholder"
                             v-model="operate.value">
             </el-date-picker>
@@ -376,33 +372,7 @@
         operationWidth: 0, // 操作栏的宽度
         isShowDetail: false, // 是否显示详情按钮
 
-        definedOperate: [], // 自定义操作
-
-        pickerOptions: { // 日期选项配置
-          disabledDate(time) {
-            return time.getTime() > Date.now()
-          },
-          shortcuts: [{
-            text: '今天',
-            onClick(picker) {
-              picker.$emit('pick', new Date())
-            }
-          }, {
-            text: '昨天',
-            onClick(picker) {
-              const date = new Date()
-              date.setTime(date.getTime() - 3600 * 1000 * 24)
-              picker.$emit('pick', date)
-            }
-          }, {
-            text: '一周前',
-            onClick(picker) {
-              const date = new Date()
-              date.setTime(date.getTime() - 3600 * 1000 * 24 * 7)
-              picker.$emit('pick', date)
-            }
-          }]
-        }
+        definedOperate: [] // 自定义操作
       }
     },
     computed: {
@@ -563,7 +533,7 @@
           }
           // 数据库字段转化显示
           if (self.options && self.options.changeValue) {
-            resp.data = self.changeValue(self.list)
+            self.list = self.changeValue(self.list)
           }
 
           // 数据处理
