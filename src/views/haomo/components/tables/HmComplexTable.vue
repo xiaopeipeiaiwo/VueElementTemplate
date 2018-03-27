@@ -54,7 +54,7 @@
           <el-button v-if="operate.type == 'button'" class="filter-item" type="primary" v-waves :icon="operate.icon" @click="operate.func">{{operate.label}}</el-button>
           <!--自定义下拉选择-->
           <el-form-item v-if="operate.type == 'select'" :label="operate.label">
-            <el-select v-model="operate.value" :placeholder="operate.placeholder">
+            <el-select v-model="operate.value" :placeholder="operate.placeholder" clearable>
               <el-option v-for="o in operate.options" :label="o.label" :value="o.code"></el-option>
             </el-select>
           </el-form-item>
@@ -538,14 +538,14 @@
 
           // 数据处理
           if (self.options && self.options.dataProcessing) {
-            if (Object.prototype.toString.apply(self.options.dataProcessing(resp.data)) === '[object Promise]') {
+            if (Object.prototype.toString.apply(self.options.dataProcessing(resp.data, params, self.definedOperate)) === '[object Promise]') {
               console.log('IS-[object Promise]')
-              self.options.dataProcessing(resp.data).then(function(dataList) {
+              self.options.dataProcessing(resp.data, params, self.definedOperate).then(function(dataList) {
                 self.list = dataList
               })
             } else {
               console.log('NO-[object Promise]')
-              self.list = self.options.dataProcessing(resp.data)
+              self.list = self.options.dataProcessing(resp.data, params, self.definedOperate)
             }
           }
           self.total = parseInt(resp.headers.total)
@@ -580,7 +580,18 @@
       // 添加一条数据
       openDialog(type, data) {
         const self = this
-        self.dialogFormVisible = true
+        if (type === 'editData' && self.userDefined && self.userDefined.definedEdit) {
+          self.userDefined.definedEdit(true, data)
+          return false
+        }
+        if (type === 'newData' && self.userDefined && self.userDefined.definedNew) {
+          self.userDefined.definedNew(true)
+          return false
+        }
+        if (type === 'newData' && self.userDefined && self.userDefined.definedDetail) {
+          self.userDefined.definedDetail(true, data)
+          return false
+        }
         if (type === 'editData') {
           self.dialogName = '编辑'
           self.showUserColumns = self.options.editData.showUserColumns
@@ -610,6 +621,7 @@
             item.id = data.id
           })
         }
+        self.dialogFormVisible = true
       },
       // 表单的提交
       formConfirm() {
