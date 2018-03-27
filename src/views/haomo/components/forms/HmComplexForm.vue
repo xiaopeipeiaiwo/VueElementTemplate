@@ -95,7 +95,6 @@
                          :file-list="fileList"
                          multiple
                          ref="upload"
-                         :data-code="column.codeCamel"
                          :on-success="uploadSuccess">
                 <el-button slot="trigger" size="small" type="primary"
                            :disabled="column.disabled">选取文件</el-button>
@@ -160,7 +159,7 @@
        * name属性表示自定义的字段名，如果不传，默认为数据库中的字段名，
        * widgetType属性表示该字段要显示的表单类型(普通输入框、文本域、富文本、下拉框...)，不传默认为普通input
        * change属性，值为函数类型，表示input的change事件的执行方法，参数即为input输入内容
-       * 取值1-7(1表示普通输入框,2表示下拉框,3表示复选框,4表示文本域,5表示富文本,6表示日期，7表示单选框)，
+       * 取值1-8(1表示普通输入框,2表示下拉框,3表示复选框,4表示文本域,5表示富文本,6表示日期，7表示单选框，8表示文件上传)，
        * 若表单类型为下拉框/复选框/单选框，还需传入options字段，值为数组(数组元素是下拉框/复选框/单选框的选项），
        * 对于复选框，如果只有一个备选项则不必传options,
        * 若表单类型为下拉框，还可传入multiple字段，取值bolean类型，true/false，表示是否多选，默认false
@@ -352,18 +351,31 @@
     },
     methods: {
       handleRemove(file, fileList) {
-        console.log(file, fileList)
+        // const self = this
+        // console.log(file, fileList)
+        // this.fileList.push(fileList.response)
+        // console.log(this.fileList)
+        // console.log(self.formModel)
       },
       handlePreview(file) {
         console.log(file)
       },
       uploadSuccess(response, file, fileList) {
+        const self = this
         console.log('上传成功')
         console.log(response)
-        // console.log(file)
-        // console.log(fileList)
-        this.fileList = fileList
-        this.formModel[this.fileCode] = fileList
+        console.log('fileList', fileList)
+        console.log(self.fileList)
+        _.each(self.columns, function(item, index) {
+          if (item.widgetType === 8) {
+            _.forEach(self.formModel, function(value, key) {
+              if (item.codeCamel === key) {
+                self.formModel[key] = fileList
+              }
+            })
+          }
+        })
+        console.log(self.formModel)
       },
       // inputChange(val) {
       //   // console.log(event)
@@ -474,7 +486,7 @@
           // console.log(self.showUserColumns)
           // 提取v-model绑定的变量
           _.each(self.showUserColumns, function(item) {
-            if (item.widgetType === 3 && item.options && item.options.length > 0) {
+            if (item.widgetType === 8 || (item.widgetType === 3 && item.options && item.options.length > 0)) {
               self.$set(self.formModel, item.codeCamel, [])
             } else {
               self.$set(self.formModel, item.codeCamel, '')
@@ -533,11 +545,13 @@
               }).then(resp => {
                 console.log('修改成功')
                 self.resetForm()
+                self.formModel = {} // 新建完成清空数据
                 if (typeof (callback) === 'function') {
                   callback()
                 }
               })
             } else { // 不存在tableId 则创建一条数据
+              console.log('self.formModel', self.formModel)
               request(self.schema.modelUnderscorePlural + '/new', {
                 method: 'post',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
@@ -552,6 +566,7 @@
                   }
               }).then(resp => {
                 console.log('创建成功')
+                self.formModel = {} // 新建完成清空数据
                 // self.resetForm()
                 if (typeof (callback) === 'function') {
                   callback()
