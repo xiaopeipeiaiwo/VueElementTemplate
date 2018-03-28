@@ -102,7 +102,7 @@
 
     <!-- 表格 -->
     <el-table :data="list" v-loading="listLoading" element-loading-text="给我一点时间" border fit highlight-current-row
-              style="width: 100%" @selection-change="handleSelectionChange" @sort-change="sortChange">
+              style="width: 100%" @selection-change="handleSelectionChange" @sort-change="sortChange" @current-change="tableCurrentChange">
       <el-table-column type="index" :index="indexMethod" label="序号" width="50px"></el-table-column>
       <el-table-column type="selection" width="55" v-if="isShowSelection"></el-table-column>
       <el-table-column v-for="(column,index) in showColumns" :key="index" align="center" :label="column.name" :prop="column.codeCamel" :sortable="column.isSort">
@@ -116,6 +116,7 @@
           <el-button @click="openDialog('editData',scope.row)" v-if="isShowEditDataButton" type="text" size="small">编辑</el-button>
           <el-button @click="deleteData(scope.row)" type="text" v-if="isShowDeleteButton" size="small">删除</el-button>
           <el-button @click="openDialog('detail',scope.row)" type="text" v-if="isShowDetail" size="small">详情</el-button>
+          <el-button @click="openDialog('detail',scope.row)" type="text" v-if="isShowDetail" size="small"></el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -285,6 +286,7 @@
        *    "showRefresh": false, //默认不显示刷新按钮
        *    "showDeleteButton": false,  //默认不显示删除按钮
        *    "buttonGroup": false  //默认不以按钮组的方式呈现button
+       *    tableCurrentChange(value){} // 设置点击某行所执行方法
        *    showDetail: {
        *      isShow: false,      // 默认不显示详情
        *      showColumns: ['mobile', 'loginid', 'username', 'email']
@@ -551,6 +553,13 @@
           self.total = parseInt(resp.headers.total)
           self.listLoading = false
         })
+      },
+      tableCurrentChange(value) {
+        const self = this
+        if (self.options && self.options.tableCurrentChange) {
+          console.log('value', value)
+          self.options.tableCurrentChange(value)
+        }
       },
       // 数据库字段转化显示，例如(0=否,1=是)
       changeValue(data) {

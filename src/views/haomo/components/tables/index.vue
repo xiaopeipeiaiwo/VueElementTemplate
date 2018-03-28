@@ -77,7 +77,8 @@
         showDetail: {
           isShow: true,
           showColumns: ['mobile', 'loginid', 'username', 'email']
-        }
+        },
+        tableCurrentChange(value) {}
         // dataProcessing(value, params, definedOperate) {} // 处理返回后的数据,必须return 处理后的数据
       }
       this.userDefined = {
@@ -89,6 +90,9 @@
           { type: 'input', label: '', placeholder: '邮箱', code: 'email', value: '' },
           { type: 'datetime', label: '', placeholder: '创建时间', code: 'createTime', value: '' }
         ],
+        definedOperation: {
+          label: '测试'
+        },
         definedEdit() {
 
         },
