@@ -604,12 +604,18 @@
         if (type === 'editData') {
           self.dialogName = '编辑'
           self.showUserColumns = self.options.editData.showUserColumns
+          if (self.options.editData.showUserButtons) {
+            self.showUserButtons = self.options.editData.showUserButtons
+          }
           self.formSchema = self.options.editData.formSchema
           self.layout = self.options.editData.layout
           self.tableId = data.id
         }
         if (type === 'newData') {
           self.dialogName = '新建'
+          if (self.options.newData.showUserButtons) {
+            self.showUserButtons = self.options.newData.showUserButtons
+          }
           self.showUserColumns = self.options.newData.showUserColumns
           self.formSchema = self.options.newData.formSchema
           self.layout = self.options.newData.layout

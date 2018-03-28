@@ -60,12 +60,14 @@
             { name: '登录ID', codeCamel: 'loginid', widgetType: 1 },
             { name: '类型', codeCamel: 'type', widgetType: 1 }
           ],
+          showUserButtons: [],
           formSchema: schema['HmUser'],
           layout: { left: 0, middle: 24, right: 0 }
         },
         editData: {
           isShow: true,
           showUserColumns: [{ name: '姓名', codeCamel: 'username', widgetType: 1 }],
+          showUserButtons: [],
           formSchema: schema['HmUser'],
           layout: { left: 0, middle: 24, right: 0 }
         },
