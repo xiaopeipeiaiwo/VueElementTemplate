@@ -116,7 +116,7 @@
           <el-button @click="openDialog('editData',scope.row)" v-if="isShowEditDataButton" type="text" size="small">编辑</el-button>
           <el-button @click="deleteData(scope.row)" type="text" v-if="isShowDeleteButton" size="small">删除</el-button>
           <el-button @click="openDialog('detail',scope.row)" type="text" v-if="isShowDetail" size="small">详情</el-button>
-          <el-button @click="openDialog('detail',scope.row)" type="text" v-if="isShowDetail" size="small"></el-button>
+          <el-button @click="operation.func(scope.row)" type="text" v-if="definedOperation.length" size="small" v-for="operation in definedOperation">{{operation.label}}</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -133,7 +133,7 @@
     <!-- 弹窗 -->
     <!-- @TODO 补充详情弹窗 -->
 
-    <el-dialog :title="dialogName" :visible.sync="dialogFormVisible" :close-on-click-modal="closeOnClickModal" width="dialogWidth">
+    <el-dialog :title="dialogName" :visible.sync="dialogFormVisible" :close-on-click-modal="closeOnClickModal" width="dialogWidth" v-if="dialogFormVisible">
       <el-form v-if="dialogName == '详情'">
         <el-form-item :label="dialog.name" :label-width="formLabelWidth" v-for="dialog in dialogForm">
           <el-input v-model="dialog.value" disabled auto-complete="off"></el-input>
@@ -143,7 +143,7 @@
                        :columns="showUserColumns"
                        :buttons="showUserButtons"
                        :layout="layout"
-                       :tableId="tableId" v-if="dialogName != '详情'">
+                       :tableId="tableId" v-if="dialogName != '详情'" ref="selectfood">
       </hm-complex-form>
     </el-dialog>
 
@@ -374,7 +374,8 @@
         operationWidth: 0, // 操作栏的宽度
         isShowDetail: false, // 是否显示详情按钮
 
-        definedOperate: [] // 自定义操作
+        definedOperate: [], // 自定义操作
+        definedOperation: []
       }
     },
     computed: {
@@ -494,6 +495,10 @@
         if (self.userDefined.definedOperate) {
           self.definedOperate = self.userDefined.definedOperate
         }
+        if (self.userDefined.definedOperation) {
+          self.operationWidth += 50 * self.userDefined.definedOperation.length
+          self.definedOperation = self.userDefined.definedOperation
+        }
       },
       // 排序
       sortChange(row) {
@@ -597,10 +602,11 @@
           self.userDefined.definedNew(true)
           return false
         }
-        if (type === 'newData' && self.userDefined && self.userDefined.definedDetail) {
+        if (type === 'detail' && self.userDefined && self.userDefined.definedDetail) {
           self.userDefined.definedDetail(true, data)
           return false
         }
+        self.tableId = ''
         if (type === 'editData') {
           self.dialogName = '编辑'
           self.showUserColumns = self.options.editData.showUserColumns
