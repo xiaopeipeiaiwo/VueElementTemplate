@@ -60,12 +60,14 @@
             { name: '登录ID', codeCamel: 'loginid', widgetType: 1 },
             { name: '类型', codeCamel: 'type', widgetType: 1 }
           ],
+          showUserButtons: [],
           formSchema: schema['HmUser'],
           layout: { left: 0, middle: 24, right: 0 }
         },
         editData: {
           isShow: true,
           showUserColumns: [{ name: '姓名', codeCamel: 'username', widgetType: 1 }],
+          showUserButtons: [],
           formSchema: schema['HmUser'],
           layout: { left: 0, middle: 24, right: 0 }
         },
@@ -77,7 +79,8 @@
         showDetail: {
           isShow: true,
           showColumns: ['mobile', 'loginid', 'username', 'email']
-        }
+        },
+        tableCurrentChange(value) {}
         // dataProcessing(value, params, definedOperate) {} // 处理返回后的数据,必须return 处理后的数据
       }
       this.userDefined = {
@@ -89,6 +92,9 @@
           { type: 'input', label: '', placeholder: '邮箱', code: 'email', value: '' },
           { type: 'datetime', label: '', placeholder: '创建时间', code: 'createTime', value: '' }
         ],
+        definedOperation: {
+          label: '测试'
+        },
         definedEdit() {
 
         },
