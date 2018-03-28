@@ -48,7 +48,7 @@
           { codeCamel: 'password', widgetType: 4, change: this.inputChange },
           { name: '新建时间', codeCamel: 'createTime', widgetType: 6, dateType: 'datetime', dateFormate: 'yyyy-MM-dd HH:mm:ss', change: this.inputChange },
           { name: '登陆id', codeCamel: 'loginid', widgetType: 7, options: ['会员', '访客'], change: this.inputChange },
-          { name: '选择头像', codeCamel: 'avatar', widgetType: 8 }
+          { name: '选择头像', codeCamel: 'avatar', widgetType: 8 } // url是后台接口地址
         ],
         // 要显示按钮
         showUserButtons: [
@@ -68,7 +68,8 @@
     created() {
       this.schema = schema
       // console.log(this.schema)
-      this.tableId = '1efff63125954583b0ac5a9c252b9041'
+      // this.tableId = '1efff63125954583b0ac5a9c252b9041'
+      this.tableId = '363fff1772b840aa9714b491aea70806'
     },
     methods: {
       inputChange(val) {

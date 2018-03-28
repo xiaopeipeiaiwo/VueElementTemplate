@@ -90,7 +90,7 @@
               <!-- 8 文件 -->
               <el-upload v-else-if="column.widgetType === 8"
                          name="picture"
-                         action="/api/upload"
+                         :action=" column.url || '/api/upload'"
                          :on-remove="handleRemove"
                          :file-list="fileList"
                          multiple
@@ -252,20 +252,20 @@
       //     callback()
       //   }
       // }
-      var validatePassword = (rule, value, callback) => {
-        if (value.length > 0 && !(/^(?![0-9]+$)(?![a-zA-Z]+$)[0-9A-Za-z]{6,20}$/.test(value))) {
-          callback(new Error('密码必须同时包含数字和字母 6-20位'))
-        } else {
-          callback()
-        }
-      }
-      var validateMobile = (rule, value, callback) => {
-        if (value.length > 0 && !(/^((0\d{2,3}-\d{7,8})|(1[3584]\d{9}))$/.test(value))) {
-          callback(new Error('请输入正确的电话号码或手机号'))
-        } else {
-          callback()
-        }
-      }
+      // var validatePassword = (rule, value, callback) => {
+      //   if (value.length > 0 && !(/^(?![0-9]+$)(?![a-zA-Z]+$)[0-9A-Za-z]{6,20}$/.test(value))) {
+      //     callback(new Error('密码必须同时包含数字和字母 6-20位'))
+      //   } else {
+      //     callback()
+      //   }
+      // }
+      // var validateMobile = (rule, value, callback) => {
+      //   if (value.length > 0 && !(/^((0\d{2,3}-\d{7,8})|(1[3584]\d{9}))$/.test(value))) {
+      //     callback(new Error('请输入正确的电话号码或手机号'))
+      //   } else {
+      //     callback()
+      //   }
+      // }
       // var validateEmail = (rule, value, callback) => {
       //   if (value.length > 0) {
       //     if (!(/^[A-Za-z0-9\u4e00-\u9fa5]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/.test(value))) {
@@ -286,17 +286,17 @@
           // { required: true, message: '请输入用户名', trigger: 'blur' },
           // { min: 2, max: 10, message: '长度在 2 到 10 个字符', trigger: 'blur' }
           // ],
-          loginid: [
-            // { required: true, message: '请输入登陆ID', trigger: 'blur' }
-          ],
-          password: [
-            { validator: validatePassword, trigger: 'change' }
-            // { pattern: /^(?![0-9]+$)(?![a-zA-Z]+$)[0-9A-Za-z]{6,20}$/, message: '密码必须同时包含数字和字母 6-20位', trigger: 'change' }
-          ],
-          mobile: [
-            { validator: validateMobile, trigger: 'change' }
-            // { pattern: /^((0\d{2,3}-\d{7,8})|(1[3584]\d{9}))$/, message: '请输入正确的电话号码', trigger: 'change' }
-          ]
+          // loginid: [
+          // { required: true, message: '请输入登陆ID', trigger: 'blur' }
+          // ],
+          // password: [
+          //   { validator: validatePassword, trigger: 'change' }
+          // { pattern: /^(?![0-9]+$)(?![a-zA-Z]+$)[0-9A-Za-z]{6,20}$/, message: '密码必须同时包含数字和字母 6-20位', trigger: 'change' }
+          // ],
+          // mobile: [
+          //   { validator: validateMobile, trigger: 'change' }
+          // { pattern: /^((0\d{2,3}-\d{7,8})|(1[3584]\d{9}))$/, message: '请输入正确的电话号码', trigger: 'change' }
+          // ]
           // email: [
           // { validator: validateEmail, trigger: 'change' }
           // { type: 'email', message: '请输入正确的邮箱', trigger: 'change' }
@@ -314,9 +314,9 @@
           }
         },
         pickerOptions: { // 日期选项配置
-          disabledDate(time) {
-            return time.getTime() > Date.now()
-          },
+          // disabledDate(time) {
+          //   return time.getTime() > Date.now()
+          // },
           shortcuts: [{
             text: '今天',
             onClick(picker) {
@@ -351,10 +351,6 @@
     },
     methods: {
       handleRemove(file, fileList) {
-        // const self = this
-        // console.log(file, fileList)
-        // this.fileList.push(fileList.response)
-        // console.log(this.fileList)
         // console.log(self.formModel)
       },
       handlePreview(file) {
@@ -370,7 +366,7 @@
           if (item.widgetType === 8) {
             _.forEach(self.formModel, function(value, key) {
               if (item.codeCamel === key) {
-                self.formModel[key] = fileList
+                self.formModel[key] = response
               }
             })
           }
@@ -480,6 +476,7 @@
               column.dateType && self.$set(tmp, 'dateType', column.dateType) // 设置日期表单显示类型
               column.dateFormate && self.$set(tmp, 'dateFormate', column.dateFormate) // 设置日期格式
               column.change && self.$set(tmp, 'change', column.change) // 设置change函数
+              column.url && self.$set(tmp, 'url', column.url) // 设置文件上传地址
               self.$set(self.showUserColumns, index, tmp) // 顺序
             }
           })
@@ -516,10 +513,13 @@
       onSubmit(callback, processData) {
         const self = this
         console.log('点击了提交函数')
-        // console.log(self.formModel)
-        self.formModel = processData ? processData(self.formModel) : self.formModel // 对表单数据进行处理
-        _.each()
         console.log(self.formModel)
+        self.formModel = processData ? processData(self.formModel) : self.formModel // 对表单数据进行处理
+        // self.formModel = JSON.stringify(self.formModel)
+        // var params = _.cloneDeep(self.formModel)
+        // params = JSON.stringify(params)
+        // console.log(self.formModel)
+        // console.log(params)
         // if (self.isEmpty(self.formModel)) return
         self.$refs.form.validate((valid) => {
           if (valid) {
@@ -545,13 +545,12 @@
               }).then(resp => {
                 console.log('修改成功')
                 self.resetForm()
-                self.formModel = {} // 新建完成清空数据
+                // self.formModel = {} // 新建完成清空数据
                 if (typeof (callback) === 'function') {
                   callback()
                 }
               })
             } else { // 不存在tableId 则创建一条数据
-              console.log('self.formModel', self.formModel)
               request(self.schema.modelUnderscorePlural + '/new', {
                 method: 'post',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
@@ -566,7 +565,7 @@
                   }
               }).then(resp => {
                 console.log('创建成功')
-                self.formModel = {} // 新建完成清空数据
+                // self.formModel = {} // 新建完成清空数据
                 // self.resetForm()
                 if (typeof (callback) === 'function') {
                   callback()
