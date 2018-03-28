@@ -78,7 +78,7 @@
           isShow: true,
           showColumns: ['mobile', 'loginid', 'username', 'email']
         }
-        // dataProcessing(value) {} // 处理返回后的数据,必须return 处理后的数据
+        // dataProcessing(value, params, definedOperate) {} // 处理返回后的数据,必须return 处理后的数据
       }
       this.userDefined = {
         definedParams(params, operate) {
@@ -88,7 +88,16 @@
           { type: 'select', label: '', placeholder: '类型', options: [{ label: '姓名', code: 'username' }, { label: '登录ID', code: 'loginid' }], value: '' },
           { type: 'input', label: '', placeholder: '邮箱', code: 'email', value: '' },
           { type: 'datetime', label: '', placeholder: '创建时间', code: 'createTime', value: '' }
-        ]
+        ],
+        definedEdit() {
+
+        },
+        definedNew() {
+
+        },
+        definedDetail() {
+
+        }
       }
     },
     methods: {
