@@ -93,7 +93,7 @@
                          :action=" column.url || '/api/upload'"
                          :on-remove="handleRemove"
                          :file-list="fileList"
-                         multiple
+                         :multiple="column.multiple"
                          ref="upload"
                          :on-success="uploadSuccess">
                 <el-button slot="trigger" size="small" type="primary"
@@ -111,7 +111,7 @@
                            @click="resetForm(btn.method)">{{btn.text}}</el-button>
                 <el-button v-if="btn.type === 3"
                            type="primary"
-                           @click="btn.method">{{btn.text}}</el-button>
+                           @click="btn.method || ''">{{btn.text}}</el-button>
               </el-col>
             </el-form-item>
           </el-form>
@@ -208,16 +208,17 @@
       /**
        * 非必传，指定要显示的按钮及类型，默认不显示。
        * 类型（type）关系到按钮要执行的方法，type=1，执行组件的提交方法，还可以传入了method字段，值为函数，
-       * 该函数会作为提交方法的回调函数执行,同时还可以传入beforeSubmit字段，值为函数，函数接受一个包含表单数据的Object
-       * 类型参数，该函数可以在提交之前对表单数据进行处理，参数类似{username: 'name', loginid: 'id'},其中键为
-       * 调用者传入的codeCamel
+       * 该函数会作为提交方法的回调函数执行，函数接受一个参数为新建或修改的数据,
+       * 同时还可以传入beforeSubmit字段，值为函数，函数接受一个包含表单数据的对象类型参数，
+       * 该函数可以在提交之前对表单数据进行处理，参数类似{username: 'name', loginid: 'id'},
+       * 其中键为调用者传入的codeCamel
        * type=2，执行组件的重置方法,如果用户传入了method，会作为重置方法的回调函数执行
        * type=3，直接执行用户传入的方法
        * 如果要传入了确定/取消的回调函数，请先传入对应的按钮
        * 示例：[
-       *        {text: '确定', type: '1', method: method1},
-       *        {text: '重置', type: '2', method: method2},
-       *        {text: '取消', type: '3', method: method3}
+       *        {text: '确定', type: 1, method: method1, beforeSubmit: this.processData},
+       *        {text: '重置', type: 2, method: method2},
+       *        {text: '取消', type: 3, method: method3}
        *      ]
        */
       buttons: {
@@ -366,7 +367,7 @@
           if (item.widgetType === 8) {
             _.forEach(self.formModel, function(value, key) {
               if (item.codeCamel === key) {
-                self.formModel[key] = response
+                self.formModel[key] = response.visitName
               }
             })
           }
@@ -547,7 +548,7 @@
                 self.resetForm()
                 // self.formModel = {} // 新建完成清空数据
                 if (typeof (callback) === 'function') {
-                  callback()
+                  callback(resp.data)
                 }
               })
             } else { // 不存在tableId 则创建一条数据
@@ -568,7 +569,7 @@
                 // self.formModel = {} // 新建完成清空数据
                 // self.resetForm()
                 if (typeof (callback) === 'function') {
-                  callback()
+                  callback(resp.data)
                 }
               })
             }

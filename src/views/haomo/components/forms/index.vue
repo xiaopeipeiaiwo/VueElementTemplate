@@ -51,10 +51,13 @@
           { name: '选择头像', codeCamel: 'avatar', widgetType: 8 } // url是后台接口地址
         ],
         // 要显示按钮
+        //, method: this.method1, beforeSubmit: this.processData
+        // , method: this.method2
+        // , method: this.method3
         showUserButtons: [
-          { text: '确定', type: 1, method: this.method1, beforeSubmit: this.processData },
-          { text: '重置', type: 2, method: this.method2 },
-          { text: '取消', type: 3, method: this.method3 }
+          { text: '确定', type: 1 },
+          { text: '重置', type: 2 },
+          { text: '取消', type: 3 }
         ],
         // showUserButtons: []
         // 布局方式
