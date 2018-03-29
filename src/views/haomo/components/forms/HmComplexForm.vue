@@ -84,8 +84,8 @@
                               :disabled="column.disabled"
                               @change="column.change && column.change($event)"
                               v-model="formModel[column.codeCamel]">
-                <el-radio v-for="(option,key) in column.options"
-                          :key="key" :label="key">{{option}}</el-radio>
+                <el-radio v-for="option in column.options"
+                          :key="option.label" :label="option.label">{{option.value}}</el-radio>
               </el-radio-group>
               <!-- 8 文件 -->
               <el-upload v-else-if="column.widgetType === 8"
@@ -111,7 +111,7 @@
                            @click="resetForm(btn.method)">{{btn.text}}</el-button>
                 <el-button v-if="btn.type === 3"
                            type="primary"
-                           @click="btn.method || ''">{{btn.text}}</el-button>
+                           @click="cancel(btn.method)">{{btn.text}}</el-button>
               </el-col>
             </el-form-item>
           </el-form>
@@ -238,6 +238,31 @@
        * 示例：{ left: 0, middle: 12, right: 12 }
        */
       layout: {
+        type: Object,
+        required: false
+      },
+      /**
+       * 用来将本表的外链字段(table_id类似的字段)指向的外链表相关联, 格式为:
+       *  {
+       *    "hm_user": {    //外链表 表名 本表所对应的主键表）
+       *      includes:['user_id'] // 与主表所对应的外键
+       *    }
+       *  }
+       *
+       */
+      includes: {
+        type: Object,
+        required: false
+      },
+      /**
+       * 用来将其他表的外链字段指向本表关联，同时返回数据, 格式为:
+       *  {
+       *    'auth_token': {          //主键id所对应的外键表 表名1 （本表所对应的外键表）
+       *      includes: ['user_id']   //外键表的外键字段
+       *    }
+       *  }
+       */
+      refers: {
         type: Object,
         required: false
       }
@@ -461,6 +486,21 @@
         console.log(self.columns)
         if (self.columns && self.columns.length) {
           self.showUserColumns = _.cloneDeep(self.columns)
+
+          // 提取v-model绑定的变量
+          _.each(self.showUserColumns, function(item) {
+            if (item.widgetType === 8 || (item.widgetType === 3 && item.options && item.options.length > 0)) {
+              self.$set(self.formModel, item.codeCamel, [])
+            } else {
+              if (item.widgetType === 6) {
+                item.default && self.$set(self.formModel, item.codeCamel, new Date())
+              } else {
+                item.default ? self.$set(self.formModel, item.codeCamel, item.default) : self.$set(self.formModel, item.codeCamel, '')
+              }
+            }
+          })
+          console.log(self.formModel)
+          console.log(self.showUserColumns)
           // 将字符串对象进行替换处理
           _.each(self.showUserColumns, function(column, index) {
             if (typeof column === 'object') {
@@ -481,15 +521,7 @@
               self.$set(self.showUserColumns, index, tmp) // 顺序
             }
           })
-          // console.log(self.showUserColumns)
-          // 提取v-model绑定的变量
-          _.each(self.showUserColumns, function(item) {
-            if (item.widgetType === 8 || (item.widgetType === 3 && item.options && item.options.length > 0)) {
-              self.$set(self.formModel, item.codeCamel, [])
-            } else {
-              self.$set(self.formModel, item.codeCamel, '')
-            }
-          })
+          console.log(self.showUserColumns)
           if (!request.defaults.baseURL) {
             request.defaults.baseURL = '/org/api'
           }
@@ -592,6 +624,11 @@
       resetForm(callback) {
         console.log('重置')
         this.$refs.form.resetFields()
+        if (typeof (callback) === 'function') {
+          callback()
+        }
+      },
+      cancel(callback) {
         if (typeof (callback) === 'function') {
           callback()
         }
