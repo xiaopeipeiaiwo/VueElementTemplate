@@ -504,7 +504,7 @@
 
           // 下拉框多选时将字符串转为数组
           _.each(self.columns, function(item, index) {
-            if (item.widgetType === 2) {
+            if (item.widgetType === 2 && item.multiple === true) {
               _.forEach(self.formModel, function(value, key) {
                 if (item.codeCamel === key) {
                   // console.log(11111, self.formModel[key])
@@ -605,10 +605,10 @@
                 transformRequest:
                   function(obj) {
                     var str = []
-                    // 删除空值的属性
-                    obj = _.omitBy(obj, function(value) {
-                      return !value
-                    })
+                    // // 删除空值的属性
+                    // obj = _.omitBy(obj, function(value) {
+                    //   return !value
+                    // })
                     for (var p in obj) {
                       str.push(encodeURIComponent(p) + '=' + encodeURIComponent(obj[p]))
                     }

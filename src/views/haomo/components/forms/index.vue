@@ -6,6 +6,7 @@
                      :buttons="showUserButtons"
                      :layout="layout"
                      :tips="tips"
+                     :tableId="tableId"
                      :refers="judgeRefers">
     </hm-complex-form>
   </div>
@@ -43,7 +44,7 @@
             // ]
           },
           // 2下拉框
-          { name: '用户名称', codeCamel: 'username', widgetType: 2, multiple: true,
+          { name: '用户名称', codeCamel: 'username', widgetType: 2, multiple: false,
             change: this.inputChange, // default: [1], 如果开启多选，默认选中项用数组[1]、[1,2,3]
             options: [
               { value: '1', label: '企业' }, // 下拉框的label是选项文字，value是选中值
