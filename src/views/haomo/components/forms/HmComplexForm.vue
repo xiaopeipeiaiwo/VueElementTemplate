@@ -396,12 +396,12 @@
           if (item.widgetType === 8) {
             _.forEach(self.formModel, function(value, key) {
               if (item.codeCamel === key) {
-                self.formModel[key] = response.visitName
+                self.formModel[key] = response.message || response.visitName
               }
             })
           }
         })
-        console.log(self.formModel)
+        console.log(404, self.formModel)
       },
       // inputChange(val) {
       //   // console.log(event)
@@ -482,7 +482,19 @@
           var formArray = _.keys(self.formModel) // 提取formModel的属性到数组
           // console.log(formArray)
           self.formModel = _.pick(resp.data, formArray) // 根据数组中的属性提取出data中对应的数据
-          // console.log(self.formModel)
+
+          // 下拉框多选时将字符串转为数组
+          _.each(self.columns, function(item, index) {
+            if (item.widgetType === 2) {
+              _.forEach(self.formModel, function(value, key) {
+                if (item.codeCamel === key) {
+                  // console.log(11111, self.formModel[key])
+                  self.formModel[key] = self.formModel[key].split(',')
+                }
+              })
+            }
+          })
+          // console.log(2222, self.formModel)
         })
       },
       init() {
