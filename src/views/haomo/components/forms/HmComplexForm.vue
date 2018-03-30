@@ -15,6 +15,7 @@
                    label-width="200px"
                    style="width:80%;margin:0 auto">
             <el-form-item v-for="column in showUserColumns"
+                          v-show="!column.hide"
                           :key="column.id"
                           :label="column.name"
                           :rules="column.rule?column.rule:null"
@@ -155,19 +156,22 @@
       /**
        * 必传，指定要显示的表单字段及类型。数组的元素为对象类型，对象的属性有name、codeCamel、widgetType、disabled、
        * options、multiple、dateType等，不同的表单类型需配置的属性不同，
-       * codeCamel属性必须有，表示要显示的表单字段,
-       * name属性表示自定义的字段名，如果不传，默认为数据库中的字段名，
-       * widgetType属性表示该字段要显示的表单类型(普通输入框、文本域、富文本、下拉框...)，不传默认为普通input
-       * change属性，值为函数类型，表示input的change事件的执行方法，参数即为input输入内容
+       * codeCamel属性，表示要显示的表单字段, 如果其他字段都不需要传，可以只写codeCamel的值，比如['username','departmentId']
+       * name属性可选，表示自定义的字段名，如果不传，默认为数据库中的字段名，
+       * change属性可选，值为函数类型，表示input的change事件的执行方法，参数即为input输入内容
+       * default属性可选(复选框不支持)，设置默认值，取值规范参考form/index.vue
+       * hide属性可选，设置该表单字段是否显示,值为boolean
+       * widgetType属性可选，表示该字段要显示的表单类型(普通输入框、文本域、富文本、下拉框...)，不传默认为普通input
        * 取值1-8(1表示普通输入框,2表示下拉框,3表示复选框,4表示文本域,5表示富文本,6表示日期，7表示单选框，8表示文件上传)，
        * 若表单类型为下拉框/复选框/单选框，还需传入options字段，值为数组(数组元素是下拉框/复选框/单选框的选项），
        * 对于复选框，如果只有一个备选项则不必传options,
-       * 若表单类型为下拉框，还可传入multiple字段，取值bolean类型，true/false，表示是否多选，默认false
+       * 若表单类型为下拉框，还可传入multiple字段，取值boolean类型，true/false，表示是否多选，默认false
        * 若表单类型为时间日期，可传入dateType字段，值为'date'（只显示日期）或'datetime'（显示日期和时间），如果不传，
        * 默认只显示日期; 可传入dateFormate字段，为日期格式，取值遵循elementUI DatePicker组件中的日期格式，
-       * 比如 只显示日期取值'yyyy-MM-dd'，显示日期和时间取值'yyyy-MM-dd HH:mm:ss'，如果不传默认为只显示日期取值'yyyy-MM-dd'，date字段和dateFormate字段取值须对应
-       * 所有的表单类型都可传入disabled属性，取值bolean类型,true/false，表示是否禁用，默认不禁用
-       * input类表单还可传入rule属性来进行自定义验证规则，rule取值规范参照elementUI，下面有简单示例
+       * 比如 只显示日期取值'yyyy-MM-dd'，显示日期和时间取值'yyyy-MM-ddHH:mm:ss'，
+       * 如果不传默认为只显示日期取值'yyyy-MM-dd'，date字段和dateFormate字段取值须对应
+       * disabled属性可选，取值boolean类型,true/false，表示是否禁用，默认不禁用
+       * rule属性可选，进行自定义验证规则，rule取值规范参照elementUI，下面有简单示例
        * 示例：[
        { name: '用户名称', codeCamel: 'username', widgetType: 1, disabled: true,
          rule: { required: true, message: '用户名不能为空', trigger: 'blur' }
@@ -617,8 +621,15 @@
        * 清空所有输入及提示信息。
        */
       resetForm(callback) {
+        const self = this
         console.log('重置')
         this.$refs.form.resetFields()
+        console.log(self.formModel)
+        // // 清空
+        // _.each(self.formModel, function(value, index) {
+        //   self.formModel[index] = ''
+        // })
+        // 执行回调
         if (typeof (callback) === 'function') {
           callback()
         }

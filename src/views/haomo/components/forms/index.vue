@@ -28,12 +28,12 @@
         showUserColumns: [
           // 1普通input
           { name: '用户名称', codeCamel: 'username', widgetType: 1, disabled: false, default: '默认值',
-            change: this.inputChange
+            change: this.inputChange, hide: true
             // rule: { required: true, message: '用户名不能为空', trigger: 'blur' }
           },
           // 5富文本
           { name: '电子邮件', codeCamel: 'email', widgetType: 5, disabled: false,
-            change: this.inputChange
+            change: this.inputChange, hide: false
             // rule: [
             //   { required: true, message: '请输入邮箱地址', trigger: 'blur' },
             //   { type: 'email', message: '请输入正确的邮箱地址', trigger: 'blur,change' }
