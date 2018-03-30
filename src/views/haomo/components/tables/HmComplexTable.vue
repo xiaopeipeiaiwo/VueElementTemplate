@@ -111,7 +111,7 @@
           <el-checkbox v-if="scope.row[column.codeCamel] === false || scope.row[column.codeCamel] === true" v-model="scope.row[column.codeCamel]"></el-checkbox>
         </template>
       </el-table-column>
-      <el-table-column fixed="right" label="操作" :width="operationWidth" v-if="isShowEditDataButton || isShowDeleteButton">
+      <el-table-column fixed="right" label="操作" :width="operationWidth" v-if="isShowEditDataButton || isShowDeleteButton || definedOperation.length">
         <template slot-scope="scope">
           <el-button @click="openDialog('editData',scope.row)" v-if="isShowEditDataButton" type="text" size="small">编辑</el-button>
           <el-button @click="deleteData(scope.row)" type="text" v-if="isShowDeleteButton" size="small">删除</el-button>
@@ -403,9 +403,17 @@
     created() {
       // this.validate()
 
-      this.init()
+      if (this.userDefined && Object.prototype.toString.apply(this.userDefined.pretreatment()) === '[object Promise]') {
+        this.userDefined.pretreatment().then(function() {
+          this.init()
 
-      this.getList()
+          this.getList()
+        })
+      } else {
+        this.init()
+
+        this.getList()
+      }
     },
     methods: {
       indexMethod(index) {

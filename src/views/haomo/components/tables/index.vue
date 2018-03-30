@@ -101,6 +101,9 @@
         },
         definedDetail() {
 
+        },
+        pretreatment() {
+
         }
       }
     },
