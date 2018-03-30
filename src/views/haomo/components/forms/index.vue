@@ -50,10 +50,13 @@
           // 3多选 不支持默认值
           { name: '部门ID', codeCamel: 'departmentId', widgetType: 3, options: ['美女', '帅哥'], change: this.inputChange },
           // 4密码
-          { codeCamel: 'password', widgetType: 4, change: this.inputChange },
+          // { codeCamel: 'password', widgetType: 4, change: this.inputChange },
+          'password',
           // 6日期
           { name: '新建时间', codeCamel: 'createTime', widgetType: 6, dateType: 'datetime',
-            dateFormate: 'yyyy-MM-dd HH:mm:ss', change: this.inputChange, default: true },
+            dateFormate: 'yyyy-MM-dd HH:mm:ss', change: this.inputChange, default: '2018-01-01 00:07:08'
+          },
+          'lastUpdateTime',
           // 7单选
           { name: '登陆id', codeCamel: 'loginid', widgetType: 7,
             options: [

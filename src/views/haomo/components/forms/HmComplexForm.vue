@@ -21,14 +21,9 @@
                           :prop="column.codeCamel">
               <!--el-input<el-input v-if="column.codeCamel==='password'" type="password"
                         v-model="formModel[column.codeCamel]"></el-input>-->
-
-              <!-- 1 普通input -->
-              <el-input v-if="column.widgetType === 1"
-                        v-model="formModel[column.codeCamel]"
-                        :disabled="column.disabled"
-                        @change="column.change && column.change($event)"></el-input>
               <!-- 2 日期选择 -->
-              <el-date-picker v-else-if="column.widgetType === 6 || column.type === 'datetime' || column.type === 'date'"
+              <!-- -->
+              <el-date-picker v-if="column.widgetType === 6 || column.type === 'datetime' || column.type === 'date'"
                               v-model="formModel[column.codeCamel]"
                               :type="column.dateType || 'date'"
                               align="right" :disabled="column.disabled"
@@ -99,6 +94,11 @@
                 <el-button slot="trigger" size="small" type="primary"
                            :disabled="column.disabled">选取文件</el-button>
               </el-upload>
+              <!-- 1 普通input -->
+              <el-input v-else
+                        v-model="formModel[column.codeCamel]"
+                        :disabled="column.disabled"
+                        @change="column.change && column.change($event)"></el-input>
             </el-form-item>
             <!--按钮-->
             <el-form-item v-if="buttons && buttons.length > 0">
@@ -169,29 +169,29 @@
        * 所有的表单类型都可传入disabled属性，取值bolean类型,true/false，表示是否禁用，默认不禁用
        * input类表单还可传入rule属性来进行自定义验证规则，rule取值规范参照elementUI，下面有简单示例
        * 示例：[
-                { name: '用户名称', codeCamel: 'username', widgetType: 1, disabled: true,
-                  rule: { required: true, message: '用户名不能为空', trigger: 'blur' }
-                },
-                { name: '电子邮件', codeCamel: 'email', widgetType: 5, disabled: false,
-                  rule: [
-                    { required: true, message: '请输入邮箱地址', trigger: 'blur' },
-                    { type: 'email', message: '请输入正确的邮箱地址', trigger: 'blur,change' }
-                  ]
-                },
-                { name: '选择类型', codeCamel: 'type', widgetType: 2, multiple: false,
-                  options: [
-                              { value: 0, label: '选项1' },
-                              { value: 1, label: '选项2' },
-                              { value: 2, label: '选项3' },
-                              { value: 3, label: '选项4' },
-                              { value: 4, label: '选项5' }
-                            ]
-                },
-                { name: '部门ID', codeCamel: 'departmentId', widgetType: 3, options: ['美女', '帅哥'] },
-                { codeCamel: 'password', widgetType: 4 },
-                { name: '新建时间', codeCamel: 'createTime', widgetType: 6, dateType: 'datetime', dateFormate: 'yyyy-MM-dd HH:mm:ss' },
-                { name: '登陆id', codeCamel: 'loginid', widgetType: 7, options: ['会员', '访客'] },
-                { name: '选择头像', codeCamel: 'avatar', widgetType: 8 }
+       { name: '用户名称', codeCamel: 'username', widgetType: 1, disabled: true,
+         rule: { required: true, message: '用户名不能为空', trigger: 'blur' }
+       },
+       { name: '电子邮件', codeCamel: 'email', widgetType: 5, disabled: false,
+         rule: [
+           { required: true, message: '请输入邮箱地址', trigger: 'blur' },
+           { type: 'email', message: '请输入正确的邮箱地址', trigger: 'blur,change' }
+         ]
+       },
+       { name: '选择类型', codeCamel: 'type', widgetType: 2, multiple: false,
+         options: [
+                     { value: 0, label: '选项1' },
+                     { value: 1, label: '选项2' },
+                     { value: 2, label: '选项3' },
+                     { value: 3, label: '选项4' },
+                     { value: 4, label: '选项5' }
+                   ]
+       },
+       { name: '部门ID', codeCamel: 'departmentId', widgetType: 3, options: ['美女', '帅哥'] },
+       { codeCamel: 'password', widgetType: 4 },
+       { name: '新建时间', codeCamel: 'createTime', widgetType: 6, dateType: 'datetime', dateFormate: 'yyyy-MM-dd HH:mm:ss' },
+       { name: '登陆id', codeCamel: 'loginid', widgetType: 7, options: ['会员', '访客'] },
+       { name: '选择头像', codeCamel: 'avatar', widgetType: 8 }
        ]
        */
       columns: {
@@ -492,24 +492,18 @@
             if (item.widgetType === 8 || (item.widgetType === 3 && item.options && item.options.length > 0)) {
               self.$set(self.formModel, item.codeCamel, [])
             } else {
-              if (item.widgetType === 6) {
-                item.default && self.$set(self.formModel, item.codeCamel, new Date())
-              } else {
-                item.default ? self.$set(self.formModel, item.codeCamel, item.default) : self.$set(self.formModel, item.codeCamel, '')
-              }
+              item.default ? self.$set(self.formModel, item.codeCamel, item.default) : self.$set(self.formModel, item.codeCamel, '')
             }
           })
           console.log(self.formModel)
           console.log(self.showUserColumns)
           // 将字符串对象进行替换处理
           _.each(self.showUserColumns, function(column, index) {
-            if (typeof column === 'object') {
+            if (typeof column === 'string') {
               // 生成一个新对象
-              const tmp = _.keyBy(self.schema['columns'], 'codeCamel')[column.codeCamel]
-              // console.log(tmp)
-              // self.$set(tmp, 'code', tmp.code.toLowerCase())
+              const tmp = _.keyBy(self.schema['columns'], 'codeCamel')[column]
+              /* self.$set(tmp, 'code', tmp.code.toLowerCase())
               column.name && self.$set(tmp, 'name', column.name) // 自定义字段名
-              self.$set(tmp, 'widgetType', column.widgetType || 1) // 设置表单类型
               column.rule && self.$set(tmp, 'rule', column.rule) // 设置表单校验规则
               column.disabled && self.$set(tmp, 'disabled', column.disabled) // 设置是否禁用
               column.options && self.$set(tmp, 'options', column.options) // 设置下拉框或者多选的选项
@@ -517,7 +511,8 @@
               column.dateType && self.$set(tmp, 'dateType', column.dateType) // 设置日期表单显示类型
               column.dateFormate && self.$set(tmp, 'dateFormate', column.dateFormate) // 设置日期格式
               column.change && self.$set(tmp, 'change', column.change) // 设置change函数
-              column.url && self.$set(tmp, 'url', column.url) // 设置文件上传地址
+              column.url && self.$set(tmp, 'url', column.url) // 设置文件上传地址 */
+              self.$set(tmp, 'widgetType', 1) // 设置表单类型
               self.$set(self.showUserColumns, index, tmp) // 顺序
             }
           })
