@@ -39,8 +39,8 @@
                          :multiple="column.multiple"
                          :disabled="column.disabled"
                          clearable>
-                <el-option v-for="item in column.options"
-                           :key="item.value"
+                <el-option v-for="(item,key) in column.options"
+                           :key="key"
                            :label="item.label"
                            :value="item.value">
                 </el-option>
@@ -111,6 +111,9 @@
                            type="primary"
                            @click="resetForm(btn.method)">{{btn.text}}</el-button>
                 <el-button v-if="btn.type === 3"
+                           type="primary"
+                           @click="cancel(btn.method)">{{btn.text}}</el-button>
+                <el-button v-if="!btn.type"
                            type="primary"
                            @click="cancel(btn.method)">{{btn.text}}</el-button>
               </el-col>
@@ -213,9 +216,10 @@
        * 非必传，指定要显示的按钮及类型，默认不显示。
        * 类型（type）关系到按钮要执行的方法，type=1，执行组件的提交方法，还可以传入了method字段，值为函数，
        * 该函数会作为提交方法的回调函数执行，函数接受一个参数为新建或修改的数据,
-       * 同时还可以传入beforeSubmit字段，值为函数，函数接受一个包含表单数据的对象类型参数，
-       * 该函数可以在提交之前对表单数据进行处理，参数类似{username: 'name', loginid: 'id'},
-       * 其中键为调用者传入的codeCamel
+       * 同时还可以传入beforeSubmit字段，值为函数，函数接受两个参数(value,isCancel)
+       * value为包含表单数据的对象，{username: 'name', loginid: 'id'},其中键为调用者传入的codeCamel
+       * 该函数可以在提交之前对表单数据进行处理，并返回数据；对象isCancel包含一个值为false的属性cancelSubmit
+       * 如果需要取消提交，将cancelSubmit值改为true
        * type=2，执行组件的重置方法,如果用户传入了method，会作为重置方法的回调函数执行
        * type=3，直接执行用户传入的方法
        * 如果要传入了确定/取消的回调函数，请先传入对应的按钮
@@ -267,6 +271,21 @@
        *  }
        */
       refers: {
+        type: Object,
+        required: false
+      },
+      /**
+       * 请求成功或失败时的提示信息,格式为:
+       *  tips: {
+       *     hidde: false, // 是否显示提示，默认false显示
+       *     newSuccess: { text: '发布成功' }, // 新建成功的提示
+       *     newError: { text: '发布失败' }, // 新建失败的提示
+       *     editSuccess: { text: '编辑成功' }, // 编辑成功的提示
+       *     editError: { text: '编辑失败' } // 编辑失败的提示
+       *     otherError: { text: '没有传ID，不可以提交' }
+       *  }
+       */
+      tips: {
         type: Object,
         required: false
       }
@@ -369,8 +388,8 @@
           }]
         },
         fileList: [], // 上传文件列表
-        fileCode: '' // 上传组件对应的数据库字段
-
+        fileCode: '', // 上传组件对应的数据库字段
+        isCancel: { cancelSubmit: false }
       }
     },
     created() {
@@ -389,9 +408,9 @@
       uploadSuccess(response, file, fileList) {
         const self = this
         console.log('上传成功')
-        console.log(response)
-        console.log('fileList', fileList)
-        console.log(self.fileList)
+        // console.log(response)
+        // console.log('fileList', fileList)
+        // console.log(self.fileList)
         _.each(self.columns, function(item, index) {
           if (item.widgetType === 8) {
             _.forEach(self.formModel, function(value, key) {
@@ -401,7 +420,7 @@
             })
           }
         })
-        console.log(404, self.formModel)
+        // console.log(404, self.formModel)
       },
       // inputChange(val) {
       //   // console.log(event)
@@ -497,22 +516,13 @@
           // console.log(2222, self.formModel)
         })
       },
+      // 初始化
       init() {
         const self = this
-        console.log(self.columns)
         if (self.columns && self.columns.length) {
           self.showUserColumns = _.cloneDeep(self.columns)
-
-          // 提取v-model绑定的变量
-          _.each(self.showUserColumns, function(item) {
-            if (item.widgetType === 8 || (item.widgetType === 3 && item.options && item.options.length > 0)) {
-              self.$set(self.formModel, item.codeCamel, [])
-            } else {
-              item.default ? self.$set(self.formModel, item.codeCamel, item.default) : self.$set(self.formModel, item.codeCamel, '')
-            }
-          })
-          console.log(self.formModel)
-          console.log(self.showUserColumns)
+          // console.log(504, self.showUserColumns)
+          // console.log(514, self.formModel)
           // 将字符串对象进行替换处理
           _.each(self.showUserColumns, function(column, index) {
             if (typeof column === 'string') {
@@ -533,6 +543,14 @@
             }
           })
           console.log(self.showUserColumns)
+          // 提取v-model绑定的变量
+          _.each(self.showUserColumns, function(item) {
+            if (item.widgetType === 8 || (item.widgetType === 3 && item.options && item.options.length > 0)) {
+              self.$set(self.formModel, item.codeCamel, [])
+            } else {
+              item.default ? self.$set(self.formModel, item.codeCamel, item.default) : self.$set(self.formModel, item.codeCamel, '')
+            }
+          })
           if (!request.defaults.baseURL) {
             request.defaults.baseURL = '/org/api'
           }
@@ -558,7 +576,17 @@
         const self = this
         console.log('点击了提交函数')
         console.log(self.formModel)
-        self.formModel = processData ? processData(self.formModel) : self.formModel // 对表单数据进行处理
+        self.formModel = processData ? processData(self.formModel, self.isCancel) : self.formModel // 对表单数据进行处理
+        if (self.isCancel.cancelSubmit) {
+          console.log('取消提交')
+          if (self.tips && !self.tips.hidde) {
+            self.$message({
+              message: self.tips.otherError.text,
+              type: 'error'
+            })
+          }
+          return
+        }
         // self.formModel = JSON.stringify(self.formModel)
         // var params = _.cloneDeep(self.formModel)
         // params = JSON.stringify(params)
@@ -589,9 +617,23 @@
               }).then(resp => {
                 console.log('修改成功')
                 self.resetForm()
+                if (self.tips && !self.tips.hidde) {
+                  self.$message({
+                    message: self.tips.editSuccess.text,
+                    type: 'success'
+                  })
+                }
                 // self.formModel = {} // 新建完成清空数据
                 if (typeof (callback) === 'function') {
                   callback(resp.data)
+                }
+              }).catch(err => {
+                console.log(err)
+                if (self.tips && !self.tips.hidde) {
+                  self.$message({
+                    message: self.tips.editError.text,
+                    type: 'error'
+                  })
                 }
               })
             } else { // 不存在tableId 则创建一条数据
@@ -609,15 +651,33 @@
                   }
               }).then(resp => {
                 console.log('创建成功')
+                if (self.tips && !self.tips.hidde) {
+                  self.$message({
+                    message: self.tips.newSuccess.text,
+                    type: 'success'
+                  })
+                }
                 // self.formModel = {} // 新建完成清空数据
                 // self.resetForm()
                 if (typeof (callback) === 'function') {
                   callback(resp.data)
                 }
+              }).catch(err => {
+                console.log(err)
+                if (self.tips && !self.tips.hidde) {
+                  self.$message({
+                    message: self.tips.newError.text,
+                    type: 'error'
+                  })
+                }
               })
             }
           } else {
             console.log('提交失败!!')
+            self.$message({
+              message: '验证未通过',
+              type: 'error'
+            })
             return false
           }
         })
@@ -633,10 +693,10 @@
        * 清空所有输入及提示信息。
        */
       resetForm(callback) {
-        const self = this
+        // const self = this
         console.log('重置')
         this.$refs.form.resetFields()
-        console.log(self.formModel)
+        // console.log(self.formModel)
         // // 清空
         // _.each(self.formModel, function(value, index) {
         //   self.formModel[index] = ''

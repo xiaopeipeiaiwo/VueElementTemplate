@@ -5,7 +5,7 @@
                      :columns="showUserColumns"
                      :buttons="showUserButtons"
                      :layout="layout"
-                     :tableId="tableId"
+                     :tips="tips"
                      :refers="judgeRefers">
     </hm-complex-form>
   </div>
@@ -62,7 +62,6 @@
             dateFormate: 'yyyy-MM-dd HH:mm:ss', change: this.inputChange
           // default: '2018-01-01 00:07:08'
           },
-          'lastUpdateTime',
           // 7单选
           { name: '登陆id', codeCamel: 'loginid', widgetType: 7,
             options: [
@@ -86,17 +85,24 @@
             rule: { required: true, message: '科室不能为空', trigger: 'blur' }}
         ],
         // 要显示按钮
-        //
-        // ,
-        // , method:
         showUserButtons: [
           { text: '确定', type: 1, method: this.method1, beforeSubmit: this.processData },
           { text: '重置', type: 2, method: this.method2 },
+          { text: '生成', method: this.method4 },
           { text: '取消', type: 3, method: this.method3 }
         ],
         // showUserButtons: []
         // 布局方式
-        layout: { left: 6, middle: 12, right: 6 },
+        layout: { left: 2, middle: 20, right: 2 },
+        // 自定义提示消息
+        tips: {
+          hidde: false, // 是否显示提示，默认false显示
+          newSuccess: { text: '发布成功' }, // 新建成功的提示
+          newError: { text: '发布失败' }, // 新建失败的提示
+          editSuccess: { text: '编辑成功' }, // 编辑成功的提示
+          editError: { text: '编辑失败' }, // 编辑失败的提示
+          otherError: { text: '填写有误，不可以提交' } // processData中取消提交的提示
+        },
         // 'cc_option': {
         //   includes: ['ccSubjectId']
         // }
@@ -122,9 +128,10 @@
         // console.log(event)
         console.log(val)
       },
-      processData(object) {
-        console.log(object)
-        return object
+      processData(object, isCancel) {
+        isCancel.cancelSubmit = false // 如果要取消提交，设为true
+        console.log(125, object)
+        return object // 将数据返回
       },
       method1() {
         console.log('method1')
@@ -134,6 +141,9 @@
       },
       method3() {
         console.log('method3')
+      },
+      method4() {
+        console.log('method4')
       }
     }
   }
