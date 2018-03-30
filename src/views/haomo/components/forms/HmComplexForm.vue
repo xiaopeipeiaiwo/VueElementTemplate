@@ -15,20 +15,16 @@
                    label-width="200px"
                    style="width:80%;margin:0 auto">
             <el-form-item v-for="column in showUserColumns"
+                          v-show="!column.hide"
                           :key="column.id"
                           :label="column.name"
                           :rules="column.rule?column.rule:null"
                           :prop="column.codeCamel">
               <!--el-input<el-input v-if="column.codeCamel==='password'" type="password"
                         v-model="formModel[column.codeCamel]"></el-input>-->
-
-              <!-- 1 普通input -->
-              <el-input v-if="column.widgetType === 1"
-                        v-model="formModel[column.codeCamel]"
-                        :disabled="column.disabled"
-                        @change="column.change && column.change($event)"></el-input>
               <!-- 2 日期选择 -->
-              <el-date-picker v-else-if="column.widgetType === 6 || column.type === 'datetime' || column.type === 'date'"
+              <!-- -->
+              <el-date-picker v-if="column.widgetType === 6 || column.type === 'datetime' || column.type === 'date'"
                               v-model="formModel[column.codeCamel]"
                               :type="column.dateType || 'date'"
                               align="right" :disabled="column.disabled"
@@ -84,8 +80,8 @@
                               :disabled="column.disabled"
                               @change="column.change && column.change($event)"
                               v-model="formModel[column.codeCamel]">
-                <el-radio v-for="(option,key) in column.options"
-                          :key="key" :label="key">{{option}}</el-radio>
+                <el-radio v-for="option in column.options"
+                          :key="option.label" :label="option.label">{{option.value}}</el-radio>
               </el-radio-group>
               <!-- 8 文件 -->
               <el-upload v-else-if="column.widgetType === 8"
@@ -99,6 +95,11 @@
                 <el-button slot="trigger" size="small" type="primary"
                            :disabled="column.disabled">选取文件</el-button>
               </el-upload>
+              <!-- 1 普通input -->
+              <el-input v-else
+                        v-model="formModel[column.codeCamel]"
+                        :disabled="column.disabled"
+                        @change="column.change && column.change($event)"></el-input>
             </el-form-item>
             <!--按钮-->
             <el-form-item v-if="buttons && buttons.length > 0">
@@ -111,7 +112,7 @@
                            @click="resetForm(btn.method)">{{btn.text}}</el-button>
                 <el-button v-if="btn.type === 3"
                            type="primary"
-                           @click="btn.method || ''">{{btn.text}}</el-button>
+                           @click="cancel(btn.method)">{{btn.text}}</el-button>
               </el-col>
             </el-form-item>
           </el-form>
@@ -155,43 +156,46 @@
       /**
        * 必传，指定要显示的表单字段及类型。数组的元素为对象类型，对象的属性有name、codeCamel、widgetType、disabled、
        * options、multiple、dateType等，不同的表单类型需配置的属性不同，
-       * codeCamel属性必须有，表示要显示的表单字段,
-       * name属性表示自定义的字段名，如果不传，默认为数据库中的字段名，
-       * widgetType属性表示该字段要显示的表单类型(普通输入框、文本域、富文本、下拉框...)，不传默认为普通input
-       * change属性，值为函数类型，表示input的change事件的执行方法，参数即为input输入内容
+       * codeCamel属性，表示要显示的表单字段, 如果其他字段都不需要传，可以只写codeCamel的值，比如['username','departmentId']
+       * name属性可选，表示自定义的字段名，如果不传，默认为数据库中的字段名，
+       * change属性可选，值为函数类型，表示input的change事件的执行方法，参数即为input输入内容
+       * default属性可选(复选框不支持)，设置默认值，取值规范参考form/index.vue
+       * hide属性可选，设置该表单字段是否显示,值为boolean
+       * widgetType属性可选，表示该字段要显示的表单类型(普通输入框、文本域、富文本、下拉框...)，不传默认为普通input
        * 取值1-8(1表示普通输入框,2表示下拉框,3表示复选框,4表示文本域,5表示富文本,6表示日期，7表示单选框，8表示文件上传)，
        * 若表单类型为下拉框/复选框/单选框，还需传入options字段，值为数组(数组元素是下拉框/复选框/单选框的选项），
        * 对于复选框，如果只有一个备选项则不必传options,
-       * 若表单类型为下拉框，还可传入multiple字段，取值bolean类型，true/false，表示是否多选，默认false
+       * 若表单类型为下拉框，还可传入multiple字段，取值boolean类型，true/false，表示是否多选，默认false
        * 若表单类型为时间日期，可传入dateType字段，值为'date'（只显示日期）或'datetime'（显示日期和时间），如果不传，
        * 默认只显示日期; 可传入dateFormate字段，为日期格式，取值遵循elementUI DatePicker组件中的日期格式，
-       * 比如 只显示日期取值'yyyy-MM-dd'，显示日期和时间取值'yyyy-MM-dd HH:mm:ss'，如果不传默认为只显示日期取值'yyyy-MM-dd'，date字段和dateFormate字段取值须对应
-       * 所有的表单类型都可传入disabled属性，取值bolean类型,true/false，表示是否禁用，默认不禁用
-       * input类表单还可传入rule属性来进行自定义验证规则，rule取值规范参照elementUI，下面有简单示例
+       * 比如 只显示日期取值'yyyy-MM-dd'，显示日期和时间取值'yyyy-MM-ddHH:mm:ss'，
+       * 如果不传默认为只显示日期取值'yyyy-MM-dd'，date字段和dateFormate字段取值须对应
+       * disabled属性可选，取值boolean类型,true/false，表示是否禁用，默认不禁用
+       * rule属性可选，进行自定义验证规则，rule取值规范参照elementUI，下面有简单示例
        * 示例：[
-                { name: '用户名称', codeCamel: 'username', widgetType: 1, disabled: true,
-                  rule: { required: true, message: '用户名不能为空', trigger: 'blur' }
-                },
-                { name: '电子邮件', codeCamel: 'email', widgetType: 5, disabled: false,
-                  rule: [
-                    { required: true, message: '请输入邮箱地址', trigger: 'blur' },
-                    { type: 'email', message: '请输入正确的邮箱地址', trigger: 'blur,change' }
-                  ]
-                },
-                { name: '选择类型', codeCamel: 'type', widgetType: 2, multiple: false,
-                  options: [
-                              { value: 0, label: '选项1' },
-                              { value: 1, label: '选项2' },
-                              { value: 2, label: '选项3' },
-                              { value: 3, label: '选项4' },
-                              { value: 4, label: '选项5' }
-                            ]
-                },
-                { name: '部门ID', codeCamel: 'departmentId', widgetType: 3, options: ['美女', '帅哥'] },
-                { codeCamel: 'password', widgetType: 4 },
-                { name: '新建时间', codeCamel: 'createTime', widgetType: 6, dateType: 'datetime', dateFormate: 'yyyy-MM-dd HH:mm:ss' },
-                { name: '登陆id', codeCamel: 'loginid', widgetType: 7, options: ['会员', '访客'] },
-                { name: '选择头像', codeCamel: 'avatar', widgetType: 8 }
+       { name: '用户名称', codeCamel: 'username', widgetType: 1, disabled: true,
+         rule: { required: true, message: '用户名不能为空', trigger: 'blur' }
+       },
+       { name: '电子邮件', codeCamel: 'email', widgetType: 5, disabled: false,
+         rule: [
+           { required: true, message: '请输入邮箱地址', trigger: 'blur' },
+           { type: 'email', message: '请输入正确的邮箱地址', trigger: 'blur,change' }
+         ]
+       },
+       { name: '选择类型', codeCamel: 'type', widgetType: 2, multiple: false,
+         options: [
+                     { value: 0, label: '选项1' },
+                     { value: 1, label: '选项2' },
+                     { value: 2, label: '选项3' },
+                     { value: 3, label: '选项4' },
+                     { value: 4, label: '选项5' }
+                   ]
+       },
+       { name: '部门ID', codeCamel: 'departmentId', widgetType: 3, options: ['美女', '帅哥'] },
+       { codeCamel: 'password', widgetType: 4 },
+       { name: '新建时间', codeCamel: 'createTime', widgetType: 6, dateType: 'datetime', dateFormate: 'yyyy-MM-dd HH:mm:ss' },
+       { name: '登陆id', codeCamel: 'loginid', widgetType: 7, options: ['会员', '访客'] },
+       { name: '选择头像', codeCamel: 'avatar', widgetType: 8 }
        ]
        */
       columns: {
@@ -238,6 +242,31 @@
        * 示例：{ left: 0, middle: 12, right: 12 }
        */
       layout: {
+        type: Object,
+        required: false
+      },
+      /**
+       * 用来将本表的外链字段(table_id类似的字段)指向的外链表相关联, 格式为:
+       *  {
+       *    "hm_user": {    //外链表 表名 本表所对应的主键表）
+       *      includes:['user_id'] // 与主表所对应的外键
+       *    }
+       *  }
+       *
+       */
+      includes: {
+        type: Object,
+        required: false
+      },
+      /**
+       * 用来将其他表的外链字段指向本表关联，同时返回数据, 格式为:
+       *  {
+       *    'auth_token': {          //主键id所对应的外键表 表名1 （本表所对应的外键表）
+       *      includes: ['user_id']   //外键表的外键字段
+       *    }
+       *  }
+       */
+      refers: {
         type: Object,
         required: false
       }
@@ -367,12 +396,12 @@
           if (item.widgetType === 8) {
             _.forEach(self.formModel, function(value, key) {
               if (item.codeCamel === key) {
-                self.formModel[key] = response.visitName
+                self.formModel[key] = response.message || response.visitName
               }
             })
           }
         })
-        console.log(self.formModel)
+        console.log(404, self.formModel)
       },
       // inputChange(val) {
       //   // console.log(event)
@@ -453,7 +482,19 @@
           var formArray = _.keys(self.formModel) // 提取formModel的属性到数组
           // console.log(formArray)
           self.formModel = _.pick(resp.data, formArray) // 根据数组中的属性提取出data中对应的数据
-          // console.log(self.formModel)
+
+          // 下拉框多选时将字符串转为数组
+          _.each(self.columns, function(item, index) {
+            if (item.widgetType === 2) {
+              _.forEach(self.formModel, function(value, key) {
+                if (item.codeCamel === key) {
+                  // console.log(11111, self.formModel[key])
+                  self.formModel[key] = self.formModel[key].split(',')
+                }
+              })
+            }
+          })
+          // console.log(2222, self.formModel)
         })
       },
       init() {
@@ -461,15 +502,24 @@
         console.log(self.columns)
         if (self.columns && self.columns.length) {
           self.showUserColumns = _.cloneDeep(self.columns)
+
+          // 提取v-model绑定的变量
+          _.each(self.showUserColumns, function(item) {
+            if (item.widgetType === 8 || (item.widgetType === 3 && item.options && item.options.length > 0)) {
+              self.$set(self.formModel, item.codeCamel, [])
+            } else {
+              item.default ? self.$set(self.formModel, item.codeCamel, item.default) : self.$set(self.formModel, item.codeCamel, '')
+            }
+          })
+          console.log(self.formModel)
+          console.log(self.showUserColumns)
           // 将字符串对象进行替换处理
           _.each(self.showUserColumns, function(column, index) {
-            if (typeof column === 'object') {
+            if (typeof column === 'string') {
               // 生成一个新对象
-              const tmp = _.keyBy(self.schema['columns'], 'codeCamel')[column.codeCamel]
-              // console.log(tmp)
-              // self.$set(tmp, 'code', tmp.code.toLowerCase())
+              const tmp = _.keyBy(self.schema['columns'], 'codeCamel')[column]
+              /* self.$set(tmp, 'code', tmp.code.toLowerCase())
               column.name && self.$set(tmp, 'name', column.name) // 自定义字段名
-              self.$set(tmp, 'widgetType', column.widgetType || 1) // 设置表单类型
               column.rule && self.$set(tmp, 'rule', column.rule) // 设置表单校验规则
               column.disabled && self.$set(tmp, 'disabled', column.disabled) // 设置是否禁用
               column.options && self.$set(tmp, 'options', column.options) // 设置下拉框或者多选的选项
@@ -477,19 +527,12 @@
               column.dateType && self.$set(tmp, 'dateType', column.dateType) // 设置日期表单显示类型
               column.dateFormate && self.$set(tmp, 'dateFormate', column.dateFormate) // 设置日期格式
               column.change && self.$set(tmp, 'change', column.change) // 设置change函数
-              column.url && self.$set(tmp, 'url', column.url) // 设置文件上传地址
+              column.url && self.$set(tmp, 'url', column.url) // 设置文件上传地址 */
+              self.$set(tmp, 'widgetType', 1) // 设置表单类型
               self.$set(self.showUserColumns, index, tmp) // 顺序
             }
           })
-          // console.log(self.showUserColumns)
-          // 提取v-model绑定的变量
-          _.each(self.showUserColumns, function(item) {
-            if (item.widgetType === 8 || (item.widgetType === 3 && item.options && item.options.length > 0)) {
-              self.$set(self.formModel, item.codeCamel, [])
-            } else {
-              self.$set(self.formModel, item.codeCamel, '')
-            }
-          })
+          console.log(self.showUserColumns)
           if (!request.defaults.baseURL) {
             request.defaults.baseURL = '/org/api'
           }
@@ -590,8 +633,20 @@
        * 清空所有输入及提示信息。
        */
       resetForm(callback) {
+        const self = this
         console.log('重置')
         this.$refs.form.resetFields()
+        console.log(self.formModel)
+        // // 清空
+        // _.each(self.formModel, function(value, index) {
+        //   self.formModel[index] = ''
+        // })
+        // 执行回调
+        if (typeof (callback) === 'function') {
+          callback()
+        }
+      },
+      cancel(callback) {
         if (typeof (callback) === 'function') {
           callback()
         }
