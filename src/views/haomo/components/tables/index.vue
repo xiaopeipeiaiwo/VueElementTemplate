@@ -62,26 +62,30 @@
           ],
           showUserButtons: [],
           formSchema: schema['HmUser'],
-          layout: { left: 0, middle: 24, right: 0 }
+          layout: { left: 0, middle: 24, right: 0 },
+          tips: {},
+          formStyle: {}
         },
         editData: {
           isShow: true,
           showUserColumns: [{ name: '姓名', codeCamel: 'username', widgetType: 1 }],
           showUserButtons: [],
           formSchema: schema['HmUser'],
-          layout: { left: 0, middle: 24, right: 0 }
+          layout: { left: 0, middle: 24, right: 0 },
+          tips: {},
+          formStyle: {}
+        },
+        showDetail: {
+          isShow: true
         },
         showRefresh: true,
         showExport: true,
         showDeleteButton: true,
         buttonGroup: false,
         showSelection: false,
-        showDetail: {
-          isShow: true,
-          showColumns: ['mobile', 'loginid', 'username', 'email']
-        },
         tableCurrentChange(value) {}
-        // dataProcessing(value, params, definedOperate) {} // 处理返回后的数据,必须return 处理后的数据
+        // dataProcessing(value, params, definedOperate) {}, // 处理返回后的数据,必须return 处理后的数据
+        // promiseProcessing(value, params, definedOperate) {} // 处理返回后的数据,必须return Promise对象
       }
       this.userDefined = {
         definedParams(params, operate) {
@@ -101,10 +105,8 @@
         },
         definedDetail() {
 
-        },
-        pretreatment() {
-
         }
+        // pretreatment() {}
       }
     },
     methods: {

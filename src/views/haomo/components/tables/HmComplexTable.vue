@@ -134,16 +134,14 @@
     <!-- @TODO 补充详情弹窗 -->
 
     <el-dialog :title="dialogName" :visible.sync="dialogFormVisible" :close-on-click-modal="closeOnClickModal" width="dialogWidth" v-if="dialogFormVisible">
-      <el-form v-if="dialogName == '详情'">
-        <el-form-item :label="dialog.name" :label-width="formLabelWidth" v-for="dialog in dialogForm">
-          <el-input v-model="dialog.value" disabled auto-complete="off"></el-input>
-        </el-form-item>
-      </el-form>
       <hm-complex-form :schema="formSchema"
                        :columns="showUserColumns"
                        :buttons="showUserButtons"
                        :layout="layout"
-                       :tableId="tableId" v-if="dialogName != '详情'" ref="selectfood">
+                       :tableId="tableId"
+                       :tips="formTips"
+                       :formStyle="formStyle"
+                       ref="selectfood">
       </hm-complex-form>
     </el-dialog>
 
@@ -277,7 +275,7 @@
       },
       /**
        * 表格的选项，包括：pageSize、showExport、sortItem、sortOrder、showRefresh、showDeleteButton、
-       * buttonGroup、showDetail、dataProcessing、changeValue、newData、editData完整的示例为：
+       * buttonGroup、showDetail、dataProcessing、promiseProcessing、changeValue、newData、editData完整的示例为：
        *  {
        *    "pageSize": 10, // 默认为10条数据/页
        *    "showExport": false,  // 默认为不显示导出按钮
@@ -287,11 +285,8 @@
        *    "showDeleteButton": false,  //默认不显示删除按钮
        *    "buttonGroup": false  //默认不以按钮组的方式呈现button
        *    tableCurrentChange(value){} // 设置点击某行所执行方法
-       *    showDetail: {
-       *      isShow: false,      // 默认不显示详情
-       *      showColumns: ['mobile', 'loginid', 'username', 'email']
-       *    },
-       *    dataProcessing(value){}  // 对接口返回数据进行处理（必须有返回值,返回值需为 [{}] 的形式，支持放回Promise对象）
+       *    dataProcessing(value, params, definedOperate){}  // 对接口返回数据进行处理（必须有返回值,返回值需为 [{}] 的形式，支持放回Promise对象）
+       *    promiseProcessing(value, params, definedOperate){}  // 对接口返回数据进行处理（必须有返回值,返回Promise对象）
        *    "changeValue": {      // 数据库字段转化显示，例如(0=否,1=是)
        *      username: {1: '是', 0: '否'},
        *      type: { 1: 'Hm-isChecked', 0: 'Hm-noChecked' } // 以多选框的形式展示Hm-isChecked(选择状态)、Hm-noChecked(未选择状态)
@@ -307,7 +302,10 @@
        *      showUserColumns: [], // 编辑表单的Columns配置,详情参考Form组件
        *      formSchema: {}, // 编辑表单的schema配置
        *      layout: {} // 布局方式
-       *    }
+       *    },
+       *    showDetail: { // 同编辑的的配置
+       *      isShow: false,      // 默认不显示详情
+       *    },
        *  }
        */
       options: {
@@ -362,12 +360,11 @@
         isShowExport: false, // 是否显示导出按钮
         formSchema: {}, // form弹窗的Schema定义
         showUserColumns: [], // form弹窗的Columns定义
-        showUserButtons: [ // from弹窗显示按钮
-          { text: '确定', type: 1, method: this.formConfirm },
-          { text: '取消', type: 2, method: this.formCancel }
-        ],
+        showUserButtons: [], // from弹窗显示按钮,
         layout: { left: 0, middle: 24, right: 0 }, // form弹窗的布局方式
         tableId: '',
+        formTips: '',
+        formStyle: '',
 
         isShowRefresh: false,
         buttonGroup: false,
@@ -402,17 +399,15 @@
     },
     created() {
       // this.validate()
-
-      if (this.userDefined && Object.prototype.toString.apply(this.userDefined.pretreatment()) === '[object Promise]') {
-        this.userDefined.pretreatment().then(function() {
-          this.init()
-
-          this.getList()
-        })
+      const self = this
+      if (this.userDefined && this.userDefined.pretreatment) {
+        self.userDefined.pretreatment().then(function() {})
+        self.init()
+        self.getList()
+        console.log('IS-[object Promise]')
       } else {
-        this.init()
-
-        this.getList()
+        self.init()
+        self.getList()
       }
     },
     methods: {
@@ -553,15 +548,13 @@
 
           // 数据处理
           if (self.options && self.options.dataProcessing) {
-            if (Object.prototype.toString.apply(self.options.dataProcessing(resp.data, params, self.definedOperate)) === '[object Promise]') {
-              console.log('IS-[object Promise]')
-              self.options.dataProcessing(resp.data, params, self.definedOperate).then(function(dataList) {
-                self.list = dataList
-              })
-            } else {
-              console.log('NO-[object Promise]')
-              self.list = self.options.dataProcessing(resp.data, params, self.definedOperate)
-            }
+            console.log('NO-[object Promise]')
+            self.list = self.options.dataProcessing(resp.data, params, self.definedOperate)
+          }
+          if (self.options && self.options.promiseProcessing) {
+            self.options.promiseProcessing(resp.data, params, self.definedOperate).then(function(dataList) {
+              self.list = dataList
+            })
           }
           self.total = parseInt(resp.headers.total)
           self.listLoading = false
@@ -617,12 +610,9 @@
         self.tableId = ''
         if (type === 'editData') {
           self.dialogName = '编辑'
-          self.showUserColumns = self.options.editData.showUserColumns
           if (self.options.editData.showUserButtons) {
             self.showUserButtons = self.options.editData.showUserButtons
           }
-          self.formSchema = self.options.editData.formSchema
-          self.layout = self.options.editData.layout
           self.tableId = data.id
         }
         if (type === 'newData') {
@@ -630,26 +620,22 @@
           if (self.options.newData.showUserButtons) {
             self.showUserButtons = self.options.newData.showUserButtons
           }
-          self.showUserColumns = self.options.newData.showUserColumns
-          self.formSchema = self.options.newData.formSchema
-          self.layout = self.options.newData.layout
         }
         if (type === 'detail') {
           self.dialogName = '详情'
-          self.dialogForm = []
-          _.each(self.options.showDetail.showColumns, function(columns) {
-            _.each(self.schema.columns, function(item, index) {
-              if (columns === item.codeCamel) {
-                self.dialogForm.push(item)
-              }
-            })
-          })
 
-          _.map(self.dialogForm, function(item, index) {
-            item.value = data[item.code]
-            item.id = data.id
-          })
+          if (self.options.detailData.showUserButtons) {
+            self.showUserButtons = self.options.detailData.showUserButtons
+          }
+          self.tableId = data.id
         }
+
+        self.showUserColumns = self.options.editData.showUserColumns
+        self.formSchema = self.options.editData.formSchema
+        self.layout = self.options.editData.layout
+        self.formTips = self.options.editData.tips
+        self.formStyle = self.options.editData.formStyle
+
         self.dialogFormVisible = true
       },
       // 表单的提交
