@@ -9,11 +9,12 @@
         <div>
           <!--表单部分-->
           <el-form ref="form"
+                   :label-position="formStyle && formStyle.formOptions && formStyle.formOptions.labelPosition || 'right'"
                    element-loading-text="加载中"
+                   :label-width="formStyle && formStyle.formOptions && formStyle.formOptions.labelWidth || '170px'"
                    :model="formModel"
                    :rules="rules"
-                   label-width="200px"
-                   style="width:80%;margin:0 auto">
+                   :style=" formStyle && formStyle.formOptions && formStyle.formOptions.style || {width:'80%',margin:'0 auto'}">
             <el-form-item v-for="column in showUserColumns"
                           v-show="!column.hide"
                           :key="column.id"
@@ -26,6 +27,7 @@
               <!-- -->
               <el-date-picker v-if="column.widgetType === 6 || column.type === 'datetime' || column.type === 'date'"
                               v-model="formModel[column.codeCamel]"
+                              :style="formStyle && formStyle.datePicker && formStyle.datePicker.style || {width: '65%'}"
                               :type="column.dateType || 'date'"
                               align="right" :disabled="column.disabled"
                               @change="column.change && column.change($event)"
@@ -36,8 +38,10 @@
               <el-select v-else-if="column.widgetType === 2"
                          v-model="formModel[column.codeCamel]"
                          @change="column.change && column.change($event)"
+                         :style="formStyle && formStyle.select && formStyle.select.style || {width: '65%'}"
                          :multiple="column.multiple"
                          :disabled="column.disabled"
+                         style="width: 50%"
                          clearable>
                 <el-option v-for="(item,key) in column.options"
                            :key="key"
@@ -47,10 +51,12 @@
               </el-select>
               <!-- 4 文本域 -->
               <el-input v-else-if="column.widgetType === 4"
+                        :style="formStyle && formStyle.textarea && formStyle.textarea.style || {width: '65%'}"
                         v-model="formModel[column.codeCamel]"
                         type="textarea" :disabled="column.disabled"
-                        :autosize="{ minRows: 2, maxRows: 5}"
-                        :rows="2" @change="column.change && column.change($event)">
+                        :resize="formStyle && formStyle.textarea && formStyle.textarea.resize || 'vertical'"
+                        :autosize="formStyle && formStyle.textarea && formStyle.textarea.autosize || { minRows: 4, maxRows: 6}"
+                        :rows="formStyle && formStyle.textarea && formStyle.textarea.rows || 4" @change="column.change && column.change($event)">
               </el-input>
               <!-- 5 复选框 -->
               <el-checkbox v-else-if="column.widgetType === 3 && !column.options"
@@ -69,6 +75,7 @@
               <quill-editor v-else-if="column.widgetType === 5"
                             ref="textEditor" :disabled="column.disabled"
                             v-model="formModel[column.codeCamel]"
+                            :style="formStyle && formStyle.quillEdito && formStyle.quillEdito.style || {width:'65%'}"
                             :options="editorOption"
                             @blur="onEditorBlur($event)"
                             @focus="onEditorFocus($event)"
@@ -97,6 +104,7 @@
               </el-upload>
               <!-- 1 普通input -->
               <el-input v-else
+                        :style="formStyle && formStyle.input && formStyle.input.style || {width:'65%'}"
                         v-model="formModel[column.codeCamel]"
                         :disabled="column.disabled"
                         @change="column.change && column.change($event)"></el-input>
@@ -288,6 +296,26 @@
       tips: {
         type: Object,
         required: false
+      },
+      /**
+       * 表单样式设置,格式为:
+       *  formStyle: {
+       *   formOptions: { labelWidth: '170px', labelPosition: 'right' },
+       *   datePicker: { style: { width: '60%' }},
+       *   input: { style: { width: '60%' }},
+       *   select: { style: { width: '60%' }},
+       *   textarea: {
+       *      style: { width: '60%' },
+       *      resize: 'none',
+       *      autosize: { minRows: 3, maxRows: 5 },
+       *      rows: 3
+       *   },
+       *  quillEdito: { style: { width: '65%' }}
+       * },
+       */
+      formStyle: {
+        type: Object,
+        required: false
       }
     },
     data() {
@@ -461,9 +489,11 @@
       },
       // 判断是否一个对象的所有属性都为空
       isEmpty(obj) {
-        _.forEach(obj, function(val) {
-          if (val) return false
-        })
+        for (var key in obj) {
+          if (obj[key] && _.trim(obj[key])) {
+            return false
+          }
+        }
         return true
       },
       validate() {
@@ -523,7 +553,7 @@
           self.showUserColumns = _.cloneDeep(self.columns)
           // console.log(504, self.showUserColumns)
           // console.log(514, self.formModel)
-          // 将字符串对象进行替换处理
+          // 处理传来的表单字段
           _.each(self.showUserColumns, function(column, index) {
             if (typeof column === 'string') {
               // 生成一个新对象
@@ -576,7 +606,9 @@
         const self = this
         console.log('点击了提交函数')
         console.log(self.formModel)
-        self.formModel = processData ? processData(self.formModel, self.isCancel) : self.formModel // 对表单数据进行处理
+        // 对表单数据进行处理
+        self.formModel = processData ? processData(self.formModel, self.isCancel) : self.formModel
+        // 如果在processData中禁止提交了，显示提示信息
         if (self.isCancel.cancelSubmit) {
           console.log('取消提交')
           if (self.tips && !self.tips.hidde) {
@@ -591,11 +623,18 @@
         // var params = _.cloneDeep(self.formModel)
         // params = JSON.stringify(params)
         // console.log(self.formModel)
-        // console.log(params)
-        // if (self.isEmpty(self.formModel)) return
+        // 如果所有值都为空 禁止提交
+        if (self.isEmpty(self.formModel)) {
+          self.$message({
+            message: '不能都为空',
+            type: 'error'
+          })
+          return
+        }
+        // 验证、提交
         self.$refs.form.validate((valid) => {
           if (valid) {
-            console.log('valid通过!')
+            // console.log('valid通过!')
             // 存在tableId 则修改信息
             if (self.tableId) {
               request(self.schema.modelUnderscorePlural + '/' + self.tableId + '/edit', {
@@ -605,10 +644,10 @@
                 transformRequest:
                   function(obj) {
                     var str = []
-                    // // 删除空值的属性
-                    // obj = _.omitBy(obj, function(value) {
-                    //   return !value
-                    // })
+                    // 删除空值的属性
+                    obj = _.omitBy(obj, function(value) {
+                      return value === null // 删除value=null的属性，剩下的返回给新对象
+                    })
                     for (var p in obj) {
                       str.push(encodeURIComponent(p) + '=' + encodeURIComponent(obj[p]))
                     }
@@ -616,7 +655,7 @@
                   }
               }).then(resp => {
                 console.log('修改成功')
-                self.resetForm()
+                // self.resetForm()
                 if (self.tips && !self.tips.hidde) {
                   self.$message({
                     message: self.tips.editSuccess.text,
@@ -637,6 +676,14 @@
                 }
               })
             } else { // 不存在tableId 则创建一条数据
+              console.log(self.formModel)
+              // if (self.isEmpty(self.formModel)) {
+              //   self.$message({
+              //     message: '不能都为空',
+              //     type: 'error'
+              //   })
+              //   return
+              // }
               request(self.schema.modelUnderscorePlural + '/new', {
                 method: 'post',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
