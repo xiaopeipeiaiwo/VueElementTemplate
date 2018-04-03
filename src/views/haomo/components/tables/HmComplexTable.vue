@@ -105,11 +105,13 @@
               style="width: 100%" @selection-change="handleSelectionChange" @sort-change="sortChange" @current-change="tableCurrentChange">
       <el-table-column type="index" :index="indexMethod" label="序号" width="50px"></el-table-column>
       <el-table-column type="selection" width="55" v-if="isShowSelection"></el-table-column>
-      <el-table-column v-for="(column,index) in showColumns" :key="index" align="center" :label="column.name" :prop="column.codeCamel" :sortable="column.isSort">
-        <template slot-scope="scope">
-          <span v-if="scope.row[column.codeCamel] !== false && scope.row[column.codeCamel] !== true">{{ scope.row[column.codeCamel] }}</span>
-          <el-checkbox v-if="scope.row[column.codeCamel] === false || scope.row[column.codeCamel] === true" v-model="scope.row[column.codeCamel]"></el-checkbox>
-        </template>
+      <el-table-column v-for="(column,index) in showColumns" :key="index" align="center" :label="column.name"
+                       :prop="column.codeCamel" :sortable="column.isSort" :width="column.width" :show-overflow-tooltip="showOverflowTooltip">
+      <template slot-scope="scope">
+          <span v-if="(scope.row[column.codeCamel] !== false && scope.row[column.codeCamel] !== true )&& !column.render">{{ scope.row[column.codeCamel] }}</span>
+          <el-checkbox v-if="(scope.row[column.codeCamel] === false || scope.row[column.codeCamel] === true) && !column.render" v-model="scope.row[column.codeCamel]"></el-checkbox>
+          <span v-if='column.render' v-html="column.render(scope)"></span>
+      </template>
       </el-table-column>
       <el-table-column fixed="right" label="操作" :width="operationWidth" v-if="isShowEditDataButton || isShowDeleteButton || definedOperation.length">
         <template slot-scope="scope">
@@ -246,6 +248,7 @@
        *    {
        *      "name": "姓名",
        *      "codeCamel": "username",
+       *      "isSort": false, //是否排序，默认false
        *      "render": function(value){
        *        return "<a href='value'></a>"
        *      }
@@ -365,6 +368,7 @@
         tableId: '',
         formTips: '',
         formStyle: '',
+        showOverflowTooltip: false,
 
         isShowRefresh: false,
         buttonGroup: false,
@@ -445,7 +449,7 @@
             self.showColumns.push(tmp)
           })
         } else {
-          self.showColumns = JSON.parse(JSON.stringify(self.columns))
+          self.showColumns = _.cloneDeep(self.columns)
           // 将字符串对象进行替换处理
           _.each(self.showColumns, function(column, index) {
             if (typeof column === 'string') {
@@ -776,6 +780,9 @@
         }
         if (self.options.showSelection) { // 设置是否显示多选
           self.isShowSelection = self.options.showSelection
+        }
+        if (self.options.showOverflowTooltip) { // 当内容过长被隐藏时显示 tooltip
+          self.showOverflowTooltip = self.options.showOverflowTooltip
         }
       },
       handleSelectionChange(val) {

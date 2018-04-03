@@ -24,7 +24,11 @@
     },
     data() {
       return {
-        showUserColumns: [{ name: '手机号', codeCamel: 'mobile', isSort: true }, { name: '登录ID', codeCamel: 'loginid', isSort: true }, 'username', 'email', { name: '创建时间', codeCamel: 'createTime', isSort: true }],
+        showUserColumns: [
+          { name: '手机号', codeCamel: 'mobile', isSort: true },
+          { name: '登录ID', codeCamel: 'loginid', isSort: true },
+          'username', 'email', { name: '创建时间', codeCamel: 'createTime', isSort: true, width: '130px' }
+        ],
         userFilters: [
           { placeholder: '过滤手机号', 'mobile': { 'like': '' }, isShow: true },
           { placeholder: '过滤用户名', 'username': { 'equalTo': '' }, isShow: true },
@@ -83,6 +87,7 @@
         showDeleteButton: true,
         buttonGroup: false,
         showSelection: false,
+        showOverflowTooltip: true,
         tableCurrentChange(value) {}
         // dataProcessing(value, params, definedOperate) {}, // 处理返回后的数据,必须return 处理后的数据
         // promiseProcessing(value, params, definedOperate) {} // 处理返回后的数据,必须return Promise对象
