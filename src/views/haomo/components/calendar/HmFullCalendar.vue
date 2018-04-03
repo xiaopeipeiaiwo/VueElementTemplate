@@ -1,7 +1,7 @@
 <template>
 	<div class="calender">
     <i class="el-icon-date" @click="dialogTableVisible = true"></i>
-    <el-dialog :visible.sync="dialogTableVisible">
+    <el-dialog :visible.sync="dialogTableVisible" style="line-hight:16px;">
       <full-calendar 
       :events="fcEvents" 
       lang="zh"
@@ -57,11 +57,10 @@
     methods: {
       getList() {
         const self = this
-        console.log(self.schema)
         request(self.schema.modelUnderscorePlural).then(resp => {
           console.log(resp.data)
           _.each(resp.data, function(item, index) {
-            const test = _.cloneDeep(self.demoEvents)
+            const test = {}
             test.title = item[self.demoEvents.title]
             if (item[self.demoEvents.end] == null) {
               item[self.demoEvents.end] = item[self.demoEvents.start]
@@ -73,13 +72,13 @@
           console.log(self.fcEvents)
         })
       },
-      changeMonth(start, end, current) {
+      'changeMonth'(start, end, current) {
         console.log('changeMonth', start.format(), end.format(), current.format())
       },
-      eventClick(event, jsEvent, pos) {
+      'eventClick'(event, jsEvent, pos) {
         console.log('eventClick', event, jsEvent, pos)
       },
-      dayClick(day, jsEvent) {
+      'dayClick'(day, jsEvent) {
         console.log('dayClick', day, jsEvent)
       }
     }

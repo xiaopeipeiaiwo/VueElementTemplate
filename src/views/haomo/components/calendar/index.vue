@@ -24,6 +24,7 @@
     },
     created() {
       this.schema = schema
+      // 传入对应的字段
       this.demoEvents = {
         title: 'username',
         start: 'createTime',
