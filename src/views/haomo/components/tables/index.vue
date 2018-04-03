@@ -82,6 +82,14 @@
         showDetail: {
           isShow: true
         },
+        HmFullCalendar: {
+          calendarSchema: schema['HmUser'],
+          demoEvents: {
+            title: 'username',
+            start: 'createTime',
+            end: 'lastUpdateTime'
+          }
+        },
         showRefresh: true,
         showExport: true,
         showDeleteButton: true,
