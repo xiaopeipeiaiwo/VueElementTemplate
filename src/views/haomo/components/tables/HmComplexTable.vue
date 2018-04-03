@@ -3,104 +3,98 @@
     <!-- 过滤 -->
     <div class="filter-container">
       <el-form :inline="true">
-      <!-- 过滤条件 -->
-      <span v-for="filter in filters" class="hm-complex-table__filter-span">
-        <el-input @keyup.enter.native="handleFilter"
-                  style="width: 200px;"
-                  class="filter-item"
-                  :placeholder="filter.placeholder"
-                  v-if="filter.isShow && isShowFilter(filter)"
-                  v-model="listQuery.filters[schema['modelUnderscore']][getFilterColumn(filter)][getFilterOper(filter)]">
-        </el-input>
-
-        <el-input @keyup.enter.native="handleFilter"
-                  style="width: 200px;"
-                  class="filter-item"
-                  :placeholder="filter.placeholder[0]"
-                  v-if="filter.isShow && !isShowFilter(filter) && !isDatetimeFilter(filter)"
-                  v-model="listQuery.filters[schema['modelUnderscore']][getFilterColumn(filter)][getFilterOper(filter)]">
-        </el-input>
-        <el-input @keyup.enter.native="handleFilter"
-                  style="width: 200px;"
-                  class="filter-item"
-                  :placeholder="filter.placeholder[1]"
-                  v-if="filter.isShow && !isShowFilter(filter) && !isDatetimeFilter(filter)"
-                  v-model="listQuery.filters[schema['modelUnderscore']][getFilterColumn(filter)][getFilterOperTwin(filter)]">
-        </el-input>
-
-        <el-date-picker type="datetime"
-                        align="right"
-                        class="filter-item hm-complex-table__filter-span"
-                        @keyup.enter.native="handleFilter"
-                        value-format="yyyy-MM-dd HH:mm:ss"
-                        :picker-options="pickerOptions"
-                        :placeholder="filter.placeholder[0]"
-                        v-if="filter.isShow && !isShowFilter(filter) && isDatetimeFilter(filter)"
-                        v-model="listQuery.filters[schema['modelUnderscore']][getFilterColumn(filter)][getFilterOper(filter)]">
-        </el-date-picker>
-        <el-date-picker type="datetime"
-                        align="right"
-                        class="filter-item"
-                        @keyup.enter.native="handleFilter"
-                        value-format="yyyy-MM-dd HH:mm:ss"
-                        :picker-options="pickerOptions"
-                        :placeholder="filter.placeholder[1]"
-                        v-if="filter.isShow && !isShowFilter(filter) && isDatetimeFilter(filter)"
-                        v-model="listQuery.filters[schema['modelUnderscore']][getFilterColumn(filter)][getFilterOperTwin(filter)]">
-        </el-date-picker>
-      </span>
-      <!-- end 过滤条件 -->
-
-      <!--预定义按钮-->
-      <el-button-group v-if="buttonGroup">
-        <el-button class="filter-item" type="primary" v-waves icon="el-icon-search" @click="handleFilter">搜索</el-button>
-        <el-button class="filter-item" type="primary" :loading="downloadLoading" v-waves icon="el-icon-download" v-if="isShowExport" @click="handleDownload">导出</el-button>
-        <el-button class="filter-item" type="primary" v-waves icon="el-icon-plus" v-if="isShowNewButton" @click="openDialog('newData')">新建</el-button>
-        <el-button class="filter-item" type="primary" v-waves icon="el-icon-refresh" v-if="isShowRefresh" @click="refreshList">刷新</el-button>
-        <el-button class="filter-item" type="primary" v-waves icon="el-icon-close" v-if="multipleSelection.length" @click="BatchRemove">批量删除</el-button>
-      </el-button-group>
-      <span v-if="!buttonGroup">
-        <el-button class="filter-item" type="primary" v-waves icon="el-icon-search" @click="handleFilter">搜索</el-button>
-        <el-button class="filter-item" type="primary" :loading="downloadLoading" v-waves icon="el-icon-download" v-if="isShowExport" @click="handleDownload">导出</el-button>
-        <el-button class="filter-item" type="primary" v-waves icon="el-icon-plus" v-if="isShowNewButton" @click="openDialog('newData')">新建</el-button>
-        <el-button class="filter-item" type="primary" v-waves icon="el-icon-refresh" v-if="isShowRefresh" @click="refreshList">刷新</el-button>
-        <el-button class="filter-item" type="primary" v-waves icon="el-icon-close" v-if="multipleSelection.length" @click="BatchRemove">批量删除</el-button>
-      </span>
-
-      <!--自定义-->
-      <span v-if="definedOperate.length" v-for="operate in definedOperate">
-        <!--自定义按钮-->
-        <el-button v-if="operate.type == 'button'" class="filter-item" type="primary" v-waves :icon="operate.icon" @click="operate.func">{{operate.label}}</el-button>
-        <!--自定义下拉选择-->
-        <el-form-item v-if="operate.type == 'select'" :label="operate.label">
-          <el-select v-model="operate.value" :placeholder="operate.placeholder">
-            <el-option v-for="o in operate.options" :label="o.label" :value="o.code"></el-option>
-          </el-select>
-        </el-form-item>
-        <!--自定义输入框-->
-        <el-form-item v-if="operate.type == 'input'" :label="operate.label">
+        <!-- 过滤条件 -->
+        <span v-for="filter in filters" class="hm-complex-table__filter-span">
           <el-input @keyup.enter.native="handleFilter"
                     style="width: 200px;"
                     class="filter-item"
-                    :placeholder="operate.placeholder"
-                    v-model="operate.value">
+                    :placeholder="filter.placeholder"
+                    v-if="filter.isShow && isShowFilter(filter)"
+                    v-model="listQuery.filters[schema['modelUnderscore']][getFilterColumn(filter)][getFilterOper(filter)]">
           </el-input>
-        </el-form-item>
-        <!--自定义时间选择-->
-        <el-form-item v-if="operate.type == 'datetime'" :label="operate.label">
+
+          <el-input @keyup.enter.native="handleFilter"
+                    style="width: 200px;"
+                    class="filter-item"
+                    :placeholder="filter.placeholder[0]"
+                    v-if="filter.isShow && !isShowFilter(filter) && !isDatetimeFilter(filter)"
+                    v-model="listQuery.filters[schema['modelUnderscore']][getFilterColumn(filter)][getFilterOper(filter)]">
+          </el-input>
+          <el-input @keyup.enter.native="handleFilter"
+                    style="width: 200px;"
+                    class="filter-item"
+                    :placeholder="filter.placeholder[1]"
+                    v-if="filter.isShow && !isShowFilter(filter) && !isDatetimeFilter(filter)"
+                    v-model="listQuery.filters[schema['modelUnderscore']][getFilterColumn(filter)][getFilterOperTwin(filter)]">
+          </el-input>
+
+          <el-date-picker type="datetime"
+                          align="right"
+                          class="filter-item hm-complex-table__filter-span"
+                          @keyup.enter.native="handleFilter"
+                          value-format="yyyy-MM-dd HH:mm:ss"
+                          :placeholder="filter.placeholder[0]"
+                          v-if="filter.isShow && !isShowFilter(filter) && isDatetimeFilter(filter)"
+                          v-model="listQuery.filters[schema['modelUnderscore']][getFilterColumn(filter)][getFilterOper(filter)]">
+          </el-date-picker>
           <el-date-picker type="datetime"
                           align="right"
                           class="filter-item"
                           @keyup.enter.native="handleFilter"
                           value-format="yyyy-MM-dd HH:mm:ss"
-                          :picker-options="pickerOptions"
-                          :placeholder="operate.placeholder"
-                          v-model="operate.value">
+                          :placeholder="filter.placeholder[1]"
+                          v-if="filter.isShow && !isShowFilter(filter) && isDatetimeFilter(filter)"
+                          v-model="listQuery.filters[schema['modelUnderscore']][getFilterColumn(filter)][getFilterOperTwin(filter)]">
           </el-date-picker>
-        </el-form-item>
-      </span>
+        </span>
+        <!-- end 过滤条件 -->
+        <!--自定义-->
+        <span v-if="definedOperate.length" v-for="operate in definedOperate">
+          <!--自定义按钮-->
+          <el-button v-if="operate.type == 'button'" class="filter-item" type="primary" v-waves :icon="operate.icon" @click="operate.func">{{operate.label}}</el-button>
+          <!--自定义下拉选择-->
+          <el-form-item v-if="operate.type == 'select'" :label="operate.label">
+            <el-select v-model="operate.value" :placeholder="operate.placeholder" clearable>
+              <el-option v-for="o in operate.options" :label="o.label" :value="o.code"></el-option>
+            </el-select>
+          </el-form-item>
+          <!--自定义输入框-->
+          <el-form-item v-if="operate.type == 'input'" :label="operate.label">
+            <el-input @keyup.enter.native="handleFilter"
+                      style="width: 200px;"
+                      class="filter-item"
+                      :placeholder="operate.placeholder"
+                      v-model="operate.value">
+            </el-input>
+          </el-form-item>
+          <!--自定义时间选择-->
+          <el-form-item v-if="operate.type == 'datetime'" :label="operate.label">
+            <el-date-picker type="datetime"
+                            class="filter-item"
+                            @keyup.enter.native="handleFilter"
+                            value-format="yyyy-MM-dd HH:mm:ss"
+                            :placeholder="operate.placeholder"
+                            v-model="operate.value">
+            </el-date-picker>
+          </el-form-item>
+        </span>
 
+        <!--预定义按钮-->
+        <el-button-group v-if="buttonGroup">
+          <el-button class="filter-item" type="primary" v-waves icon="el-icon-search" @click="handleFilter">搜索</el-button>
+          <el-button class="filter-item" type="primary" :loading="downloadLoading" v-waves icon="el-icon-download" v-if="isShowExport" @click="handleDownload">导出</el-button>
+          <el-button class="filter-item" type="primary" v-waves icon="el-icon-plus" v-if="isShowNewButton" @click="openDialog('newData')">新建</el-button>
+          <el-button class="filter-item" type="primary" v-waves icon="el-icon-refresh" v-if="isShowRefresh" @click="refreshList">刷新</el-button>
+          <el-button class="filter-item" type="primary" v-waves icon="el-icon-close" v-if="multipleSelection.length" @click="BatchRemove">批量删除</el-button>
+        </el-button-group>
 
+        <span v-if="!buttonGroup">
+          <el-button class="filter-item" type="primary" v-waves icon="el-icon-search" @click="handleFilter">搜索</el-button>
+          <el-button class="filter-item" type="primary" :loading="downloadLoading" v-waves icon="el-icon-download" v-if="isShowExport" @click="handleDownload">导出</el-button>
+          <el-button class="filter-item" type="primary" v-waves icon="el-icon-plus" v-if="isShowNewButton" @click="openDialog('newData')">新建</el-button>
+          <el-button class="filter-item" type="primary" v-waves icon="el-icon-refresh" v-if="isShowRefresh" @click="refreshList">刷新</el-button>
+          <el-button class="filter-item" type="primary" v-waves icon="el-icon-close" v-if="multipleSelection.length" @click="BatchRemove">批量删除</el-button>
+        </span>
 
       </el-form>
     </div>
@@ -108,20 +102,23 @@
 
     <!-- 表格 -->
     <el-table :data="list" v-loading="listLoading" element-loading-text="给我一点时间" border fit highlight-current-row
-              style="width: 100%" @selection-change="handleSelectionChange">
+              style="width: 100%" @selection-change="handleSelectionChange" @sort-change="sortChange" @current-change="tableCurrentChange">
       <el-table-column type="index" :index="indexMethod" label="序号" width="50px"></el-table-column>
-      <el-table-column type="selection" width="55">
+      <el-table-column type="selection" width="55" v-if="isShowSelection"></el-table-column>
+      <el-table-column v-for="(column,index) in showColumns" :key="index" align="center" :label="column.name"
+                       :prop="column.codeCamel" :sortable="column.isSort" :width="column.width" :show-overflow-tooltip="showOverflowTooltip">
+      <template slot-scope="scope">
+          <span v-if="(scope.row[column.codeCamel] !== false && scope.row[column.codeCamel] !== true )&& !column.render">{{ scope.row[column.codeCamel] }}</span>
+          <el-checkbox v-if="(scope.row[column.codeCamel] === false || scope.row[column.codeCamel] === true) && !column.render" v-model="scope.row[column.codeCamel]"></el-checkbox>
+          <span v-if='column.render' v-html="column.render(scope)"></span>
+      </template>
       </el-table-column>
-      <el-table-column v-for="(column,index) in showColumns" :key="index" align="center" :label="column.name">
-        <template slot-scope="scope">
-          <span>{{ scope.row[column.codeCamel] }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column fixed="right" label="操作" :width="operationWidth" v-if="isShowEditDataButton || isShowDeleteButton">
+      <el-table-column fixed="right" label="操作" :width="operationWidth" v-if="isShowEditDataButton || isShowDeleteButton || definedOperation.length">
         <template slot-scope="scope">
           <el-button @click="openDialog('editData',scope.row)" v-if="isShowEditDataButton" type="text" size="small">编辑</el-button>
           <el-button @click="deleteData(scope.row)" type="text" v-if="isShowDeleteButton" size="small">删除</el-button>
           <el-button @click="openDialog('detail',scope.row)" type="text" v-if="isShowDetail" size="small">详情</el-button>
+          <el-button @click="operation.func(scope.row)" type="text" v-if="definedOperation.length" size="small" v-for="operation in definedOperation">{{operation.label}}</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -138,17 +135,15 @@
     <!-- 弹窗 -->
     <!-- @TODO 补充详情弹窗 -->
 
-    <el-dialog :title="dialogName" :visible.sync="dialogFormVisible" :close-on-click-modal="closeOnClickModal" width="dialogWidth">
-      <el-form v-if="dialogName == '详情'">
-        <el-form-item :label="dialog.name" :label-width="formLabelWidth" v-for="dialog in dialogForm">
-          <el-input v-model="dialog.value" disabled auto-complete="off"></el-input>
-        </el-form-item>
-      </el-form>
+    <el-dialog :title="dialogName" :visible.sync="dialogFormVisible" :close-on-click-modal="closeOnClickModal" width="dialogWidth" v-if="dialogFormVisible">
       <hm-complex-form :schema="formSchema"
                        :columns="showUserColumns"
                        :buttons="showUserButtons"
                        :layout="layout"
-                       :tableId="tableId" v-if="dialogName != '详情'">
+                       :tableId="tableId"
+                       :tips="formTips"
+                       :formStyle="formStyle"
+                       ref="selectfood">
       </hm-complex-form>
     </el-dialog>
 
@@ -253,6 +248,7 @@
        *    {
        *      "name": "姓名",
        *      "codeCamel": "username",
+       *      "isSort": false, //是否排序，默认false
        *      "render": function(value){
        *        return "<a href='value'></a>"
        *      }
@@ -282,7 +278,7 @@
       },
       /**
        * 表格的选项，包括：pageSize、showExport、sortItem、sortOrder、showRefresh、showDeleteButton、
-       * buttonGroup、showDetail、dataProcessing、changeValue、newData、editData完整的示例为：
+       * buttonGroup、showDetail、dataProcessing、promiseProcessing、changeValue、newData、editData完整的示例为：
        *  {
        *    "pageSize": 10, // 默认为10条数据/页
        *    "showExport": false,  // 默认为不显示导出按钮
@@ -291,13 +287,12 @@
        *    "showRefresh": false, //默认不显示刷新按钮
        *    "showDeleteButton": false,  //默认不显示删除按钮
        *    "buttonGroup": false  //默认不以按钮组的方式呈现button
-       *    showDetail: {
-       *      isShow: false,      // 默认不显示详情
-       *      showColumns: ['mobile', 'loginid', 'username', 'email']
-       *    },
-       *    dataProcessing(value){}  // 对接口返回数据进行处理
+       *    tableCurrentChange(value){} // 设置点击某行所执行方法
+       *    dataProcessing(value, params, definedOperate){}  // 对接口返回数据进行处理（必须有返回值,返回值需为 [{}] 的形式，支持放回Promise对象）
+       *    promiseProcessing(value, params, definedOperate){}  // 对接口返回数据进行处理（必须有返回值,返回Promise对象）
        *    "changeValue": {      // 数据库字段转化显示，例如(0=否,1=是)
-       *      username: {1: '是', 0: '否'}
+       *      username: {1: '是', 0: '否'},
+       *      type: { 1: 'Hm-isChecked', 0: 'Hm-noChecked' } // 以多选框的形式展示Hm-isChecked(选择状态)、Hm-noChecked(未选择状态)
        *    },
        *    "newData": {  // 新建按钮的配置
        *      isShow: false,  // 默认不显示新建按钮
@@ -310,7 +305,10 @@
        *      showUserColumns: [], // 编辑表单的Columns配置,详情参考Form组件
        *      formSchema: {}, // 编辑表单的schema配置
        *      layout: {} // 布局方式
-       *    }
+       *    },
+       *    showDetail: { // 同编辑的的配置
+       *      isShow: false,      // 默认不显示详情
+       *    },
        *  }
        */
       options: {
@@ -321,7 +319,7 @@
        * 自定义表格选项，包括：definedParams、definedOperate、完整的示例为：
        *  {
        *    definedParams(params, operate){return params} // 自定义查询数据时的Params
-       *    definedOperate: [         // 自定义table顶部的操作，如果要根据多选框、输入框、时间选择器的值查询，需在自定义definedParams()方法中添加
+       *    definedOperate: [         // 自定义table顶部的操作，如果要根据下拉选择、输入框、时间选择器的值查询，需在自定义definedParams()方法中添加
        *      { type: 'select', label:'', placeholder: '', options:[{label: '', code: ''}], value:''}, // 自定义多选框
        *      { type: 'input', label:'', placeholder: '', code:'', value:''}, // 自定义输入框
        *      { type: 'datetime', label:'', placeholder: '', code:'', value:''},  // 自定义时间选择器
@@ -358,18 +356,19 @@
         multipleSelection: [], // 选择的数组
         dialogName: '',
 
+        isShowSelection: false, // 是否显示多选
         isShowNewButton: false, // 是否显示新建
         isShowEditDataButton: false, // 是否显示编辑
         isShowDeleteButton: false, // 是否显示删除
         isShowExport: false, // 是否显示导出按钮
         formSchema: {}, // form弹窗的Schema定义
         showUserColumns: [], // form弹窗的Columns定义
-        showUserButtons: [ // from弹窗显示按钮
-          { text: '确定', type: 1, method: this.formConfirm },
-          { text: '取消', type: 2, method: this.formCancel }
-        ],
+        showUserButtons: [], // from弹窗显示按钮,
         layout: { left: 0, middle: 24, right: 0 }, // form弹窗的布局方式
         tableId: '',
+        formTips: '',
+        formStyle: '',
+        showOverflowTooltip: false,
 
         isShowRefresh: false,
         buttonGroup: false,
@@ -377,32 +376,7 @@
         isShowDetail: false, // 是否显示详情按钮
 
         definedOperate: [], // 自定义操作
-
-        pickerOptions: { // 日期选项配置
-          disabledDate(time) {
-            return time.getTime() > Date.now()
-          },
-          shortcuts: [{
-            text: '今天',
-            onClick(picker) {
-              picker.$emit('pick', new Date())
-            }
-          }, {
-            text: '昨天',
-            onClick(picker) {
-              const date = new Date()
-              date.setTime(date.getTime() - 3600 * 1000 * 24)
-              picker.$emit('pick', date)
-            }
-          }, {
-            text: '一周前',
-            onClick(picker) {
-              const date = new Date()
-              date.setTime(date.getTime() - 3600 * 1000 * 24 * 7)
-              picker.$emit('pick', date)
-            }
-          }]
-        }
+        definedOperation: []
       }
     },
     computed: {
@@ -429,10 +403,16 @@
     },
     created() {
       // this.validate()
-
-      this.init()
-
-      this.getList()
+      const self = this
+      if (this.userDefined && this.userDefined.pretreatment) {
+        self.userDefined.pretreatment().then(function() {})
+        self.init()
+        self.getList()
+        console.log('IS-[object Promise]')
+      } else {
+        self.init()
+        self.getList()
+      }
     },
     methods: {
       indexMethod(index) {
@@ -469,7 +449,7 @@
             self.showColumns.push(tmp)
           })
         } else {
-          self.showColumns = JSON.parse(JSON.stringify(self.columns))
+          self.showColumns = _.cloneDeep(self.columns)
           // 将字符串对象进行替换处理
           _.each(self.showColumns, function(column, index) {
             if (typeof column === 'string') {
@@ -479,6 +459,11 @@
               self.$set(tmp, 'code', tmp.code.toLowerCase())
               self.$set(self.showColumns, index, tmp)
             }
+          })
+        }
+        if (self.showColumns) {
+          _.map(self.showColumns, function(item, index) {
+            item.isSort = item.isSort === undefined ? false : item.isSort === true ? 'custom' : false
           })
         }
 
@@ -511,11 +496,22 @@
         console.log(request.defaults)
         console.log(`request.defaults.baseURL: ${request.defaults.baseURL}`)
       },
+      // 设置自定义组件
       setDefinedOperate() {
         const self = this
         if (self.userDefined.definedOperate) {
           self.definedOperate = self.userDefined.definedOperate
         }
+        if (self.userDefined.definedOperation) {
+          self.operationWidth += 50 * self.userDefined.definedOperation.length
+          self.definedOperation = self.userDefined.definedOperation
+        }
+      },
+      // 排序
+      sortChange(row) {
+        this.listQuery.sortItem = row.prop.replace(/([A-Z])/g, '_$1').toLowerCase()
+        this.listQuery.sortOrder = row.order === 'descending' ? 'desc' : 'asc'
+        this.getList()
       },
       getList() {
         const self = this
@@ -540,10 +536,6 @@
         request(self.schema.modelUnderscorePlural, {
           params: params
         }).then(resp => {
-          // 数据库字段转化显示
-          if (self.options && self.options.changeValue) {
-            resp.data = self.changeValue(resp.data)
-          }
           if (resp.data.length !== 0 && resp.data[0].superior !== undefined && resp.data[0].includes !== undefined &&
             resp.data[0].refers !== undefined && resp.data[0].relates !== undefined) {
             self.list = []
@@ -553,14 +545,31 @@
           } else {
             self.list = resp.data
           }
+          // 数据库字段转化显示
+          if (self.options && self.options.changeValue) {
+            self.list = self.changeValue(self.list)
+          }
 
           // 数据处理
           if (self.options && self.options.dataProcessing) {
-            self.list = self.options.dataProcessing(resp.data)
+            console.log('NO-[object Promise]')
+            self.list = self.options.dataProcessing(resp.data, params, self.definedOperate)
+          }
+          if (self.options && self.options.promiseProcessing) {
+            self.options.promiseProcessing(resp.data, params, self.definedOperate).then(function(dataList) {
+              self.list = dataList
+            })
           }
           self.total = parseInt(resp.headers.total)
           self.listLoading = false
         })
+      },
+      tableCurrentChange(value) {
+        const self = this
+        if (self.options && self.options.tableCurrentChange) {
+          console.log('value', value)
+          self.options.tableCurrentChange(value)
+        }
       },
       // 数据库字段转化显示，例如(0=否,1=是)
       changeValue(data) {
@@ -568,7 +577,7 @@
         _.map(data, function(item, index) {
           _.forEach(item, function(listValue, listKey) {
             if (self.options.changeValue[listKey] && self.options.changeValue[listKey][listValue]) {
-              item[listKey] = self.options.changeValue[listKey][listValue]
+              item[listKey] = self.options.changeValue[listKey][listValue] === 'Hm-isChecked' ? true : self.options.changeValue[listKey][listValue] === 'Hm-noChecked' ? false : self.options.changeValue[listKey][listValue]
             }
           })
         })
@@ -590,36 +599,57 @@
       // 添加一条数据
       openDialog(type, data) {
         const self = this
-        self.dialogFormVisible = true
+        if (type === 'editData' && self.userDefined && self.userDefined.definedEdit) {
+          self.userDefined.definedEdit(true, data)
+          return false
+        }
+        if (type === 'newData' && self.userDefined && self.userDefined.definedNew) {
+          self.userDefined.definedNew(true)
+          return false
+        }
+        if (type === 'detail' && self.userDefined && self.userDefined.definedDetail) {
+          self.userDefined.definedDetail(true, data)
+          return false
+        }
+        self.tableId = ''
         if (type === 'editData') {
           self.dialogName = '编辑'
+          if (self.options.editData.showUserButtons) {
+            self.showUserButtons = self.options.editData.showUserButtons
+          }
+          self.tableId = data.id
           self.showUserColumns = self.options.editData.showUserColumns
           self.formSchema = self.options.editData.formSchema
           self.layout = self.options.editData.layout
-          self.tableId = data.id
+          self.formTips = self.options.editData.tips
+          self.formStyle = self.options.editData.formStyle
         }
         if (type === 'newData') {
           self.dialogName = '新建'
+          if (self.options.newData.showUserButtons) {
+            self.showUserButtons = self.options.newData.showUserButtons
+          }
           self.showUserColumns = self.options.newData.showUserColumns
           self.formSchema = self.options.newData.formSchema
           self.layout = self.options.newData.layout
+          self.formTips = self.options.newData.tips
+          self.formStyle = self.options.newData.formStyle
         }
         if (type === 'detail') {
           self.dialogName = '详情'
-          self.dialogForm = []
-          _.each(self.options.showDetail.showColumns, function(columns) {
-            _.each(self.schema.columns, function(item, index) {
-              if (columns === item.codeCamel) {
-                self.dialogForm.push(item)
-              }
-            })
-          })
 
-          _.map(self.dialogForm, function(item, index) {
-            item.value = data[item.code]
-            item.id = data.id
-          })
+          if (self.options.detailData.showUserButtons) {
+            self.showUserButtons = self.options.detailData.showUserButtons
+          }
+          self.showUserColumns = self.options.showDetail.showUserColumns
+          self.formSchema = self.options.showDetail.formSchema
+          self.layout = self.options.showDetail.layout
+          self.formTips = self.options.showDetail.tips
+          self.formStyle = self.options.showDetail.formStyle
+          self.tableId = data.id
         }
+
+        self.dialogFormVisible = true
       },
       // 表单的提交
       formConfirm() {
@@ -747,6 +777,12 @@
         if (self.options.showDetail && self.options.showDetail.isShow) { // 设置按钮是否以按钮组呈现
           self.isShowDetail = self.options.showDetail.isShow
           self.operationWidth += 50
+        }
+        if (self.options.showSelection) { // 设置是否显示多选
+          self.isShowSelection = self.options.showSelection
+        }
+        if (self.options.showOverflowTooltip) { // 当内容过长被隐藏时显示 tooltip
+          self.showOverflowTooltip = self.options.showOverflowTooltip
         }
       },
       handleSelectionChange(val) {

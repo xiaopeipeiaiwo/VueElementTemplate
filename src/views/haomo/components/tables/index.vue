@@ -24,7 +24,11 @@
     },
     data() {
       return {
-        showUserColumns: ['mobile', 'loginid', 'username', 'email', 'createTime'],
+        showUserColumns: [
+          { name: '手机号', codeCamel: 'mobile', isSort: true },
+          { name: '登录ID', codeCamel: 'loginid', isSort: true },
+          'username', 'email', { name: '创建时间', codeCamel: 'createTime', isSort: true, width: '130px' }
+        ],
         userFilters: [
           { placeholder: '过滤手机号', 'mobile': { 'like': '' }, isShow: true },
           { placeholder: '过滤用户名', 'username': { 'equalTo': '' }, isShow: true },
@@ -51,7 +55,7 @@
         sortItem: 'create_time',
         sortOrder: 'desc',
         changeValue: {
-          username: { 1: '是', 0: '否' }
+          username: { 1: 'Hm-isChecked', 0: 'Hm-noChecked' }
         },
         newData: {
           isShow: true,
@@ -60,24 +64,33 @@
             { name: '登录ID', codeCamel: 'loginid', widgetType: 1 },
             { name: '类型', codeCamel: 'type', widgetType: 1 }
           ],
+          showUserButtons: [],
           formSchema: schema['HmUser'],
-          layout: { left: 0, middle: 24, right: 0 }
+          layout: { left: 0, middle: 24, right: 0 },
+          tips: {},
+          formStyle: {}
         },
         editData: {
           isShow: true,
           showUserColumns: [{ name: '姓名', codeCamel: 'username', widgetType: 1 }],
+          showUserButtons: [],
           formSchema: schema['HmUser'],
-          layout: { left: 0, middle: 24, right: 0 }
+          layout: { left: 0, middle: 24, right: 0 },
+          tips: {},
+          formStyle: {}
+        },
+        showDetail: {
+          isShow: true
         },
         showRefresh: true,
         showExport: true,
         showDeleteButton: true,
         buttonGroup: false,
-        showDetail: {
-          isShow: true,
-          showColumns: ['mobile', 'loginid', 'username', 'email']
-        }
-        // dataProcessing(value) {} // 处理返回后的数据,必须return 处理后的数据
+        showSelection: false,
+        showOverflowTooltip: true,
+        tableCurrentChange(value) {}
+        // dataProcessing(value, params, definedOperate) {}, // 处理返回后的数据,必须return 处理后的数据
+        // promiseProcessing(value, params, definedOperate) {} // 处理返回后的数据,必须return Promise对象
       }
       this.userDefined = {
         definedParams(params, operate) {
@@ -86,8 +99,19 @@
         definedOperate: [
           { type: 'select', label: '', placeholder: '类型', options: [{ label: '姓名', code: 'username' }, { label: '登录ID', code: 'loginid' }], value: '' },
           { type: 'input', label: '', placeholder: '邮箱', code: 'email', value: '' },
-          { type: 'datetime', label: '', placeholder: '创建时间', code: 'createTime', value: '' },
-          { type: 'button', label: '搜索', icon: 'el-icon-search', func: this.dropDown }]
+          { type: 'datetime', label: '', placeholder: '创建时间', code: 'createTime', value: '' }
+        ],
+        definedOperation: [{ label: '测试', func: this.dropDown }],
+        definedEdit() {
+
+        },
+        definedNew() {
+
+        },
+        definedDetail() {
+
+        }
+        // pretreatment() {}
       }
     },
     methods: {
@@ -95,8 +119,8 @@
         this.dialogFormVisible = false
         console.log('method1')
       },
-      dropDown() {
-        console.log('输出一些东西')
+      dropDown(value) {
+        console.log('输出一些东西', value)
       }
     }
   }
