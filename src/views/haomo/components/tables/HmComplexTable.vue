@@ -681,29 +681,9 @@
       // 删除一条数据
       deleteData(data) {
         const self = this
-        self.$confirm('此操作将永久删除该数据, 是否继续?', '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        }).then(() => {
-          request(self.schema.modelUnderscorePlural + '/' + data.id + '/delete', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' }
-          }).then(data => {
-            if (data.data.message === 'delete success') {
-              self.$message({
-                message: data.data.message,
-                type: 'success'
-              })
-              self.getList()
-            }
-          })
-        }).catch(() => {
-          self.$message({
-            message: '已取消删除',
-            type: 'success'
-          })
-        })
+        const params = { ids: [data.id] }
+        params.ids = JSON.stringify(params.ids)
+        self.deleteDataRequest(params)
       },
       refreshList() {
         this.listQuery = {
@@ -720,15 +700,17 @@
       // 批量删除
       BatchRemove() {
         const self = this
-        const datas = {
-          ids: []
-        }
+        const datas = { ids: [] }
         if (!self.multipleSelection) return false
         _.each(self.multipleSelection, function(item, index) {
           datas.ids.push(item.id)
         })
         datas.ids = JSON.stringify(datas.ids)
-        self.$confirm('此操作将永久删除该数据, 是否继续?', '提示', {
+        self.deleteDataRequest(datas)
+      },
+      deleteDataRequest(data) {
+        const self = this
+        self.$confirm('此操作将永久删除数据, 是否继续?', '提示', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
           type: 'warning'
@@ -736,12 +718,12 @@
           request(self.schema.modelUnderscorePlural + '/delete/batch', {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
-            data: datas,
+            data: data,
             transformRequest: param
-          }).then(data => {
-            if (data.data.message === 'delete success') {
+          }).then(resp => {
+            if (resp.data.message === 'delete success') {
               self.$message({
-                message: data.data.message,
+                message: resp.data.message,
                 type: 'success'
               })
               self.getList()
