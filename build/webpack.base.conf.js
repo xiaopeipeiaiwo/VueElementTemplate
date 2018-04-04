@@ -22,7 +22,11 @@ const createLintingRule = () => ({
 module.exports = {
   context: path.resolve(__dirname, '../'),
   entry: {
-    app: './src/main.js'
+    app: './src/main.js',
+    styles: [
+      './node_modules/fullcalendar/dist/fullcalendar.css',
+      './node_modules/fullcalendar/dist/fullcalendar.print.css'
+    ]
   },
   output: {
     path: config.build.assetsRoot,
