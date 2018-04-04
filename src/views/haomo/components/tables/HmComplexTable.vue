@@ -620,7 +620,7 @@
         if (type === 'editData') {
           self.dialogName = '编辑'
           if (self.options.editData.showUserButtons) {
-            self.showUserButtons = self.options.editData.showUserButtons
+            self.HmComplexForm.showUserButtons = self.options.editData.showUserButtons
           }
           self.HmComplexForm.tableId = data.id
           self.HmComplexForm.showUserColumns = self.options.editData.showUserColumns
@@ -632,7 +632,7 @@
         if (type === 'newData') {
           self.dialogName = '新建'
           if (self.options.newData.showUserButtons) {
-            self.showUserButtons = self.options.newData.showUserButtons
+            self.HmComplexForm.showUserButtons = self.options.newData.showUserButtons
           }
           self.HmComplexForm.showUserColumns = self.options.newData.showUserColumns
           self.HmComplexForm.formSchema = self.options.newData.formSchema
@@ -644,7 +644,7 @@
           self.dialogName = '详情'
 
           if (self.options.detailData.showUserButtons) {
-            self.showUserButtons = self.options.detailData.showUserButtons
+            self.HmComplexForm.showUserButtons = self.options.detailData.showUserButtons
           }
           self.HmComplexForm.showUserColumns = self.options.showDetail.showUserColumns
           self.HmComplexForm.formSchema = self.options.showDetail.formSchema
