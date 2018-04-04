@@ -75,7 +75,7 @@
               <quill-editor v-else-if="column.widgetType === 5"
                             ref="textEditor" :disabled="column.disabled"
                             v-model="formModel[column.codeCamel]"
-                            :style="formStyle && formStyle.quillEdito && formStyle.quillEdito.style || {width:'65%'}"
+                            :style="formStyle && formStyle.quillEditor && formStyle.quillEditor.style || {width:'65%'}"
                             :options="editorOption"
                             @blur="onEditorBlur($event)"
                             @focus="onEditorFocus($event)"
@@ -283,6 +283,27 @@
         required: false
       },
       /**
+       * 要写入或修改的外表字段codeCamel值, 第一个元素为外键字段，格式为:
+       *  [ ccSubjectId, description, correct, serialNumber]
+       */
+      foreignFormFields: {
+        type: Array,
+        required: false
+      },
+      /**
+       * 用来将其他有间接关系的表(所谓间接关系, 一定是跟本表的某个字段名一致, 且指向同一张表),
+       * 两张表中非主键的两个字段相等 格式为:
+       *  {
+       *    'relate_table1': ['column1', 'column2'], //’关联的另一张表名’:[‘一致的字段名’]
+       *    'relate_table1': ['column3', 'column4']
+       *    }
+       *  }
+       */
+      relates: {
+        type: Array,
+        required: false
+      },
+      /**
        * 请求成功或失败时的提示信息,格式为:
        *  tips: {
        *     hidde: false, // 是否显示提示，默认false显示
@@ -301,16 +322,16 @@
        * 表单样式设置,格式为:
        *  formStyle: {
        *   formOptions: { labelWidth: '170px', labelPosition: 'right' },
-       *   datePicker: { style: { width: '60%' }},
+       *   datePicker: { style: { width: '100px' }},
        *   input: { style: { width: '60%' }},
-       *   select: { style: { width: '60%' }},
+       *   select: { style: { width: '100px' }},
        *   textarea: {
-       *      style: { width: '60%' },
+       *      style: { width: '100px' },
        *      resize: 'none',
        *      autosize: { minRows: 3, maxRows: 5 },
        *      rows: 3
        *   },
-       *  quillEdito: { style: { width: '65%' }}
+       *  quillEditor: { style: { width: '65%' }}
        * },
        */
       formStyle: {
@@ -353,7 +374,14 @@
       //   }
       // }
       return {
-        Loading: true,
+        foreignArray: [], // 批量创建或删除的多条外表数据
+        nativeFormModel: {}, // 有外表时 本表数据  从formModel中提取
+        foreignFormModel: {}, // 字段相同的多条外表数据 从formModel中提取
+        foreignForm: {}, // 单条外表数据 只包含键，值为空 从foreignFormFields中提取
+        partPropModel: {}, // 外表中从属于foreignFormModel的属性 从formModel中提取
+        indirectData: '', // 间接关联表数据
+        relateData: {}, // 中间表数据
+        Loading: true, // 加载等待
         form: null,
         formModel: {}, // 双向绑定的数据变量
         showUserColumns: [], // 要显示的字段
@@ -390,7 +418,8 @@
             ]
           }
         },
-        pickerOptions: { // 日期选项配置
+        // 日期选项配置
+        pickerOptions: {
           // disabledDate(time) {
           //   return time.getTime() > Date.now()
           // },
@@ -417,22 +446,22 @@
         },
         fileList: [], // 上传文件列表
         fileCode: '', // 上传组件对应的数据库字段
-        isCancel: { cancelSubmit: false }
+        isCancel: { cancelSubmit: false } // 主动取消提交（processData中）
       }
     },
     created() {
       // this.validate()
       this.init()
+      this.getData()
       this.getList()
+      // setTimeout(function() {
+      //   var url = _.keys(self.refers)[0] + 's' + '/create/batch'
+      //   console.log(url)
+      // }, 3000)
       // console.log(this.buttons)
     },
     methods: {
-      handleRemove(file, fileList) {
-        // console.log(self.formModel)
-      },
-      handlePreview(file) {
-        console.log(file)
-      },
+      // 上传成功的回调函数
       uploadSuccess(response, file, fileList) {
         const self = this
         console.log('上传成功')
@@ -487,7 +516,11 @@
       onEditorReady(val) {
         // console.log('editor ready!')
       },
+      handleRemove(file, fileList) {
+        // console.log(self.formModel)
+      },
       // 判断是否一个对象的所有属性都为空
+      // 可判断空对象或者属性值为null、空数组、空字符串，属性值为空对象无法判断
       isEmpty(obj) {
         for (var key in obj) {
           if (obj[key] && _.trim(obj[key])) {
@@ -495,6 +528,14 @@
           }
         }
         return true
+      },
+      // 判断一个对象是否为空对象，没有属性
+      isEmptyObject(e) {
+        var t
+        for (t in e) {
+          return !1
+        }
+        return !0
       },
       validate() {
         const self = this
@@ -516,23 +557,75 @@
           }
         })
       },
-      // 存在tableId，修改数据前先获取数据
+      // 获取间接关联表数据
+      getData() {
+        const self = this
+        if (!self.relates || !self.relates.length || !self.relates[0].indirectTable) return
+        // console.log(534, self.relates)
+        var params = {}
+        params.filters = self.relates[0].filters || { }
+        // console.log('url', typeof (self.relates[0].indirectTable))
+        request(self.relates[0].indirectTable, {
+          params: params
+        }).then(resp => {
+          // 设置中间表与间接关联表对应字段
+          if (resp.data && resp.data.length) {
+            // console.log(resp.data)
+            self.$set(self.relateData, self.relates[1].relateKeys[1], resp.data[0].id)
+          }
+          // console.log(548, self.relateData)
+        })
+      },
+      // 创建中间表数据
+      newRelateData() {
+        const self = this
+        if (self.tableId || !self.relates || !self.relates.length || !self.relates[1].relateTable) return
+        var data = self.relateData
+        if (self.isEmpty(data)) {
+          console.error('不能创建空数据')
+          return
+        }
+        request(self.relates[1].relateTable + '/new', {
+          method: 'post',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+          data: data,
+          transformRequest:
+            function(obj) {
+              var str = []
+              for (var p in obj) {
+                str.push(encodeURIComponent(p) + '=' + encodeURIComponent(obj[p]))
+              }
+              return str.join('&')
+            }
+        }).then(resp => {
+          console.log('创建中间表成功')
+          console.log(resp.data)
+        })
+      },
+      // 批量创建的参数处理
+      transformRequest(arr) {
+        var str = []
+        _.each(arr, function(obj, i) {
+          for (var k in obj) {
+            str.push(encodeURIComponent(k) + '=' + encodeURIComponent(obj[k]))
+          }
+        })
+        console.log(str.join('&'))
+        return str.join('&')
+      },
+      // 存在tableId，编辑数据前先获取数据
       getList() {
         const self = this
         if (!self.tableId) return
         // 获取数据
         request(self.schema.modelUnderscorePlural + '/' + self.tableId).then(resp => {
-          // 数据库字段转化显示
-          /* if (self.options.changeValue) {
-            resp.data = self.changeValue(resp.data)
-          } */
           self.Loading = false
           // console.log(self.formModel)
           var formArray = _.keys(self.formModel) // 提取formModel的属性到数组
           // console.log(formArray)
           self.formModel = _.pick(resp.data, formArray) // 根据数组中的属性提取出data中对应的数据
 
-          // 下拉框多选时将字符串转为数组
+          // 下拉框多选时将字符串转为数组 column.widgetType === 3 && !column.options
           _.each(self.columns, function(item, index) {
             if (item.widgetType === 2 && item.multiple === true) {
               _.forEach(self.formModel, function(value, key) {
@@ -542,8 +635,18 @@
                 }
               })
             }
+            // 单个复选框时，将请求回来的1和0转为'1'和'0'
+            if (item.widgetType === 3 && !item.options) {
+              _.forEach(self.formModel, function(value, key) {
+                if (item.codeCamel === key) {
+                  // console.log(11111, self.formModel[key])
+                  self.formModel[key] = self.formModel[key] + ''
+                }
+              })
+            }
           })
-          // console.log(2222, self.formModel)
+          // console.log('getList', self.formModel)
+          // console.log(typeof self.formModel.isUsed)
         })
       },
       // 初始化
@@ -572,7 +675,7 @@
               self.$set(self.showUserColumns, index, tmp) // 顺序
             }
           })
-          console.log(self.showUserColumns)
+          console.log('self.showUserColumns', self.showUserColumns)
           // 提取v-model绑定的变量
           _.each(self.showUserColumns, function(item) {
             if (item.widgetType === 8 || (item.widgetType === 3 && item.options && item.options.length > 0)) {
@@ -581,6 +684,7 @@
               item.default ? self.$set(self.formModel, item.codeCamel, item.default) : self.$set(self.formModel, item.codeCamel, '')
             }
           })
+          console.log('self.formModel', self.formModel)
           if (!request.defaults.baseURL) {
             request.defaults.baseURL = '/org/api'
           }
@@ -675,19 +779,52 @@
                   })
                 }
               })
-            } else { // 不存在tableId 则创建一条数据
+            } else {
+              // 不存在tableId 则创建一条数据
               console.log(self.formModel)
-              // if (self.isEmpty(self.formModel)) {
-              //   self.$message({
-              //     message: '不能都为空',
-              //     type: 'error'
-              //   })
-              //   return
-              // }
+              if (self.refers && self.foreignForm) {
+                // 遍历foreignFormFields 生成外表数据对象
+                _.each(self.foreignFormFields, function(val, key) {
+                  self.$set(self.foreignForm, val, '')
+                })
+                _.each(self.showUserColumns, function(item, index) {
+                  // 提取本表数据以提交
+                  if (!item.isForeign) {
+                    for (const key in self.formModel) {
+                      if (item.codeCamel === key) {
+                        self.nativeFormModel[key] = self.formModel[key]
+                        break
+                      }
+                    }
+                  }
+                  // 提取字段相同的多条外表数据 到foreignFormModel
+                  if (item.isForeign && !item.partProp) {
+                    for (const key in self.formModel) {
+                      if (item.codeCamel === key) {
+                        self.foreignFormModel[key] = self.formModel[key]
+                        break
+                      }
+                    }
+                  }
+                  // 提取外表中从属于foreignFormModel的属性到partPropModel
+                  if (item.partProp) {
+                    for (const key in self.formModel) {
+                      if (item.codeCamel === key) {
+                        self.partPropModel[key] = self.formModel[key]
+                        break
+                      }
+                    }
+                  }
+                })
+                console.log('本表', self.nativeFormModel)
+                console.log('外表', self.foreignFormModel)
+                console.log('部分属性', self.partPropModel)
+              }
+              // 发送新建请求
               request(self.schema.modelUnderscorePlural + '/new', {
                 method: 'post',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
-                data: self.formModel,
+                data: self.refers ? self.nativeFormModel : self.formModel,
                 transformRequest:
                   function(obj) {
                     var str = []
@@ -698,13 +835,80 @@
                   }
               }).then(resp => {
                 console.log('创建成功')
+                // 设置中间表与本表(主表)对应字段
+                console.log(resp.data)
+                // if (!self.relates || !self.relates.length) return
+                // 创建中间表数据
+                if (resp.data && self.relates && self.relates.length && self.relates[1].relateTable) {
+                  self.$set(self.relateData, self.relates[1].relateKeys[0], resp.data.id)
+                  self.newRelateData()
+                  // console.log(self.relateData)
+                }
+                // 将返回的id写入foreignForm
+                if (!self.isEmptyObject(self.foreignForm)) {
+                  self.$set(self.foreignForm, self.foreignFormFields[0], resp.data.id)
+                }
+                // 从foreignFormModel和单条外表foreignForm中提取多条数据到foreignArray
+                if (!self.isEmptyObject(self.foreignFormModel)) {
+                  _.each(self.foreignFormModel, function(val, key) {
+                    var temp = _.cloneDeep(self.foreignForm)
+                    var idx = key.slice(0, -1)
+                    temp[idx] = val
+                    // temp = Object.assign(temp, self.partProp)
+                    self.foreignArray.push(temp)
+                  })
+                }
+
+                // 提取serialNumber: 'A'之类，属于外表写入/修改的数据
+                if (!self.isEmptyObject(self.foreignForm)) {
+                  _.each(self.showUserColumns, function(item, index) {
+                    if (item.isForeign && !item.partProp) {
+                      _.each(item, function(val, key) {
+                        if (_.has(self.foreignForm, key)) {
+                          for (let i = 0, len = self.foreignArray.length; i < len; i++) {
+                            if (!self.foreignArray[i][key]) {
+                              self.foreignArray[i][key] = val
+                              break
+                            }
+                          }
+                        }
+                      })
+                    }
+                  })
+                }
+
+                // 把外表公共属性partProp的值写入foreignArray的每条数据对象
+                if (self.foreignArray.length > 0) {
+                  _.each(self.foreignArray, function(item, key) {
+                    var tem = _.cloneDeep(self.partPropModel)
+                    if (_.includes(item, _.values(self.partPropModel)[0])) {
+                      tem[_.keys(self.partPropModel)[0]] = 1 // 可能出问题
+                    } else {
+                      tem[_.keys(self.partPropModel)[0]] = 0 // 可能出问题
+                    }
+                    item = Object.assign(item, tem)
+                  })
+                  console.log('外表数据', self.foreignArray)
+                  // 批量创建信息
+                  const url = _.keys(self.refers)[0] + 's' + '/create/batch'
+                  // const string = self.transformRequest(self.foreignArray)
+                  const string = JSON.stringify(self.foreignArray)
+                  request.post(url + '?params=' + string, {
+                    headers: { 'Content-Type': 'application/json;charset=UTF-8' }
+                  }).then(resp => {
+                    console.log('批量创建成功')
+                    console.log(resp.data)
+                  }).catch(error => {
+                    console.log('批量创建失败', error)
+                  })
+                }
+                // 提示信息
                 if (self.tips && !self.tips.hidde) {
                   self.$message({
                     message: self.tips.newSuccess.text,
                     type: 'success'
                   })
                 }
-                // self.formModel = {} // 新建完成清空数据
                 // self.resetForm()
                 if (typeof (callback) === 'function') {
                   callback(resp.data)
@@ -753,9 +957,11 @@
           callback()
         }
       },
+      // 取消的回调函数
       cancel(callback) {
+        const self = this
         if (typeof (callback) === 'function') {
-          callback()
+          callback(self.formModel)
         }
       }
     }

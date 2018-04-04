@@ -1,12 +1,13 @@
 <template>
-  <!--:refers="judgeRefers"-->
   <div>
     <hm-complex-form :schema="schema['HmUser']"
                      :columns="showUserColumns"
                      :buttons="showUserButtons"
                      :layout="layout"
                      :tips="tips"
-                     :refers="userRefers">
+                     :refers="userRefers"
+                     :foreignFormFields="foreignFormFields"
+                     :relates="userRelates">
     </hm-complex-form>
   </div>
 </template>
@@ -32,7 +33,7 @@
             change: this.inputChange
             // rule: { required: true, message: '用户名不能为空', trigger: 'blur' }
             //  hide: true
-          //  default: '默认值',
+            //  default: '默认值',
           },
           // 5富文本
           { name: '电子邮件', codeCamel: 'email', widgetType: 5, disabled: false,
@@ -60,7 +61,7 @@
           // 6日期
           { name: '新建时间', codeCamel: 'createTime', widgetType: 6, dateType: 'datetime',
             dateFormate: 'yyyy-MM-dd HH:mm:ss', change: this.inputChange
-          // default: '2018-01-01 00:07:08'
+            // default: '2018-01-01 00:07:08'
           },
           // 7单选
           { name: '登陆id', codeCamel: 'loginid', widgetType: 7,
@@ -72,38 +73,51 @@
           // 8文件
           { name: '选择头像', codeCamel: 'avatar', widgetType: 8, url: '/api/upload' } // url是后台接口地址
         ],
+        // CcSubject示例
         showUserColumns2: [
-          // 1普通input
-          { name: '用户名称', codeCamel: 'username', widgetType: 1 },
-          { name: '部门ID', codeCamel: 'departmentId', widgetType: 1 },
-          { name: '部门名称', codeCamel: 'departmentName', widgetType: 1 },
-          { name: '密码', codeCamel: 'password', widgetType: 1 },
-          { name: '电话', codeCamel: 'mobile', widgetType: 1 },
-          { name: '电子邮件', codeCamel: 'email', widgetType: 1 },
-          { name: '新建时间', codeCamel: 'createTime', widgetType: 1 },
-          { name: '登陆id', codeCamel: 'loginid', widgetType: 1 }
+          { name: '题目', codeCamel: 'subject' },
+          { name: '题目类型', codeCamel: 'subjectType', default: 3 },
+          { name: 'A选项', codeCamel: 'description0', code: 'description', serialNumber: 'A', widgetType: 1, isForeign: true },
+          { name: 'B选项', codeCamel: 'description1', code: 'description', serialNumber: 'B', widgetType: 1, isForeign: true },
+          { name: '正确选项', codeCamel: 'correct', widgetType: 1, isForeign: true, partProp: true },
+          { name: '试题详解', codeCamel: 'commentary', widgetType: 1 }
         ],
-        userIncludes: {
-          'hm_user': {
-            includes: ['user_id']
-          }
-        },
-        // 主查外
+        // schema['CcMenuResource'] + userRelates + showUserColumns3 理论学习示例
+        showUserColumns3: [
+          { name: '标题', codeCamel: 'title', widgetType: 1 },
+          { name: '封面图片', codeCamel: 'thumbnail', widgetType: 8 },
+          { name: '视频', codeCamel: 'videoName', widgetType: 8 },
+          { name: '简介', codeCamel: 'lntroduction', widgetType: 1 },
+          { name: '内容', codeCamel: 'content', widgetType: 4 },
+          { name: '发布人', codeCamel: 'publisher', widgetType: 1 }
+        ],
+
+        // schema['CcSubject']+foreignFormFields+userRefers+showUserColumns2 判断题示例
+        // 第一个值为外键字段(codeCamel)
+        foreignFormFields: ['ccSubjectId', 'description', 'correct', 'serialNumber'],
+        // 主查外表  外键字段
         userRefers: {
-          'cc_shift': {
-            includes: ['applicant_id']
+          'cc_option': {
+            includes: ['ccSubjectId']
           }
         },
+        // userIncludes: {
+        //   'hm_user': {
+        //     includes: ['user_id']
+        //   }
+        // },
         // 要显示按钮
         showUserButtons: [
           { text: '确定', type: 1, method: this.method1, beforeSubmit: this.processData },
           { text: '重置', type: 2, method: this.method2 },
           { text: '生成', method: this.method4 },
+          // { text: '预览', method: this.method5 },
+          // { text: '预览2', method: this.method5 },
           { text: '取消', type: 3, method: this.method3 }
         ],
         // showUserButtons: []
         // 布局方式
-        layout: { left: 4, middle: 16, right: 4 },
+        layout: { left: 2, middle: 20, right: 2 },
         // 自定义提示消息
         tips: {
           hidde: false, // 是否显示提示，默认false显示
@@ -128,16 +142,22 @@
             autosize: { minRows: 3, maxRows: 5 },
             rows: 3
           },
-          quillEdito: { style: { width: '65%' }}
+          quillEditor: { style: { width: '65%' }}
         },
-        // 'cc_option': {
-        //   includes: ['ccSubjectId']
-        // }
-        judgeRefers: { // 主查外
-          'cc_hm_user': {
-            includes: ['applicantId']
+
+        // 关联表 本表即页面显示的要创建的表'CcMenuResource' 中间表'cc_menu_resource_associations'
+        // 间接关联表'cc_secondary_menu_dictionaries'
+        userRelates: [
+          // 间接关联表
+          { indirectTable: 'cc_secondary_menu_dictionaries', // 下划线复数
+            // 过滤查询的条件
+            filters: { 'cc_secondary_menu_dictionary': { 'name': { equalTo: '理论学习' }}}
+          },
+          // 中间表
+          { relateTable: 'cc_menu_resource_associations',
+            relateKeys: ['resourceId', 'menuId'] // 中间表与主表(本表)字段  与间接关联表对应字段
           }
-        }
+        ]
       }
     },
     computed: {
@@ -169,7 +189,12 @@
       method3() {
         console.log('method3')
       },
-      method4() {
+      method4(formModel) {
+        console.log(formModel)
+        console.log('method4')
+      },
+      method5(formModel) {
+        console.log(formModel)
         console.log('method4')
       }
     }
