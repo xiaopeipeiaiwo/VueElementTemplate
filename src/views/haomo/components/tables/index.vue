@@ -82,11 +82,19 @@
         showDetail: {
           isShow: true
         },
+        HmFullCalendar: {
+          calendarSchema: schema['HmUser'],
+          demoEvents: {
+            title: 'username',
+            start: 'createTime',
+            end: 'lastUpdateTime'
+          }
+        },
         showRefresh: true,
         showExport: true,
         showDeleteButton: true,
         buttonGroup: false,
-        showSelection: false,
+        showSelection: true,
         showOverflowTooltip: true,
         tableCurrentChange(value) {}
         // dataProcessing(value, params, definedOperate) {}, // 处理返回后的数据,必须return 处理后的数据

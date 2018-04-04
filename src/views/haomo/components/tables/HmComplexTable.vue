@@ -95,6 +95,7 @@
           <el-button class="filter-item" type="primary" v-waves icon="el-icon-refresh" v-if="isShowRefresh" @click="refreshList">刷新</el-button>
           <el-button class="filter-item" type="primary" v-waves icon="el-icon-close" v-if="multipleSelection.length" @click="BatchRemove">批量删除</el-button>
         </span>
+        <hm-full-calendar style="display: inline;margin-left: 10px;" :schema="HmFullCalendar.calendarSchema" :demoEvents="HmFullCalendar.demoEvents" v-if="HmFullCalendar.calendarSchema"></hm-full-calendar>
 
       </el-form>
     </div>
@@ -136,14 +137,13 @@
     <!-- @TODO 补充详情弹窗 -->
 
     <el-dialog :title="dialogName" :visible.sync="dialogFormVisible" :close-on-click-modal="closeOnClickModal" width="dialogWidth" v-if="dialogFormVisible">
-      <hm-complex-form :schema="formSchema"
-                       :columns="showUserColumns"
-                       :buttons="showUserButtons"
-                       :layout="layout"
-                       :tableId="tableId"
-                       :tips="formTips"
-                       :formStyle="formStyle"
-                       ref="selectfood">
+      <hm-complex-form :schema="HmComplexForm.formSchema"
+                       :columns="HmComplexForm.showUserColumns"
+                       :buttons="HmComplexForm.showUserButtons"
+                       :layout="HmComplexForm.layout"
+                       :tableId="HmComplexForm.tableId"
+                       :tips="HmComplexForm.formTips"
+                       :formStyle="HmComplexForm.formStyle">
       </hm-complex-form>
     </el-dialog>
 
@@ -160,6 +160,7 @@
   import * as excel from '@/vendor/Export2Excel'
   import { Button, Table, TableColumn, Pagination, Loading } from 'element-ui'
   import HmComplexForm from '../forms/HmComplexForm.vue'
+  import HmFullCalendar from '../calendar/HmFullCalendar.vue'
 
   /**
    * 毫末科技的表格组件.
@@ -178,7 +179,8 @@
       'el-table': Table,
       'el-table-column': TableColumn,
       'el-pagination': Pagination,
-      'hm-complex-form': HmComplexForm
+      'hm-complex-form': HmComplexForm,
+      'hm-full-calendar': HmFullCalendar
     },
     // 混入公共对象
     mixins: [],
@@ -361,14 +363,17 @@
         isShowEditDataButton: false, // 是否显示编辑
         isShowDeleteButton: false, // 是否显示删除
         isShowExport: false, // 是否显示导出按钮
-        formSchema: {}, // form弹窗的Schema定义
-        showUserColumns: [], // form弹窗的Columns定义
-        showUserButtons: [], // from弹窗显示按钮,
-        layout: { left: 0, middle: 24, right: 0 }, // form弹窗的布局方式
-        tableId: '',
-        formTips: '',
-        formStyle: '',
-        showOverflowTooltip: false,
+        HmComplexForm: { // 设置form组件
+          formSchema: {}, // form弹窗的Schema定义
+          showUserColumns: [], // form弹窗的Columns定义
+          showUserButtons: [], // from弹窗显示按钮,
+          layout: { left: 0, middle: 24, right: 0 }, // form弹窗的布局方式
+          tableId: '',
+          formTips: '',
+          formStyle: ''
+        },
+        showOverflowTooltip: false, // 设置当内容过长被隐藏时显示 tooltip
+        HmFullCalendar: {}, //
 
         isShowRefresh: false,
         buttonGroup: false,
@@ -611,29 +616,29 @@
           self.userDefined.definedDetail(true, data)
           return false
         }
-        self.tableId = ''
+        self.HmComplexForm.tableId = ''
         if (type === 'editData') {
           self.dialogName = '编辑'
           if (self.options.editData.showUserButtons) {
             self.showUserButtons = self.options.editData.showUserButtons
           }
-          self.tableId = data.id
-          self.showUserColumns = self.options.editData.showUserColumns
-          self.formSchema = self.options.editData.formSchema
-          self.layout = self.options.editData.layout
-          self.formTips = self.options.editData.tips
-          self.formStyle = self.options.editData.formStyle
+          self.HmComplexForm.tableId = data.id
+          self.HmComplexForm.showUserColumns = self.options.editData.showUserColumns
+          self.HmComplexForm.formSchema = self.options.editData.formSchema
+          self.HmComplexForm.layout = self.options.editData.layout
+          self.HmComplexForm.formTips = self.options.editData.tips
+          self.HmComplexForm.formStyle = self.options.editData.formStyle
         }
         if (type === 'newData') {
           self.dialogName = '新建'
           if (self.options.newData.showUserButtons) {
             self.showUserButtons = self.options.newData.showUserButtons
           }
-          self.showUserColumns = self.options.newData.showUserColumns
-          self.formSchema = self.options.newData.formSchema
-          self.layout = self.options.newData.layout
-          self.formTips = self.options.newData.tips
-          self.formStyle = self.options.newData.formStyle
+          self.HmComplexForm.showUserColumns = self.options.newData.showUserColumns
+          self.HmComplexForm.formSchema = self.options.newData.formSchema
+          self.HmComplexForm.layout = self.options.newData.layout
+          self.HmComplexForm.formTips = self.options.newData.tips
+          self.HmComplexForm.formStyle = self.options.newData.formStyle
         }
         if (type === 'detail') {
           self.dialogName = '详情'
@@ -641,12 +646,12 @@
           if (self.options.detailData.showUserButtons) {
             self.showUserButtons = self.options.detailData.showUserButtons
           }
-          self.showUserColumns = self.options.showDetail.showUserColumns
-          self.formSchema = self.options.showDetail.formSchema
-          self.layout = self.options.showDetail.layout
-          self.formTips = self.options.showDetail.tips
-          self.formStyle = self.options.showDetail.formStyle
-          self.tableId = data.id
+          self.HmComplexForm.showUserColumns = self.options.showDetail.showUserColumns
+          self.HmComplexForm.formSchema = self.options.showDetail.formSchema
+          self.HmComplexForm.layout = self.options.showDetail.layout
+          self.HmComplexForm.formTips = self.options.showDetail.tips
+          self.HmComplexForm.formStyle = self.options.showDetail.formStyle
+          self.HmComplexForm.tableId = data.id
         }
 
         self.dialogFormVisible = true
@@ -676,29 +681,9 @@
       // 删除一条数据
       deleteData(data) {
         const self = this
-        self.$confirm('此操作将永久删除该数据, 是否继续?', '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        }).then(() => {
-          request(self.schema.modelUnderscorePlural + '/' + data.id + '/delete', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' }
-          }).then(data => {
-            if (data.data.message === 'delete success') {
-              self.$message({
-                message: data.data.message,
-                type: 'success'
-              })
-              self.getList()
-            }
-          })
-        }).catch(() => {
-          self.$message({
-            message: '已取消删除',
-            type: 'success'
-          })
-        })
+        const params = { ids: [data.id] }
+        params.ids = JSON.stringify(params.ids)
+        self.deleteDataRequest(params)
       },
       refreshList() {
         this.listQuery = {
@@ -715,15 +700,17 @@
       // 批量删除
       BatchRemove() {
         const self = this
-        const datas = {
-          ids: []
-        }
+        const datas = { ids: [] }
         if (!self.multipleSelection) return false
         _.each(self.multipleSelection, function(item, index) {
           datas.ids.push(item.id)
         })
         datas.ids = JSON.stringify(datas.ids)
-        self.$confirm('此操作将永久删除该数据, 是否继续?', '提示', {
+        self.deleteDataRequest(datas)
+      },
+      deleteDataRequest(data) {
+        const self = this
+        self.$confirm('此操作将永久删除数据, 是否继续?', '提示', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
           type: 'warning'
@@ -731,12 +718,12 @@
           request(self.schema.modelUnderscorePlural + '/delete/batch', {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
-            data: datas,
+            data: data,
             transformRequest: param
-          }).then(data => {
-            if (data.data.message === 'delete success') {
+          }).then(resp => {
+            if (resp.data.message === 'delete success') {
               self.$message({
-                message: data.data.message,
+                message: resp.data.message,
                 type: 'success'
               })
               self.getList()
@@ -783,6 +770,9 @@
         }
         if (self.options.showOverflowTooltip) { // 当内容过长被隐藏时显示 tooltip
           self.showOverflowTooltip = self.options.showOverflowTooltip
+        }
+        if (self.options.HmFullCalendar) { // 当内容过长被隐藏时显示 tooltip
+          self.HmFullCalendar = self.options.HmFullCalendar
         }
       },
       handleSelectionChange(val) {
