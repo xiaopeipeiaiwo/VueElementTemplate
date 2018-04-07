@@ -28,7 +28,18 @@
     created() {
       $(function() {
         $('#calendar').fullCalendar({
-          defaultView: 'month'
+          // weekends: false
+          header: {
+            left: 'title',
+            center: '',
+            right: 'today prev,next'
+          },
+          views: {
+            month: { titleFormat: 'YYYY, MM, DD' }
+          }
+        })
+        $('#my-prev-button').click(function() {
+          $('#calendar').fullCalendar('prev')
         })
       })
     },
