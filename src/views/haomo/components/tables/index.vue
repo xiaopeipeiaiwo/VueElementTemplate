@@ -68,7 +68,10 @@
           formSchema: schema['HmUser'],
           layout: { left: 0, middle: 24, right: 0 },
           tips: {},
-          formStyle: {}
+          formStyle: {},
+          formRefers: {},
+          foreignFormFields: [],
+          formRelates: []
         },
         editData: {
           isShow: true,
@@ -77,19 +80,22 @@
           formSchema: schema['HmUser'],
           layout: { left: 0, middle: 24, right: 0 },
           tips: {},
-          formStyle: {}
+          formStyle: {},
+          formRefers: {},
+          foreignFormFields: [],
+          formRelates: []
         },
         showDetail: {
           isShow: true
         },
-        HmFullCalendar: {
-          calendarSchema: schema['HmUser'],
-          demoEvents: {
-            title: 'username',
-            start: 'createTime',
-            end: 'lastUpdateTime'
-          }
-        },
+        // HmFullCalendar: {
+        // calendarSchema: schema['HmUser'],
+        // demoEvents: {
+        // title: 'username',
+        // start: 'createTime',
+        // end: 'lastUpdateTime'
+        // }
+        // },
         showRefresh: true,
         showExport: true,
         showDeleteButton: true,

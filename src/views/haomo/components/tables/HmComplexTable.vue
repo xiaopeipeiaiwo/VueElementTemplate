@@ -143,7 +143,10 @@
                        :layout="HmComplexForm.layout"
                        :tableId="HmComplexForm.tableId"
                        :tips="HmComplexForm.formTips"
-                       :formStyle="HmComplexForm.formStyle">
+                       :formStyle="HmComplexForm.formStyle"
+                       :refers="formRefers"
+                       :foreignFormFields="foreignFormFields"
+                       :relates="formRelates" >
       </hm-complex-form>
     </el-dialog>
 
@@ -296,19 +299,19 @@
        *      username: {1: '是', 0: '否'},
        *      type: { 1: 'Hm-isChecked', 0: 'Hm-noChecked' } // 以多选框的形式展示Hm-isChecked(选择状态)、Hm-noChecked(未选择状态)
        *    },
-       *    "newData": {  // 新建按钮的配置
+       *    "newData": {  // 新建按钮的配置（详细配置参考form表单）
        *      isShow: false,  // 默认不显示新建按钮
        *      showUserColumns: [], // 新建表单的Columns配置,详情参考Form组件
        *      formSchema: {}, // 新建表单的schema配置
        *      layout: {} // 布局方式
        *    },
-       *    "editData": { // 编辑按钮的配置
+       *    "editData": { // 编辑按钮的配置（详细配置参考form表单）
        *      isShow: false,  // 默认不显示编辑按钮
        *      showUserColumns: [], // 编辑表单的Columns配置,详情参考Form组件
        *      formSchema: {}, // 编辑表单的schema配置
        *      layout: {} // 布局方式
        *    },
-       *    showDetail: { // 同编辑的的配置
+       *    showDetail: { // 详情的的配置（详细配置参考form表单）
        *      isShow: false,      // 默认不显示详情
        *    },
        *  }
@@ -370,7 +373,10 @@
           layout: { left: 0, middle: 24, right: 0 }, // form弹窗的布局方式
           tableId: '',
           formTips: '',
-          formStyle: ''
+          formStyle: '',
+          formRefers: {},
+          foreignFormFields: [],
+          formRelates: []
         },
         showOverflowTooltip: false, // 设置当内容过长被隐藏时显示 tooltip
         HmFullCalendar: {}, //
@@ -628,6 +634,9 @@
           self.HmComplexForm.layout = self.options.editData.layout
           self.HmComplexForm.formTips = self.options.editData.tips
           self.HmComplexForm.formStyle = self.options.editData.formStyle
+          self.HmComplexForm.formRefers = self.options.editData.formRefers
+          self.HmComplexForm.foreignFormFields = self.options.editData.foreignFormFields
+          self.HmComplexForm.formRelates = self.options.editData.formRelates
         }
         if (type === 'newData') {
           self.dialogName = '新建'
@@ -639,6 +648,9 @@
           self.HmComplexForm.layout = self.options.newData.layout
           self.HmComplexForm.formTips = self.options.newData.tips
           self.HmComplexForm.formStyle = self.options.newData.formStyle
+          self.HmComplexForm.formRefers = self.options.newData.formRefers
+          self.HmComplexForm.foreignFormFields = self.options.newData.foreignFormFields
+          self.HmComplexForm.formRelates = self.options.newData.formRelates
         }
         if (type === 'detail') {
           self.dialogName = '详情'
@@ -651,6 +663,9 @@
           self.HmComplexForm.layout = self.options.showDetail.layout
           self.HmComplexForm.formTips = self.options.showDetail.tips
           self.HmComplexForm.formStyle = self.options.showDetail.formStyle
+          self.HmComplexForm.formRefers = self.options.showDetail.formRefers
+          self.HmComplexForm.foreignFormFields = self.options.showDetail.foreignFormFields
+          self.HmComplexForm.formRelates = self.options.showDetail.formRelates
           self.HmComplexForm.tableId = data.id
         }
 
