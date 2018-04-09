@@ -89,7 +89,7 @@
         </el-button-group>
 
         <span v-if="!buttonGroup">
-          <el-button class="filter-item" type="primary" v-waves icon="el-icon-search" @click="handleFilter">搜索</el-button>
+          <el-button class="filter-item" type="primary" v-waves icon="el-icon-search" v-if="isShowSearch" @click="handleFilter">搜索</el-button>
           <el-button class="filter-item" type="primary" :loading="downloadLoading" v-waves icon="el-icon-download" v-if="isShowExport" @click="handleDownload">导出</el-button>
           <el-button class="filter-item" type="primary" v-waves icon="el-icon-plus" v-if="isShowNewButton" @click="openDialog('newData')">新建</el-button>
           <el-button class="filter-item" type="primary" v-waves icon="el-icon-refresh" v-if="isShowRefresh" @click="refreshList">刷新</el-button>
@@ -773,10 +773,10 @@ i      *    "sShowSearch": true, //默认显示搜索按钮
         if (self.options.showExport) { // 判断是否显示导出按钮
           self.isShowExport = self.options.showExport
         }
-        if (self.options.isShowSearch) { // 判断是否显示导出按钮
+        if (self.options.isShowSearch !== undefined) { // 判断是否显示刷新
           self.isShowSearch = self.options.isShowSearch
         }
-        if (self.options.isShowPagination) { // 判断是否显示导出按钮
+        if (self.options.isShowPagination !== undefined) { // 判断是否显示分页
           self.isShowPagination = self.options.isShowPagination
         }
         if (self.options.showDeleteButton) { // 判断是否显示删除按钮
