@@ -171,9 +171,10 @@
       this.tableId = 'b08d2220d2574bf2ac09ec4f470ed999'
     },
     methods: {
-      inputChange(val) {
-        // console.log(event)
+      inputChange(val, formModel) {
         console.log(val)
+        console.log(formModel)
+        // formModel.email = val.length
       },
       processData(object, isCancel) {
         isCancel.cancelSubmit = false // 如果要取消提交，设为true
