@@ -96,6 +96,7 @@
         // end: 'lastUpdateTime'
         // }
         // },
+        cellStyle: {},
         isShowPagination: true,
         isShowSearch: true,
         showRefresh: true,

@@ -102,7 +102,7 @@
     <!-- end 过滤 -->
 
     <!-- 表格 -->
-    <el-table :data="list" v-loading="listLoading" element-loading-text="给我一点时间" border fit highlight-current-row
+    <el-table :data="list" v-loading="listLoading" element-loading-text="给我一点时间" border fit highlight-current-row :cell-style="cellStyle"
               style="width: 100%" @selection-change="handleSelectionChange" @sort-change="sortChange" @current-change="tableCurrentChange">
       <el-table-column type="index" :index="indexMethod" label="序号" width="50px"></el-table-column>
       <el-table-column type="selection" width="55" v-if="isShowSelection"></el-table-column>
@@ -283,7 +283,7 @@
       },
       /**
        * 表格的选项，包括：pageSize、showExport、sortItem、sortOrder、showRefresh、showDeleteButton、isShowPagination、isShowSearch
-       * buttonGroup、showDetail、dataProcessing、promiseProcessing、changeValue、newData、editData完整的示例为：
+       * buttonGroup、showDetail、dataProcessing、promiseProcessing、changeValue、newData、editData、cellStyle完整的示例为：
        *  {
        *    "pageSize": 10, // 默认为10条数据/页
        *    "showExport": false,  // 默认为不显示导出按钮
@@ -316,6 +316,7 @@
        *    showDetail: { // 详情的的配置（详细配置参考form表单）
        *      isShow: false,      // 默认不显示详情
        *    },
+       *    cellStyle:{} // 自定义单元格的样式
        *  }
        */
       options: {
@@ -370,6 +371,7 @@
         isShowExport: false, // 是否显示导出按钮
         isShowPagination: true, // 是否显示分页
         isShowSearch: true, // 是否显示搜索按钮
+        cellStyle: {}, // 自定义表格单元格的样式
         HmComplexForm: { // 设置form组件
           formSchema: {}, // form弹窗的Schema定义
           showUserColumns: [], // form弹窗的Columns定义
@@ -775,6 +777,9 @@
         }
         if (self.options.isShowSearch !== undefined) { // 判断是否显示刷新
           self.isShowSearch = self.options.isShowSearch
+        }
+        if (self.options.cellStyle) { // 自定义表格单元格的样式
+          self.cellStyle = self.options.cellStyle
         }
         if (self.options.isShowPagination !== undefined) { // 判断是否显示分页
           self.isShowPagination = self.options.isShowPagination
