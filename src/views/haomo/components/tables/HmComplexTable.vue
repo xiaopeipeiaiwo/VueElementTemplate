@@ -290,7 +290,7 @@
        *    "sortItem": "create_time", // 默认为create_time字段的desc排序
        *    "sortOrder": "desc",
        *    "isShowPagination": true, //默认显示分页
-       *    "sShowSearch": true, //默认显示搜索按钮
+       *    "isShowSearch": true, //默认显示搜索按钮
        *    "showRefresh": false, //默认不显示刷新按钮
        *    "showDeleteButton": false,  //默认不显示删除按钮
        *    "buttonGroup": false  //默认不以按钮组的方式呈现button
