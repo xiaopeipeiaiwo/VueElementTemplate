@@ -662,8 +662,8 @@
         if (type === 'detail') {
           self.dialogName = '详情'
 
-          if (self.options.detailData.showUserButtons) {
-            self.HmComplexForm.showUserButtons = self.options.detailData.showUserButtons
+          if (self.options.showDetail.showUserButtons) {
+            self.HmComplexForm.showUserButtons = self.options.showDetail.showUserButtons
           }
           self.HmComplexForm.showUserColumns = self.options.showDetail.showUserColumns
           self.HmComplexForm.formSchema = self.options.showDetail.formSchema
