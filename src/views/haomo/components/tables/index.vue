@@ -97,6 +97,7 @@
         // }
         // },
         cellStyle: {},
+        tableStyle: { width: '100%' },
         isShowPagination: true,
         isShowSearch: true,
         showRefresh: true,

@@ -103,7 +103,7 @@
 
     <!-- 表格 -->
     <el-table :data="list" v-loading="listLoading" element-loading-text="给我一点时间" border fit highlight-current-row :cell-style="cellStyle"
-              style="width: 100%" @selection-change="handleSelectionChange" @sort-change="sortChange" @current-change="tableCurrentChange">
+              :style="tableStyle" @selection-change="handleSelectionChange" @sort-change="sortChange" @current-change="tableCurrentChange">
       <el-table-column type="index" :index="indexMethod" label="序号" width="50px"></el-table-column>
       <el-table-column type="selection" width="55" v-if="isShowSelection"></el-table-column>
       <el-table-column v-for="(column,index) in showColumns" :key="index" align="center" :label="column.name"
@@ -283,7 +283,7 @@
       },
       /**
        * 表格的选项，包括：pageSize、showExport、sortItem、sortOrder、showRefresh、showDeleteButton、isShowPagination、isShowSearch
-       * buttonGroup、showDetail、dataProcessing、promiseProcessing、changeValue、newData、editData、cellStyle完整的示例为：
+       * buttonGroup、showDetail、dataProcessing、promiseProcessing、changeValue、newData、editData、cellStyle, tableStyle完整的示例为：
        *  {
        *    "pageSize": 10, // 默认为10条数据/页
        *    "showExport": false,  // 默认为不显示导出按钮
@@ -317,6 +317,7 @@
        *      isShow: false,      // 默认不显示详情
        *    },
        *    cellStyle:{} // 自定义单元格的样式
+       *    tableStyle:{} // 自定义表格的样式
        *  }
        */
       options: {
@@ -363,7 +364,7 @@
         closeOnClickModal: false,
         multipleSelection: [], // 选择的数组
         dialogName: '',
-
+        tableStyle: { width: '100%' }, // table的样式
         isShowSelection: false, // 是否显示多选
         isShowNewButton: false, // 是否显示新建
         isShowEditDataButton: false, // 是否显示编辑
@@ -797,6 +798,9 @@
         }
         if (self.options.showSelection) { // 设置是否显示多选
           self.isShowSelection = self.options.showSelection
+        }
+        if (self.options.tableStyle) { // 自定义table样式
+          self.tableStyle = self.options.tableStyle
         }
         if (self.options.showOverflowTooltip) { // 当内容过长被隐藏时显示 tooltip
           self.showOverflowTooltip = self.options.showOverflowTooltip
