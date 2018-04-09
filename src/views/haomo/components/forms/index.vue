@@ -5,9 +5,11 @@
                      :buttons="showUserButtons"
                      :layout="layout"
                      :tips="tips"
-                     :refers="userRefers"
                      :foreignFormFields="foreignFormFields"
-                     :relates="userRelates">
+                     :refers="userRefers">
+                      <!-- foreignFormFields 主查外的外表显示字段  和userRefers连用-->
+                      <!-- :relates="userRelates" 中间表和间接关联表-->
+                      <!--  :refers="userRefers" 主查外的外表和外键字段 和foreignFormFields；连用-->
     </hm-complex-form>
   </div>
 </template>
@@ -29,11 +31,11 @@
         // widgetType值 1：普通input 2：下拉框 (如果是下拉框 再传一个options表示下拉框选项)3：复选框 4：文本域 5：富文本 6：日期 7：单选框 8: 文件上传
         showUserColumns: [
           // 1普通input
-          { name: '选择类型', codeCamel: 'type', widgetType: 1, disabled: false,
-            change: this.inputChange
+          { name: '选择类型', codeCamel: 'type', widgetType: 1, disabled: true,
+            change: this.inputChange,
             // rule: { required: true, message: '用户名不能为空', trigger: 'blur' }
             //  hide: true
-            //  default: '默认值',
+            default: '默认值'
           },
           // 5富文本
           { name: '电子邮件', codeCamel: 'email', widgetType: 5, disabled: false,
@@ -71,7 +73,7 @@
             ], // default: 1
             change: this.inputChange },
           // 8文件
-          { name: '选择头像', codeCamel: 'avatar', widgetType: 8, url: '/api/upload' } // url是后台接口地址
+          { name: '选择头像', codeCamel: 'avatar', widgetType: 8, url: '/api/upload', change: this.uploadChange } // url是后台接口地址
         ],
         // CcSubject示例
         showUserColumns2: [
@@ -181,8 +183,14 @@
         console.log(125, object)
         return object // 将数据返回
       },
-      method1() {
-        console.log('method1')
+      method1(formModel) {
+        // console.log('method1', formModel)
+        // formModel.password = '1234'
+        // console.log('method1', formModel)
+      },
+      uploadChange(response, formModel) {
+        console.log(192, response)
+        console.log(192, formModel)
       },
       method2() {
         console.log('method2')
@@ -191,8 +199,9 @@
         console.log('method3')
       },
       method4(formModel) {
-        console.log(formModel)
-        console.log('method4')
+        console.log('method4', formModel)
+        formModel.password = 123
+        console.log('method4', formModel)
       },
       method5(formModel) {
         console.log(formModel)

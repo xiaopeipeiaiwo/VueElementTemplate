@@ -102,6 +102,7 @@
                          name="picture"
                          :action=" column.url || '/api/upload'"
                          :on-remove="handleRemove"
+                         :on-change="column.change || handleChange"
                          :file-list="fileList"
                          :multiple="column.multiple"
                          :ref="column.ref || ''"
@@ -477,18 +478,23 @@
         // console.log('上传成功')
         // console.log(response)
         // console.log('fileList', fileList)
-        // console.log(self.fileList)
-        _.each(self.columns, function(item, index) {
-          if (item.widgetType === 8) {
-            _.forEach(self.formModel, function(value, key) {
-              if (item.codeCamel === key) {
+        // console.log('formModel', self.formModel)
+        for (var i = 0, len = self.showUserColumns.length; i < len; i++) {
+          if (self.showUserColumns[i].widgetType === 8 && !self.showUserColumns[i].edited) {
+            self.$set(self.showUserColumns[i], 'edited', true)
+            for (var key in self.formModel) {
+              if (self.showUserColumns[i].codeCamel === key) {
                 // self.formModel[key] = response.message || response.visitName
-                self.formModel[key] = response.visitName + '/' + response.saveName
+                // 张家口
+                self.formModel[key] = response.visitName + response.fileName
+                break
+                // org
+                // self.formModel[key] = response.visitName + '/' + response.saveName
               }
-            })
+            }
+            break
           }
-        })
-        console.log('formModel', self.formModel)
+        }
       },
       // inputChange(val) {
       //   // console.log(event)
@@ -527,8 +533,12 @@
       onEditorReady(val) {
         // console.log('editor ready!')
       },
-      handleRemove(file, fileList) {
+      handleRemove(file, fileList, callback) {
         // console.log(self.formModel)
+      },
+      handleChange(file, fileList) {
+        // console.log(file, fileList)
+        console.log('自己的')
       },
       // 判断是否一个对象的所有属性都为空
       // 可判断空对象或者属性值为null、空数组、空字符串，属性值为空对象无法判断
@@ -726,7 +736,7 @@
         // 如果在processData中禁止提交了，显示提示信息
         if (self.isCancel.cancelSubmit) {
           console.log('取消提交')
-          if (self.tips && !self.tips.hidde) {
+          if (self.tips && !self.isEmptyObject(self.tips) && !self.tips.hidde) {
             self.$message({
               message: self.tips.otherError.text,
               type: 'error'
@@ -771,7 +781,7 @@
               }).then(resp => {
                 console.log('修改成功')
                 // self.resetForm()
-                if (self.tips && !self.tips.hidde) {
+                if (self.tips && !self.isEmptyObject(self.tips) && !self.tips.hidde) {
                   self.$message({
                     message: self.tips.editSuccess.text,
                     type: 'success'
@@ -783,7 +793,7 @@
                 }
               }).catch(err => {
                 console.log(err)
-                if (self.tips && !self.tips.hidde) {
+                if (self.tips && !self.isEmptyObject(self.tips) && !self.tips.hidde) {
                   self.$message({
                     message: self.tips.editError.text,
                     type: 'error'
@@ -914,7 +924,7 @@
                   })
                 }
                 // 提示信息
-                if (self.tips && !self.tips.hidde) {
+                if (self.tips && !self.isEmptyObject(self.tips) && !self.tips.hidde) {
                   self.$message({
                     message: self.tips.newSuccess.text,
                     type: 'success'
@@ -926,7 +936,7 @@
                 }
               }).catch(err => {
                 console.log(err)
-                if (self.tips && !self.tips.hidde) {
+                if (self.tips && !self.isEmptyObject(self.tips) && !self.tips.hidde) {
                   self.$message({
                     message: self.tips.newError.text,
                     type: 'error'
