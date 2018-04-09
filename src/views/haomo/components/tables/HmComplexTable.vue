@@ -81,7 +81,7 @@
 
         <!--预定义按钮-->
         <el-button-group v-if="buttonGroup">
-          <el-button class="filter-item" type="primary" v-waves icon="el-icon-search" @click="handleFilter">搜索</el-button>
+          <el-button class="filter-item" type="primary" v-waves icon="el-icon-search" v-if="isShowSearch" @click="handleFilter">搜索</el-button>
           <el-button class="filter-item" type="primary" :loading="downloadLoading" v-waves icon="el-icon-download" v-if="isShowExport" @click="handleDownload">导出</el-button>
           <el-button class="filter-item" type="primary" v-waves icon="el-icon-plus" v-if="isShowNewButton" @click="openDialog('newData')">新建</el-button>
           <el-button class="filter-item" type="primary" v-waves icon="el-icon-refresh" v-if="isShowRefresh" @click="refreshList">刷新</el-button>
@@ -126,7 +126,7 @@
     <!-- end 表格 -->
 
     <!-- 翻页 -->
-    <div class="pagination-container">
+    <div class="pagination-container" v-if="isShowPagination">
       <el-pagination background @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page.sync="listQuery.pageNo"
                      :page-sizes="[10,20,50]" :page-size="listQuery.pageSize" layout="total, sizes, prev, pager, next, jumper" :total="total">
       </el-pagination>
@@ -282,13 +282,15 @@
         required: false
       },
       /**
-       * 表格的选项，包括：pageSize、showExport、sortItem、sortOrder、showRefresh、showDeleteButton、
+       * 表格的选项，包括：pageSize、showExport、sortItem、sortOrder、showRefresh、showDeleteButton、isShowPagination、isShowSearch
        * buttonGroup、showDetail、dataProcessing、promiseProcessing、changeValue、newData、editData完整的示例为：
        *  {
        *    "pageSize": 10, // 默认为10条数据/页
        *    "showExport": false,  // 默认为不显示导出按钮
        *    "sortItem": "create_time", // 默认为create_time字段的desc排序
        *    "sortOrder": "desc",
+       *    "isShowPagination": true, //默认显示分页
+i      *    "sShowSearch": true, //默认显示搜索按钮
        *    "showRefresh": false, //默认不显示刷新按钮
        *    "showDeleteButton": false,  //默认不显示删除按钮
        *    "buttonGroup": false  //默认不以按钮组的方式呈现button
@@ -366,14 +368,16 @@
         isShowEditDataButton: false, // 是否显示编辑
         isShowDeleteButton: false, // 是否显示删除
         isShowExport: false, // 是否显示导出按钮
+        isShowPagination: true, // 是否显示分页
+        isShowSearch: true, // 是否显示搜索按钮
         HmComplexForm: { // 设置form组件
           formSchema: {}, // form弹窗的Schema定义
           showUserColumns: [], // form弹窗的Columns定义
           showUserButtons: [], // from弹窗显示按钮,
           layout: { left: 0, middle: 24, right: 0 }, // form弹窗的布局方式
           tableId: '',
-          formTips: '',
-          formStyle: '',
+          formTips: {},
+          formStyle: {},
           formRefers: {},
           foreignFormFields: [],
           formRelates: []
@@ -768,6 +772,12 @@
         }
         if (self.options.showExport) { // 判断是否显示导出按钮
           self.isShowExport = self.options.showExport
+        }
+        if (self.options.isShowSearch) { // 判断是否显示导出按钮
+          self.isShowSearch = self.options.isShowSearch
+        }
+        if (self.options.isShowPagination) { // 判断是否显示导出按钮
+          self.isShowPagination = self.options.isShowPagination
         }
         if (self.options.showDeleteButton) { // 判断是否显示删除按钮
           self.isShowDeleteButton = self.options.showDeleteButton

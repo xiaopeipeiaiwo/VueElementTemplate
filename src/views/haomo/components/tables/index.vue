@@ -96,6 +96,8 @@
         // end: 'lastUpdateTime'
         // }
         // },
+        isShowPagination: true,
+        isShowSearch: true,
         showRefresh: true,
         showExport: true,
         showDeleteButton: true,
