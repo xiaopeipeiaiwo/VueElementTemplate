@@ -28,6 +28,8 @@
               <el-date-picker v-if="column.widgetType === 6 || column.type === 'datetime' || column.type === 'date'"
                               v-model="formModel[column.codeCamel]"
                               :style="formStyle && formStyle.datePicker && formStyle.datePicker.style || {width: '65%'}"
+                              :ref="column.ref || ''"
+                              :readonly="column.readonly"
                               :type="column.dateType || 'date'"
                               align="right" :disabled="column.disabled"
                               @change="column.change && column.change($event)"
@@ -36,6 +38,7 @@
               </el-date-picker>
               <!-- 3 下拉框 -->
               <el-select v-else-if="column.widgetType === 2"
+                         :ref="column.ref || ''"
                          v-model="formModel[column.codeCamel]"
                          @change="column.change && column.change($event)"
                          :style="formStyle && formStyle.select && formStyle.select.style || {width: '65%'}"
@@ -51,6 +54,8 @@
               </el-select>
               <!-- 4 文本域 -->
               <el-input v-else-if="column.widgetType === 4"
+                        :ref="column.ref || ''"
+                        :readonly="column.readonly"
                         :style="formStyle && formStyle.textarea && formStyle.textarea.style || {width: '65%'}"
                         v-model="formModel[column.codeCamel]"
                         type="textarea" :disabled="column.disabled"
@@ -61,11 +66,13 @@
               <!-- 5 复选框 -->
               <el-checkbox v-else-if="column.widgetType === 3 && !column.options"
                            v-model="formModel[column.codeCamel]"
+                           :ref="column.ref || ''"
                            :disabled="column.disabled"
                            @change="column.change && column.change($event)"
                            true-label="1" false-label="0"></el-checkbox>
               <el-checkbox-group v-else-if="column.widgetType === 3 && column.options"
                                  v-model="formModel[column.codeCamel]"
+                                 :ref="column.ref || ''"
                                  :disabled="column.disabled"
                                  @change="column.change && column.change($event)">
                 <el-checkbox v-for="option in column.options"
@@ -73,7 +80,7 @@
               </el-checkbox-group>
               <!-- 6 富文本 -->
               <quill-editor v-else-if="column.widgetType === 5"
-                            ref="textEditor" :disabled="column.disabled"
+                            :ref="column.ref || ''" :disabled="column.disabled"
                             v-model="formModel[column.codeCamel]"
                             :style="formStyle && formStyle.quillEditor && formStyle.quillEditor.style || {width:'65%'}"
                             :options="editorOption"
@@ -97,7 +104,7 @@
                          :on-remove="handleRemove"
                          :file-list="fileList"
                          :multiple="column.multiple"
-                         ref="upload"
+                         :ref="column.ref || ''"
                          :on-success="uploadSuccess">
                 <el-button slot="trigger" size="small" type="primary"
                            :disabled="column.disabled">选取文件</el-button>
@@ -107,7 +114,9 @@
                         :style="formStyle && formStyle.input && formStyle.input.style || {width:'65%'}"
                         v-model="formModel[column.codeCamel]"
                         :disabled="column.disabled"
-                        @change="column.change && column.change($event)"></el-input>
+                        :readonly="column.readonly"
+                        :ref="column.ref || ''"
+                        @change="column.change && column.change($event,formModel)"></el-input>
             </el-form-item>
             <!--按钮-->
             <el-form-item v-if="buttons && buttons.length > 0">
@@ -172,6 +181,7 @@
        * change属性可选，值为函数类型，表示input的change事件的执行方法，参数即为input输入内容
        * default属性可选(复选框不支持)，设置默认值，取值规范参考form/index.vue
        * hide属性可选，设置该表单字段是否显示,值为boolean
+       * ref属性可选，用来获取当前表单dom节点
        * widgetType属性可选，表示该字段要显示的表单类型(普通输入框、文本域、富文本、下拉框...)，不传默认为普通input
        * 取值1-8(1表示普通输入框,2表示下拉框,3表示复选框,4表示文本域,5表示富文本,6表示日期，7表示单选框，8表示文件上传)，
        * 若表单类型为下拉框/复选框/单选框，还需传入options字段，值为数组(数组元素是下拉框/复选框/单选框的选项），
@@ -464,7 +474,7 @@
       // 上传成功的回调函数
       uploadSuccess(response, file, fileList) {
         const self = this
-        console.log('上传成功')
+        // console.log('上传成功')
         // console.log(response)
         // console.log('fileList', fileList)
         // console.log(self.fileList)
@@ -472,12 +482,13 @@
           if (item.widgetType === 8) {
             _.forEach(self.formModel, function(value, key) {
               if (item.codeCamel === key) {
-                self.formModel[key] = response.message || response.visitName
+                // self.formModel[key] = response.message || response.visitName
+                self.formModel[key] = response.visitName + '/' + response.saveName
               }
             })
           }
         })
-        // console.log(404, self.formModel)
+        console.log('formModel', self.formModel)
       },
       // inputChange(val) {
       //   // console.log(event)

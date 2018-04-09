@@ -108,11 +108,11 @@
       <el-table-column type="selection" width="55" v-if="isShowSelection"></el-table-column>
       <el-table-column v-for="(column,index) in showColumns" :key="index" align="center" :label="column.name"
                        :prop="column.codeCamel" :sortable="column.isSort" :width="column.width" :show-overflow-tooltip="showOverflowTooltip">
-      <template slot-scope="scope">
+        <template slot-scope="scope">
           <span v-if="(scope.row[column.codeCamel] !== false && scope.row[column.codeCamel] !== true )&& !column.render">{{ scope.row[column.codeCamel] }}</span>
           <el-checkbox v-if="(scope.row[column.codeCamel] === false || scope.row[column.codeCamel] === true) && !column.render" v-model="scope.row[column.codeCamel]"></el-checkbox>
           <span v-if='column.render' v-html="column.render(scope)"></span>
-      </template>
+        </template>
       </el-table-column>
       <el-table-column fixed="right" label="操作" :width="operationWidth" v-if="isShowEditDataButton || isShowDeleteButton || definedOperation.length">
         <template slot-scope="scope">
@@ -290,7 +290,7 @@
        *    "sortItem": "create_time", // 默认为create_time字段的desc排序
        *    "sortOrder": "desc",
        *    "isShowPagination": true, //默认显示分页
-i      *    "sShowSearch": true, //默认显示搜索按钮
+       *    "isShowSearch": true, //默认显示搜索按钮
        *    "showRefresh": false, //默认不显示刷新按钮
        *    "showDeleteButton": false,  //默认不显示删除按钮
        *    "buttonGroup": false  //默认不以按钮组的方式呈现button
