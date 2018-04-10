@@ -128,6 +128,9 @@
         },
         definedDetail() {
 
+        },
+        BatchRemove() {
+          console.log('BatchRemove')
         }
         // pretreatment() {}
       }

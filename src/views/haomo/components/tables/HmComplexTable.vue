@@ -327,7 +327,7 @@
         required: false
       },
       /**
-       * 自定义表格选项，包括：definedParams、definedOperate、完整的示例为：
+       * 自定义表格选项，包括：definedParams、definedOperate、definedOperation、definedEdit、definedNew、definedDetail、BatchRemove、pretreatment完整的示例为：
        *  {
        *    definedParams(params, operate){return params} // 自定义查询数据时的Params
        *    definedOperate: [         // 自定义table顶部的操作，如果要根据下拉选择、输入框、时间选择器的值查询，需在自定义definedParams()方法中添加
@@ -336,6 +336,12 @@
        *      { type: 'datetime', label:'', placeholder: '', code:'', value:''},  // 自定义时间选择器
        *      { type: 'button', label:'', icon:'', func: this.dropDown}] // 自定义按钮
        *    }
+       *    definedOperation: [] // 自定义操作
+       *    definedEdit(){} // 自定义操作中编辑
+       *    definedNew(){} // 自定义新建
+       *    definedDetail(){} // 自定义操作中详情
+       *    BatchRemove(){} // 自定义批量删除
+       *    pretreatment(){} // table组件init()前操作
        */
       userDefined: {
         type: Object,
@@ -425,9 +431,10 @@
       // this.validate()
       const self = this
       if (this.userDefined && this.userDefined.pretreatment) {
-        self.userDefined.pretreatment().then(function() {})
-        self.init()
-        self.getList()
+        self.userDefined.pretreatment().then(function() {
+          self.init()
+          self.getList()
+        })
         console.log('IS-[object Promise]')
       } else {
         self.init()
@@ -726,6 +733,10 @@
         const self = this
         const datas = { ids: [] }
         if (!self.multipleSelection) return false
+        if (self.userDefined.BatchRemove) {
+          self.userDefined.BatchRemove(self.multipleSelection)
+          return false
+        }
         _.each(self.multipleSelection, function(item, index) {
           datas.ids.push(item.id)
         })
