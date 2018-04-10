@@ -102,7 +102,7 @@
     <!-- end 过滤 -->
 
     <!-- 表格 -->
-    <el-table :data="list" v-loading="listLoading" element-loading-text="给我一点时间" border fit highlight-current-row :cell-style="cellStyle"
+    <el-table :data="list" v-loading="listLoading" element-loading-text="给我一点时间" border fit highlight-current-row :cell-style="cellStyle" ref="multipleTable"
               :style="tableStyle" @selection-change="handleSelectionChange" @sort-change="sortChange" @current-change="tableCurrentChange">
       <el-table-column type="index" :index="indexMethod" label="序号" width="50px"></el-table-column>
       <el-table-column type="selection" width="55" v-if="isShowSelection"></el-table-column>
@@ -282,7 +282,7 @@
         required: false
       },
       /**
-       * 表格的选项，包括：pageSize、showExport、sortItem、sortOrder、showRefresh、showDeleteButton、isShowPagination、isShowSearch
+       * 表格的选项，包括：pageSize、showExport、sortItem、sortOrder、showRefresh、showDeleteButton、isShowPagination、isShowSearch、 showSelection
        * buttonGroup、showDetail、dataProcessing、promiseProcessing、changeValue、newData、editData、cellStyle, tableStyle完整的示例为：
        *  {
        *    "pageSize": 10, // 默认为10条数据/页
@@ -290,6 +290,7 @@
        *    "sortItem": "create_time", // 默认为create_time字段的desc排序
        *    "sortOrder": "desc",
        *    "isShowPagination": true, //默认显示分页
+       *    "showSelection" : false // 默认不显示多选框(显示多选框后可调用toggleSelection()方法赋值选择)
        *    "isShowSearch": true, //默认显示搜索按钮
        *    "showRefresh": false, //默认不显示刷新按钮
        *    "showDeleteButton": false,  //默认不显示删除按钮
@@ -319,6 +320,7 @@
        *    cellStyle:{} // 自定义单元格的样式
        *    tableStyle:{} // 自定义表格的样式
        *  }
+       *
        */
       options: {
         type: Object,
@@ -808,6 +810,12 @@
         if (self.options.HmFullCalendar) { // 当内容过长被隐藏时显示 tooltip
           self.HmFullCalendar = self.options.HmFullCalendar
         }
+      },
+      toggleSelection(value) {
+        const self = this
+        _.forEach(value, function(row) {
+          self.$refs.multipleTable.toggleRowSelection(row)
+        })
       },
       handleSelectionChange(val) {
         this.multipleSelection = val
