@@ -315,6 +315,21 @@
         required: false
       },
       /**
+       * 编辑时，涉及主查外，返回数据后渲染前对数据进行处理,beforeRender函数接受两个参数，第一个参数为主查外的数据，
+       * 第二个参数为表单的绑定对象formModel，该函数需要将主查外的数据绑定到formModel，并返回formModel
+       * 格式为: 属性beforeRender为固定键
+       *  {
+       *    beforeRender: function(resp.data, formModel) {
+       *      do something
+       *      return formModel
+       *    }
+       *  }
+       */
+      funObject: {
+        type: Object,
+        required: false
+      },
+      /**
        * 请求成功或失败时的提示信息,格式为:
        *  tips: {
        *     hidde: false, // 是否显示提示，默认false显示
@@ -478,7 +493,7 @@
         // console.log('上传成功')
         // console.log(response)
         // console.log('fileList', fileList)
-        // console.log('formModel', self.formModel)
+        console.log('formModel', self.formModel)
         for (var i = 0, len = self.showUserColumns.length; i < len; i++) {
           if (self.showUserColumns[i].widgetType === 8 && !self.showUserColumns[i].edited) {
             self.$set(self.showUserColumns[i], 'edited', true)
@@ -486,10 +501,10 @@
               if (self.showUserColumns[i].codeCamel === key) {
                 // self.formModel[key] = response.message || response.visitName
                 // 张家口
-                self.formModel[key] = response.visitName + response.fileName
-                break
+                // self.formModel[key] = response.visitName + response.fileName
                 // org
-                // self.formModel[key] = response.visitName + '/' + response.saveName
+                self.formModel[key] = response.visitName + '/' + response.saveName
+                break
               }
             }
             break
@@ -533,12 +548,12 @@
       onEditorReady(val) {
         // console.log('editor ready!')
       },
-      handleRemove(file, fileList, callback) {
+      handleRemove(file, fileList) {
         // console.log(self.formModel)
       },
       handleChange(file, fileList) {
         // console.log(file, fileList)
-        console.log('自己的')
+        // console.log('自己的')
       },
       // 判断是否一个对象的所有属性都为空
       // 可判断空对象或者属性值为null、空数组、空字符串，属性值为空对象无法判断
@@ -620,7 +635,7 @@
             }
         }).then(resp => {
           console.log('创建中间表成功')
-          console.log(resp.data)
+          // console.log(resp.data)
         })
       },
       // 批量创建的参数处理
@@ -631,43 +646,77 @@
             str.push(encodeURIComponent(k) + '=' + encodeURIComponent(obj[k]))
           }
         })
-        console.log(str.join('&'))
+        // console.log(str.join('&'))
         return str.join('&')
       },
       // 存在tableId，编辑数据前先获取数据
       getList() {
         const self = this
         if (!self.tableId) return
-        // 获取数据
-        request(self.schema.modelUnderscorePlural + '/' + self.tableId).then(resp => {
+        const filters = {}
+        const params = {}
+        filters[self.schema.modelUnderscore] = { 'id': { 'equalTo': self.tableId }}
+        if (self.refers) {
+          params.refers = self.refers
+        }
+        params.filters = filters
+        // console.log('params', params)
+        // 获取数据  + '/' + self.tableId
+        request(self.schema.modelUnderscorePlural, {
+          params: params
+        }).then(resp => {
           self.Loading = false
           // console.log(self.formModel)
-          var formArray = _.keys(self.formModel) // 提取formModel的属性到数组
-          // console.log(formArray)
-          self.formModel = _.pick(resp.data, formArray) // 根据数组中的属性提取出data中对应的数据
-
-          // 下拉框多选时将字符串转为数组 column.widgetType === 3 && !column.options
-          _.each(self.columns, function(item, index) {
-            if (item.widgetType === 2 && item.multiple === true) {
-              _.forEach(self.formModel, function(value, key) {
-                if (item.codeCamel === key) {
-                  // console.log(11111, self.formModel[key])
-                  self.formModel[key] = self.formModel[key].split(',')
-                }
-              })
+          console.log('获取成功', resp.data)
+          // 如果联查了外表
+          if (resp.data.length > 0 && resp.data[0].superior !== undefined && !self.isEmptyObject(resp.data[0].superior) && resp.data[0].refers !== undefined && !self.isEmptyObject(resp.data[0].refers)) {
+            console.log(resp.data)
+            if (self.funObject && !self.isEmptyObject(self.funObject)) {
+              self.formModel = self.funObject.beforeRender(resp.data, self.formModel)
             }
-            // 单个复选框时，将请求回来的1和0转为'1'和'0'
-            if (item.widgetType === 3 && !item.options) {
-              _.forEach(self.formModel, function(value, key) {
-                if (item.codeCamel === key) {
-                  // console.log(11111, self.formModel[key])
-                  self.formModel[key] = self.formModel[key] + ''
-                }
-              })
+          } else if (resp.data.length > 0) {
+            var formArray = _.keys(self.formModel) // 提取formModel的属性到数组
+            if (resp.data[0].superior && !self.isEmptyObject(resp.data[0].superior)) {
+              self.formModel = _.pick(resp.data[0].superior, formArray) // 根据数组中的属性提取出data中对应的数据
+            } else {
+              self.formModel = _.pick(resp.data[0], formArray)
             }
-          })
-          // console.log('getList', self.formModel)
-          // console.log(typeof self.formModel.isUsed)
+            // console.log('获取到数据', self.formModel)
+            // 处理返回来的数据
+            _.each(self.columns, function(item, index) {
+              // 下拉框多选时将字符串转为数组 column.widgetType === 3 && !column.options
+              if (item.widgetType === 2 && item.multiple === true) {
+                _.forEach(self.formModel, function(value, key) {
+                  if (item.codeCamel === key) {
+                    self.formModel[key] = self.formModel[key].split(',')
+                  }
+                })
+              }
+              // 下拉框单选时将数字转为字符串 column.widgetType === 3 && !column.options
+              if (item.widgetType === 2 && !item.multiple) {
+                _.forEach(self.formModel, function(value, key) {
+                  if (item.codeCamel === key) {
+                    if (typeof self.formModel[key] === 'number') {
+                      self.formModel[key] = self.formModel[key] + ''
+                    }
+                    // self.formModel[key] = self.formModel[key].split(',')
+                  }
+                })
+              }
+              // 单个复选框时，将请求回来的1和0转为'1'和'0'
+              if (item.widgetType === 3 && !item.options) {
+                _.forEach(self.formModel, function(value, key) {
+                  if (item.codeCamel === key) {
+                    // console.log(11111, self.formModel[key])
+                    self.formModel[key] = self.formModel[key] + ''
+                  }
+                })
+              }
+            })
+          }
+          console.log('getList', self.formModel)
+        }).catch(error => {
+          console.log(error)
         })
       },
       // 初始化
@@ -696,7 +745,7 @@
               self.$set(self.showUserColumns, index, tmp) // 顺序
             }
           })
-          console.log('self.showUserColumns', self.showUserColumns)
+          // console.log('self.showUserColumns', self.showUserColumns)
           // 提取v-model绑定的变量
           _.each(self.showUserColumns, function(item) {
             if (item.widgetType === 8 || (item.widgetType === 3 && item.options && item.options.length > 0)) {
@@ -705,7 +754,7 @@
               item.default ? self.$set(self.formModel, item.codeCamel, item.default) : self.$set(self.formModel, item.codeCamel, '')
             }
           })
-          console.log('self.formModel', self.formModel)
+          // console.log('self.formModel', self.formModel)
           if (!request.defaults.baseURL) {
             request.defaults.baseURL = '/org/api'
           }
@@ -729,10 +778,10 @@
        */
       onSubmit(callback, processData) {
         const self = this
-        console.log('点击了提交函数')
-        console.log(self.formModel)
+        console.log('点击了提交函数', self.formModel)
         // 对表单数据进行处理
         self.formModel = processData ? processData(self.formModel, self.isCancel) : self.formModel
+        // console.log(self.formModel)
         // 如果在processData中禁止提交了，显示提示信息
         if (self.isCancel.cancelSubmit) {
           console.log('取消提交')
@@ -802,12 +851,13 @@
               })
             } else {
               // 不存在tableId 则创建一条数据
-              console.log(self.formModel)
+              // console.log(self.formModel)
               if (self.refers && self.foreignForm) {
                 // 遍历foreignFormFields 生成外表数据对象
                 _.each(self.foreignFormFields, function(val, key) {
                   self.$set(self.foreignForm, val, '')
                 })
+                console.log('self.foreignForm', self.foreignForm)
                 _.each(self.showUserColumns, function(item, index) {
                   // 提取本表数据以提交
                   if (!item.isForeign) {
@@ -837,15 +887,22 @@
                     }
                   }
                 })
+                // 处理多选时 部分属性值为数组，转成字符串
+                // _.each(self.partPropModel, function(value, key) {
+                //   if (typeof value === Object && value.length && value.length > 0) {
+                //     self.partPropModel[key] = value.join('')
+                //   }
+                // })
                 console.log('本表', self.nativeFormModel)
                 console.log('外表', self.foreignFormModel)
                 console.log('部分属性', self.partPropModel)
               }
               // 发送新建请求
+              console.log('请求之前', self.formModel)
               request(self.schema.modelUnderscorePlural + '/new', {
                 method: 'post',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
-                data: self.refers ? self.nativeFormModel : self.formModel,
+                data: self.isEmptyObject(self.refers) ? self.formModel : self.nativeFormModel,
                 transformRequest:
                   function(obj) {
                     var str = []
@@ -855,9 +912,8 @@
                     return str.join('&')
                   }
               }).then(resp => {
-                console.log('创建成功')
+                console.log('创建成功', resp.data)
                 // 设置中间表与本表(主表)对应字段
-                console.log(resp.data)
                 // if (!self.relates || !self.relates.length) return
                 // 创建中间表数据
                 if (resp.data && self.relates && self.relates.length && self.relates[1].relateTable) {
@@ -897,15 +953,30 @@
                     }
                   })
                 }
-
+                console.log('外表公共属性partProp', self.partPropModel)
                 // 把外表公共属性partProp的值写入foreignArray的每条数据对象
                 if (self.foreignArray.length > 0) {
                   _.each(self.foreignArray, function(item, key) {
                     var tem = _.cloneDeep(self.partPropModel)
-                    if (_.includes(item, _.values(self.partPropModel)[0])) {
-                      tem[_.keys(self.partPropModel)[0]] = 1 // 可能出问题
+                    var tem2 = _.values(self.partPropModel)[0]
+                    if (typeof tem2 !== 'object') {
+                      if (_.includes(item, tem2)) {
+                        tem[_.keys(self.partPropModel)[0]] = 1 // 可能出问题
+                      } else {
+                        tem[_.keys(self.partPropModel)[0]] = 0 // 可能出问题
+                      }
                     } else {
-                      tem[_.keys(self.partPropModel)[0]] = 0 // 可能出问题
+                      _.each(tem2, function(value, k) { // ['A','B']
+                        _.each(item, function(v, i) { // {ccSubjectId:'aaa',description: 'aaa, correct: '', serialNumber: 'A'}
+                          if (value === v && tem[_.keys(self.partPropModel)[0]] !== 1) {
+                            tem[_.keys(self.partPropModel)[0]] = 1
+                          }
+                          if ((value !== v && tem[_.keys(self.partPropModel)[0]] !== 1)) {
+                            tem[_.keys(self.partPropModel)[0]] = 0
+                          }
+                        })
+                      })
+                      console.log('多选--数组')
                     }
                     item = Object.assign(item, tem)
                   })
@@ -917,8 +988,7 @@
                   request.post(url + '?params=' + string, {
                     headers: { 'Content-Type': 'application/json;charset=UTF-8' }
                   }).then(resp => {
-                    console.log('批量创建成功')
-                    console.log(resp.data)
+                    console.log('批量创建成功', resp.data)
                   }).catch(error => {
                     console.log('批量创建失败', error)
                   })
