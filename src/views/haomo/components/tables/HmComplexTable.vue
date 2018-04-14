@@ -144,6 +144,7 @@
                        :tableId="HmComplexForm.tableId"
                        :tips="HmComplexForm.formTips"
                        :formStyle="HmComplexForm.formStyle"
+                       :funObject="HmComplexForm.funObject"
                        :refers="HmComplexForm.formRefers"
                        :foreignFormFields="HmComplexForm.foreignFormFields"
                        :relates="HmComplexForm.formRelates" >
@@ -389,6 +390,7 @@
           tableId: '',
           formTips: {},
           formStyle: {},
+          funObject: {},
           formRefers: {},
           foreignFormFields: [],
           formRelates: []
@@ -638,6 +640,19 @@
           self.userDefined.definedDetail(true, data)
           return false
         }
+        self.HmComplexForm = {
+          formSchema: {},
+          showUserColumns: [],
+          showUserButtons: [],
+          layout: { left: 0, middle: 24, right: 0 },
+          tableId: '',
+          formTips: {},
+          formStyle: {},
+          funObject: {},
+          formRefers: {},
+          foreignFormFields: [],
+          formRelates: []
+        }
         self.HmComplexForm.tableId = ''
         if (type === 'editData') {
           self.dialogName = '编辑'
@@ -650,6 +665,7 @@
           self.HmComplexForm.layout = self.options.editData.layout
           self.options.editData.tips ? self.HmComplexForm.formTips = self.options.editData.tips : ''
           self.options.editData.formStyle ? self.HmComplexForm.formStyle = self.options.editData.formStyle : ''
+          self.options.editData.funObject ? self.HmComplexForm.funObject = self.options.editData.funObject : ''
           self.options.editData.formRefers ? self.HmComplexForm.formRefers = self.options.editData.formRefers : ''
           self.options.editData.foreignFormFields ? self.HmComplexForm.foreignFormFields = self.options.editData.foreignFormFields : ''
           self.options.editData.formRelates ? self.HmComplexForm.formRelates = self.options.editData.formRelates : ''
@@ -664,6 +680,7 @@
           self.HmComplexForm.layout = self.options.newData.layout
           self.options.newData.tips ? self.HmComplexForm.formTips = self.options.newData.tips : ''
           self.options.newData.formStyle ? self.HmComplexForm.formStyle = self.options.newData.formStyle : ''
+          self.options.newData.funObject ? self.HmComplexForm.funObject = self.options.newData.funObject : ''
           self.options.newData.formRefers ? self.HmComplexForm.formRefers = self.options.newData.formRefers : ''
           self.options.newData.foreignFormFields ? self.HmComplexForm.foreignFormFields = self.options.newData.foreignFormFields : ''
           self.options.newData.formRelates ? self.HmComplexForm.formRelates = self.options.newData.formRelates : ''
@@ -679,6 +696,7 @@
           self.HmComplexForm.layout = self.options.showDetail.layout
           self.options.showDetail.tips ? self.HmComplexForm.formTips = self.options.showDetail.tips : ''
           self.options.showDetail.formStyle ? self.HmComplexForm.formStyle = self.options.showDetail.formStyle : ''
+          self.options.showDetail.funObject ? self.HmComplexForm.funObject = self.options.showDetail.funObject : ''
           self.options.showDetail.formRefers ? self.HmComplexForm.formRefers = self.options.showDetail.formRefers : ''
           self.options.showDetail.foreignFormFields ? self.HmComplexForm.foreignFormFields = self.options.showDetail.foreignFormFields : ''
           self.options.showDetail.formRelates ? self.HmComplexForm.formRelates = self.options.showDetail.formRelates : ''
