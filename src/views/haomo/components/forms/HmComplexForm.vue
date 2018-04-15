@@ -80,13 +80,13 @@
               </el-checkbox-group>
               <!-- 6 富文本 -->
               <quill-editor v-else-if="column.widgetType === 5"
-                            :ref="column.ref || ''" :disabled="column.disabled"
+                            :ref="column.ref || 'textEditor'" :disabled="column.disabled"
                             v-model="formModel[column.codeCamel]"
                             :style="formStyle && formStyle.quillEditor && formStyle.quillEditor.style || {width:'65%'}"
                             :options="editorOption"
                             @blur="onEditorBlur($event)"
                             @focus="onEditorFocus($event)"
-                            @change="column.change && column.change($event)"
+                            @change="(column.change && column.change($event)) || onEditorChange"
                             @ready="onEditorReady($event)">
               </quill-editor>
               <!-- 7 单选框 -->
@@ -533,12 +533,12 @@
       // textareaChange(val) {
       //   console.log(val)
       // },
-      // onEditorChange({ quill, html, text }) {
-      //   console.log(quill)
-      //   console.log(html)
-      //   console.log(text)
-      //   // this.content = html
-      // },
+      onEditorChange({ quill, html, text }) {
+        console.log(quill)
+        console.log(html)
+        console.log(text)
+        // this.content = html
+      },
       onEditorBlur(val) {
         // console.log(val)
       },
