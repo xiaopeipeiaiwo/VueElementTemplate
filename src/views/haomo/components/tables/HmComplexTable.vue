@@ -574,10 +574,6 @@
           } else {
             self.list = resp.data
           }
-          // 数据库字段转化显示
-          if (self.options && self.options.changeValue) {
-            self.list = self.changeValue(self.list)
-          }
 
           // 数据处理
           if (self.options && self.options.dataProcessing) {
@@ -589,6 +585,12 @@
               self.list = dataList
             })
           }
+
+          // 数据库字段转化显示
+          if (self.options && self.options.changeValue) {
+            self.list = self.changeValue(self.list)
+          }
+
           self.total = parseInt(resp.headers.total)
           self.listLoading = false
         })
