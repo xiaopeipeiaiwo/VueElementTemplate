@@ -33,12 +33,14 @@
             center: 'title',
             right: 'month,agendaWeek,agendaDay,listWeek'
           },
+          eventLimit: true,
+          weekNumberCalculation: 'ISO',
+          dayClick: function() {
+            alert('a day has been clicked!')
+          },
           views: {
             month: { titleFormat: 'YYYY, MM, DD' }
           }
-        })
-        $('#my-prev-button').click(function() {
-          $('#calendar').fullCalendar('prev')
         })
       })
     },
