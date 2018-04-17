@@ -28,11 +28,10 @@
     created() {
       $(function() {
         $('#calendar').fullCalendar({
-          // weekends: false
           header: {
-            left: 'title',
-            center: '',
-            right: 'today prev,next'
+            left: 'prev,next today',
+            center: 'title',
+            right: 'month,agendaWeek,agendaDay,listWeek'
           },
           views: {
             month: { titleFormat: 'YYYY, MM, DD' }
