@@ -28,19 +28,48 @@
     created() {
       $(function() {
         $('#calendar').fullCalendar({
-          header: {
-            left: 'prev,next today',
-            center: 'title',
-            right: 'month,agendaWeek,agendaDay,listWeek'
+          customButtons: {
+            myCustomButton: {
+              text: '自定义按钮',
+              click: function() {
+                alert('点击了自定义按钮!')
+              }
+            }
           },
+          header: {
+            left: 'title',
+            center: '',
+            right: 'today prev,next myCustomButton'
+          },
+          currentTimezone: 'Asia/Beijing',
+          weekNumbersWithinDays: true,
+          handleWindowResize: true,
           eventLimit: true,
+          views: {
+            agenda: {
+              eventLimit: 3
+            }
+          },
           weekNumberCalculation: 'ISO',
           dayClick: function() {
             alert('a day has been clicked!')
           },
-          views: {
-            month: { titleFormat: 'YYYY, MM, DD' }
-          }
+          events: [
+            {
+              title: 'event1',
+              start: '2018-04-17'
+            },
+            {
+              title: 'event2',
+              start: '2018-04-17',
+              end: '2018-04-18'
+            },
+            {
+              title: 'event3',
+              start: '',
+              allDay: false // will make the time show
+            }
+          ]
         })
       })
     },
@@ -50,5 +79,11 @@
   }
 </script>
 <style scoped>
+
+</style>
+<style>
+  .fc-button-group, .fc button {
+    display: block !important;
+  }
 </style>
 
