@@ -1,6 +1,16 @@
 <template>
   <div class="app-container calendar-list-container">
-    <hm-full-calendar></hm-full-calendar>
+    <hm-full-calendar
+      :width="width"
+      :schedules="schedules"
+      @dateChange="datechange"
+      @monthChange="monthchange"
+    ></hm-full-calendar>
+    <div v-if="show" class="incident">
+      <p>{{currentDate}}</p>
+      <span>{{event}}</span>
+      <span class="close" @click="closeEvent">X</span>
+    </div>
   </div>
 </template>
 
@@ -15,7 +25,13 @@
       'hm-full-calendar': HmFullCalendar
     },
     data() {
-      return {}
+      return {
+        show: false,
+        width: '300px',
+        currentDate: '',
+        event: '',
+        schedules: [{ date: 1524043625000, title: '个梵蒂是的舞蹈服可接受的看似简单计算的话束带结发会计师对海口市记得回复是框架的看就好山东矿机会计师发送的甲方是看得见看见的说法开始冈地方' }, { date: 1523955299000, title: '个梵蒂冈地方' }]
+      }
     },
     filters: {
 
@@ -23,7 +39,74 @@
     created() {
 
     },
-    methods: {}
+    methods: {
+      datechange(data) {
+        this.show = true
+        console.log(data)
+        if (data.schedule) {
+          const currentTime = this.timestampToTime(data.schedule.date)
+          console.log(currentTime)
+          this.currentDate = currentTime
+          this.event = data.schedule.title
+        }
+      },
+      closeEvent() {
+        this.show = false
+      },
+      monthchange(data) {
+        console.log(data, '--------')
+      },
+      timestampToTime(timestamp) {
+        var date = new Date(timestamp) // 时间戳为10位需*1000，时间戳为13位的话不需乘1000
+        const Y = date.getFullYear() + '年'
+        const M = (date.getMonth() + 1 < 10 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1) + '月'
+        const D = date.getDate() + '日'
+        return Y + M + D
+      }
+    }
   }
 </script>
+<style>
+  .calendar-list-container .incident{
+    top: -350px;
+    left:270px;
+    display:inline-block;
+    position:relative;
+    background-color:#202020;
+    width:180px;
+    padding:20px;
+    color:#CCC;
+    text-align:center;
+    font-size:14px;
+    font-family:微软雅黑;
+    border-radius:10px;
+    margin:50px;
+    box-shadow:1px 1px 2px #202020;
+    -o-box-shadow:1px 1px 2px #202020;
+    -moz-box-shadow:1px 1px 2px #202020;
+    -webkit-border-shadow:1px 1px 2px #202020;
+  }
+  .close{
+    position: absolute;
+    top:0;
+    cursor: pointer;
+    right:0;
+  }
+  .incident span {
+    font-size: 10px;
+    padding: 10px 20px;
+  }
+  .incident:before{
+    content:'';
+    position:absolute;
+    width:0;
+    height:0;
+    border:15px solid;
+    color:transparent;
+    border-right-color:#202020;
+    left:-30px;
+    top:50%;
+    margin-top:-15px;
+  }
+</style>
 
