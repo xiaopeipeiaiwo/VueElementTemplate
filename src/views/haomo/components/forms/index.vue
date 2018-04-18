@@ -75,7 +75,7 @@
             ], // default: 1
             change: this.inputChange },
           // 8文件 change: this.uploadChange
-          { name: '选择头像', codeCamel: 'avatar', widgetType: 8, url: '/api/upload', param: 'picture' } // url是后台接口地址
+          { name: '选择头像', codeCamel: 'avatar', widgetType: 8, url: '/api/upload', param: 'picture', accept: 'image/*' } // url是后台接口地址
         ],
         // CcSubject示例
         showUserColumns2: [

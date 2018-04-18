@@ -1,145 +1,145 @@
 <template>
-  <div class="app-container documentation-container">
+  <!--class="app-container documentation-container"-->
+  <div>
     <!--v-loading="Loading"-->
-    <el-row type="flex" class="hm-form" style="margin-top: 20px" >
-      <el-col :span="layout ? layout.left : 6">
+    <el-row type="flex" class="hm-form" style="margin-top: 12px" >
+      <el-col :span="layout ? layout.left : 1">
         <div></div>
       </el-col>
-      <el-col :span="layout ? layout.middle : 12">
-        <div>
-          <!--表单部分-->
-          <el-form ref="form"
-                   :label-position="formStyle && formStyle.formOptions && formStyle.formOptions.labelPosition || 'right'"
-                   element-loading-text="加载中"
-                   :label-width="formStyle && formStyle.formOptions && formStyle.formOptions.labelWidth || '170px'"
-                   :model="formModel"
-                   :rules="rules"
-                   :style=" formStyle && formStyle.formOptions && formStyle.formOptions.style || {width:'80%',margin:'0 auto'}">
-            <el-form-item v-for="column in showUserColumns"
-                          v-show="!column.hide"
-                          :key="column.id"
-                          :label="column.name"
-                          :rules="column.rule?column.rule:null"
-                          :prop="column.codeCamel">
-              <!--el-input<el-input v-if="column.codeCamel==='password'" type="password"
-                        v-model="formModel[column.codeCamel]"></el-input>-->
-              <!-- 2 日期选择 -->
-              <!-- -->
-              <el-date-picker v-if="column.widgetType === 6 || column.type === 'datetime' || column.type === 'date'"
-                              v-model="formModel[column.codeCamel]"
-                              :style="formStyle && formStyle.datePicker && formStyle.datePicker.style || {width: '65%'}"
-                              :ref="column.ref || ''"
-                              :readonly="column.readonly"
-                              :type="column.dateType || 'date'"
-                              align="right" :disabled="column.disabled"
-                              @change="column.change && column.change($event)"
-                              :value-format="column.dateFormate || 'yyyy-MM-dd'"
-                              :picker-options="pickerOptions">
-              </el-date-picker>
-              <!-- 3 下拉框 -->
-              <el-select v-else-if="column.widgetType === 2"
-                         :ref="column.ref || ''"
-                         v-model="formModel[column.codeCamel]"
-                         @change="column.change && column.change($event)"
-                         :style="formStyle && formStyle.select && formStyle.select.style || {width: '65%'}"
-                         :multiple="column.multiple"
-                         :disabled="column.disabled"
-                         style="width: 50%"
-                         clearable>
-                <el-option v-for="(item,key) in column.options"
-                           :key="key"
-                           :label="item.label"
-                           :value="item.value">
-                </el-option>
-              </el-select>
-              <!-- 4 文本域 -->
-              <el-input v-else-if="column.widgetType === 4"
-                        :ref="column.ref || ''"
-                        :readonly="column.readonly"
-                        :style="formStyle && formStyle.textarea && formStyle.textarea.style || {width: '65%'}"
-                        v-model="formModel[column.codeCamel]"
-                        type="textarea" :disabled="column.disabled"
-                        :resize="formStyle && formStyle.textarea && formStyle.textarea.resize || 'vertical'"
-                        :autosize="formStyle && formStyle.textarea && formStyle.textarea.autosize || { minRows: 4, maxRows: 6}"
-                        :rows="formStyle && formStyle.textarea && formStyle.textarea.rows || 4" @change="column.change && column.change($event)">
-              </el-input>
-              <!-- 5 复选框 -->
-              <el-checkbox v-else-if="column.widgetType === 3 && !column.options"
-                           v-model="formModel[column.codeCamel]"
-                           :ref="column.ref || ''"
-                           :disabled="column.disabled"
-                           @change="column.change && column.change($event)"
-                           true-label="1" false-label="0"></el-checkbox>
-              <el-checkbox-group v-else-if="column.widgetType === 3 && column.options"
-                                 v-model="formModel[column.codeCamel]"
-                                 :ref="column.ref || ''"
-                                 :disabled="column.disabled"
-                                 @change="column.change && column.change($event)">
-                <el-checkbox v-for="option in column.options"
-                             :label="option" :key="option">{{option}}</el-checkbox>
-              </el-checkbox-group>
-              <!-- 6 富文本 -->
-              <quill-editor v-else-if="column.widgetType === 5"
-                            :ref="column.ref || 'textEditor'" :disabled="column.disabled"
+      <el-col :span="layout ? layout.middle : 23">
+        <!--表单部分-->
+        <el-form ref="form"
+                 :label-position="formStyle && formStyle.formOptions && formStyle.formOptions.labelPosition || 'right'"
+                 element-loading-text="加载中"
+                 :label-width="formStyle && formStyle.formOptions && formStyle.formOptions.labelWidth || '163px'"
+                 :model="formModel"
+                 :rules="rules"
+                 :style=" formStyle && formStyle.formOptions && formStyle.formOptions.style || {width:'100%'}">
+          <el-form-item v-for="column in showUserColumns"
+                        v-show="!column.hide"
+                        :key="column.id"
+                        :label="column.name"
+                        :rules="column.rule?column.rule:null"
+                        :prop="column.codeCamel">
+            <!--el-input<el-input v-if="column.codeCamel==='password'" type="password"
+                      v-model="formModel[column.codeCamel]"></el-input>-->
+            <!-- 2 日期选择 -->
+            <!-- -->
+            <el-date-picker v-if="column.widgetType === 6 || column.type === 'datetime' || column.type === 'date'"
                             v-model="formModel[column.codeCamel]"
-                            :style="formStyle && formStyle.quillEditor && formStyle.quillEditor.style || {width:'65%'}"
-                            :options="editorOption"
-                            @blur="onEditorBlur($event)"
-                            @focus="onEditorFocus($event)"
-                            @change="(column.change && column.change($event)) || onEditorChange"
-                            @ready="onEditorReady($event)">
-              </quill-editor>
-              <!-- 7 单选框 -->
-              <el-radio-group v-else-if="column.widgetType === 7"
-                              :disabled="column.disabled"
-                              @change="column.change && column.change($event)"
-                              v-model="formModel[column.codeCamel]">
-                <el-radio v-for="option in column.options"
-                          :key="option.label" :label="option.label">{{option.value}}</el-radio>
-              </el-radio-group>
-              <!-- 8 文件 -->
-              <el-upload v-else-if="column.widgetType === 8"
-                         name="picture"
-                         :action=" column.url || '/api/upload'"
-                         :on-remove="handleRemove"
-                         :on-change="column.change || handleChange"
-                         :file-list="fileList"
-                         :multiple="column.multiple"
+                            :style="formStyle && formStyle.datePicker && formStyle.datePicker.style || {width: '70%'}"
+                            :ref="column.ref || ''"
+                            :readonly="column.readonly"
+                            :type="column.dateType || 'date'"
+                            align="right" :disabled="column.disabled"
+                            @change="column.change && column.change($event)"
+                            :value-format="column.dateFormate || 'yyyy-MM-dd'"
+                            :picker-options="pickerOptions">
+            </el-date-picker>
+            <!-- 3 下拉框 -->
+            <el-select v-else-if="column.widgetType === 2"
+                       :ref="column.ref || ''"
+                       v-model="formModel[column.codeCamel]"
+                       @change="column.change && column.change($event)"
+                       :style="formStyle && formStyle.select && formStyle.select.style || {width: '70%'}"
+                       :multiple="column.multiple"
+                       :disabled="column.disabled"
+                       style="width: 50%"
+                       clearable>
+              <el-option v-for="(item,key) in column.options"
+                         :key="key"
+                         :label="item.label"
+                         :value="item.value">
+              </el-option>
+            </el-select>
+            <!-- 4 文本域 -->
+            <el-input v-else-if="column.widgetType === 4"
+                      :ref="column.ref || ''"
+                      :readonly="column.readonly"
+                      :style="formStyle && formStyle.textarea && formStyle.textarea.style || {width: '70%'}"
+                      v-model="formModel[column.codeCamel]"
+                      type="textarea" :disabled="column.disabled"
+                      :resize="formStyle && formStyle.textarea && formStyle.textarea.resize || 'vertical'"
+                      :autosize="formStyle && formStyle.textarea && formStyle.textarea.autosize || { minRows: 4, maxRows: 6}"
+                      :rows="formStyle && formStyle.textarea && formStyle.textarea.rows || 4" @change="column.change && column.change($event)">
+            </el-input>
+            <!-- 5 复选框 -->
+            <el-checkbox v-else-if="column.widgetType === 3 && !column.options"
+                         v-model="formModel[column.codeCamel]"
                          :ref="column.ref || ''"
-                         :on-success="uploadSuccess">
-                <el-button slot="trigger" size="small" type="primary"
-                           :disabled="column.disabled">选取文件</el-button>
-              </el-upload>
-              <!-- 1 普通input -->
-              <el-input v-else
-                        :style="formStyle && formStyle.input && formStyle.input.style || {width:'65%'}"
-                        v-model="formModel[column.codeCamel]"
-                        :disabled="column.disabled"
-                        :readonly="column.readonly"
-                        :ref="column.ref || ''"
-                        @change="column.change && column.change($event,formModel)"></el-input>
-            </el-form-item>
-            <!--按钮-->
-            <el-form-item v-if="buttons && buttons.length > 0">
-              <el-col :span="24/buttons.length" v-for="(btn,key) in buttons" :key="key">
-                <el-button v-if="btn.type === 1"
-                           type="primary"
-                           @click="onSubmit(btn.method,btn.beforeSubmit)">{{btn.text}}</el-button>
-                <el-button v-if="btn.type === 2"
-                           type="primary"
-                           @click="resetForm(btn.method)">{{btn.text}}</el-button>
-                <el-button v-if="btn.type === 3"
-                           type="primary"
-                           @click="cancel(btn.method)">{{btn.text}}</el-button>
-                <el-button v-if="!btn.type"
-                           type="primary"
-                           @click="cancel(btn.method)">{{btn.text}}</el-button>
-              </el-col>
-            </el-form-item>
-          </el-form>
-        </div>
+                         :disabled="column.disabled"
+                         @change="column.change && column.change($event)"
+                         true-label="1" false-label="0"></el-checkbox>
+            <el-checkbox-group v-else-if="column.widgetType === 3 && column.options"
+                               v-model="formModel[column.codeCamel]"
+                               :ref="column.ref || ''"
+                               :disabled="column.disabled"
+                               @change="column.change && column.change($event)">
+              <el-checkbox v-for="option in column.options"
+                           :label="option" :key="option">{{option}}</el-checkbox>
+            </el-checkbox-group>
+            <!-- 6 富文本 -->
+            <quill-editor v-else-if="column.widgetType === 5"
+                          :ref="column.ref || ''" :disabled="column.disabled"
+                          v-model="formModel[column.codeCamel]"
+                          :style="formStyle && formStyle.quillEditor && formStyle.quillEditor.style || {width:'70%'}"
+                          :options="editorOption"
+                          @blur="onEditorBlur($event)"
+                          @focus="onEditorFocus($event)"
+                          @change="column.change && column.change($event)"
+                          @ready="onEditorReady($event)">
+            </quill-editor>
+            <!-- 7 单选框 -->
+            <el-radio-group v-else-if="column.widgetType === 7"
+                            :disabled="column.disabled"
+                            @change="column.change && column.change($event)"
+                            v-model="formModel[column.codeCamel]">
+              <el-radio v-for="option in column.options"
+                        :key="option.label" :label="option.label">{{option.value}}</el-radio>
+            </el-radio-group>
+            <!-- 8 文件 -->
+            <el-upload v-else-if="column.widgetType === 8"
+                       :accept="column.accept || '*/*'"
+                       :name="column.param || 'picture'"
+                       :action=" column.url || '/api/upload'"
+                       :on-remove="handleRemove"
+                       :on-change="column.change || handleChange"
+                       :file-list="fileList"
+                       :multiple="column.multiple"
+                       ref="upload"
+                       :on-success="uploadSuccess">
+              <el-button slot="trigger" size="small" type="primary"
+                         :disabled="column.disabled">选取文件</el-button>
+            </el-upload>
+            <!-- 1 普通input  || {width:'65%'}-->
+            <el-input v-else
+                      :style="formStyle && formStyle.input && formStyle.input.style || {width:'70%'}"
+                      v-model="formModel[column.codeCamel]"
+                      :disabled="column.disabled"
+                      :readonly="column.readonly"
+                      :ref="column.ref || ''"
+                      @change="column.change && column.change($event,formModel)"></el-input>
+          </el-form-item>
+          <!--按钮-->
+          <el-form-item v-if="buttons && buttons.length > 0">
+            <el-col :span="24/buttons.length" v-for="(btn,key) in buttons" :key="key">
+              <el-button v-if="btn.type === 1"
+                         type="primary"
+                         @click="onSubmit(btn.method,btn.beforeSubmit)">{{btn.text}}</el-button>
+              <el-button v-if="btn.type === 2"
+                         type="primary"
+                         @click="resetForm(btn.method)">{{btn.text}}</el-button>
+              <el-button v-if="btn.type === 3"
+                         type="primary"
+                         @click="cancel(btn.method)">{{btn.text}}</el-button>
+              <el-button v-if="!btn.type"
+                         type="primary"
+                         @click="cancel(btn.method)">{{btn.text}}</el-button>
+            </el-col>
+          </el-form-item>
+        </el-form>
       </el-col>
-      <el-col :span="layout ? layout.left : 6">
+      <el-col :span="layout ? layout.right : 0">
         <div></div>
       </el-col>
     </el-row>
@@ -183,6 +183,8 @@
        * default属性可选(复选框不支持)，设置默认值，取值规范参考form/index.vue
        * hide属性可选，设置该表单字段是否显示,值为boolean
        * ref属性可选，用来获取当前表单dom节点
+       * param属性可选，当表单类型为文件类型时，可传入param字段，值为后台规定必传参数，默认值为picture
+       * accept属性可选,当表单类型为文件类型时，可传入accept字段，限制限制上传文件类型，取值规范参考w3c
        * widgetType属性可选，表示该字段要显示的表单类型(普通输入框、文本域、富文本、下拉框...)，不传默认为普通input
        * 取值1-8(1表示普通输入框,2表示下拉框,3表示复选框,4表示文本域,5表示富文本,6表示日期，7表示单选框，8表示文件上传)，
        * 若表单类型为下拉框/复选框/单选框，还需传入options字段，值为数组(数组元素是下拉框/复选框/单选框的选项），
@@ -533,12 +535,12 @@
       // textareaChange(val) {
       //   console.log(val)
       // },
-      onEditorChange({ quill, html, text }) {
-        console.log(quill)
-        console.log(html)
-        console.log(text)
-        // this.content = html
-      },
+      // onEditorChange({ quill, html, text }) {
+      //   console.log(quill)
+      //   console.log(html)
+      //   console.log(text)
+      //   // this.content = html
+      // },
       onEditorBlur(val) {
         // console.log(val)
       },
@@ -893,9 +895,9 @@
                 //     self.partPropModel[key] = value.join('')
                 //   }
                 // })
-                console.log('本表', self.nativeFormModel)
-                console.log('外表', self.foreignFormModel)
-                console.log('部分属性', self.partPropModel)
+                // console.log('本表', self.nativeFormModel)
+                // console.log('外表', self.foreignFormModel)
+                // console.log('部分属性', self.partPropModel)
               }
               // 发送新建请求
               console.log('请求之前', self.formModel)
@@ -913,8 +915,6 @@
                   }
               }).then(resp => {
                 console.log('创建成功', resp.data)
-                // 设置中间表与本表(主表)对应字段
-                // if (!self.relates || !self.relates.length) return
                 // 创建中间表数据
                 if (resp.data && self.relates && self.relates.length && self.relates[1].relateTable) {
                   self.$set(self.relateData, self.relates[1].relateKeys[0], resp.data.id)
@@ -953,7 +953,7 @@
                     }
                   })
                 }
-                console.log('外表公共属性partProp', self.partPropModel)
+                // console.log('外表公共属性partProp', self.partPropModel)
                 // 把外表公共属性partProp的值写入foreignArray的每条数据对象
                 if (self.foreignArray.length > 0) {
                   _.each(self.foreignArray, function(item, key) {
@@ -980,7 +980,7 @@
                     }
                     item = Object.assign(item, tem)
                   })
-                  console.log('外表数据', self.foreignArray)
+                  // console.log('外表数据', self.foreignArray)
                   // 批量创建信息
                   const url = _.keys(self.refers)[0] + 's' + '/create/batch'
                   // const string = self.transformRequest(self.foreignArray)
@@ -1059,6 +1059,17 @@
 
   }
 </script>
-<style scoped>
-
+<style>
+  .hm-form .el-form-item__content{
+    margin-left: 173px !important;
+  }
+  .hm-form .ql-toolbar.ql-snow .ql-formats{
+    margin-right: 3px;
+  }
+  .hm-form .ql-toolbar.ql-snow + .ql-container.ql-snow {
+    height: 150px;
+  }
+  .hm-form .ql-toolbar.ql-snow{
+    padding: 7px;
+  }
 </style>
