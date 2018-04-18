@@ -136,7 +136,7 @@
     <!-- 弹窗 -->
     <!-- @TODO 补充详情弹窗 -->
 
-    <el-dialog :title="dialogName" :visible.sync="dialogFormVisible" :close-on-click-modal="closeOnClickModal" width="dialogWidth" v-if="dialogFormVisible">
+    <el-dialog :title="dialogName" :visible.sync="dialogFormVisible" :close-on-click-modal="closeOnClickModal" width="45%" v-if="dialogFormVisible">
       <hm-complex-form :schema="HmComplexForm.formSchema"
                        :columns="HmComplexForm.showUserColumns"
                        :buttons="HmComplexForm.showUserButtons"
