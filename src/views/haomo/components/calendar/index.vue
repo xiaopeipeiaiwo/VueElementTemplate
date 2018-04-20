@@ -3,19 +3,16 @@
     <hm-full-calendar
       :width="width"
       :schedules="schedules"
+      :schema="schema['HmUser']"
       @dateChange="datechange"
       @monthChange="monthchange"
     ></hm-full-calendar>
-    <!--<div v-if="show" class="incident">-->
-      <!--<p>{{currentDate}}</p>-->
-      <!--<span>{{event}}</span>-->
-      <!--<span class="close" @click="closeEvent">X</span>-->
-    <!--</div>-->
   </div>
 </template>
 
 <script>
   import HmFullCalendar from './HmFullCalendar.vue'
+  import schema from '../../schemas/hm_org_schema'
   export default {
     name: 'HmFullCalendar',
     // 继承其他组件
@@ -35,9 +32,15 @@
 
     },
     created() {
-
+      this.schema = schema
     },
     methods: {
+      datechange(data) {
+        console.log(data)
+      },
+      monthchange(data) {
+        console.log(data)
+      }
     }
   }
 </script>
