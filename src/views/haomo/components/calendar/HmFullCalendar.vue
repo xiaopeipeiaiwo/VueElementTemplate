@@ -41,6 +41,7 @@
   }
   .datebook-root .top-panel ul{
     overflow: hidden;
+    padding-left: 0px;
   }
   .datebook-root .top-panel li{
     float: left;
