@@ -137,7 +137,11 @@
 
     <!-- 弹窗 -->
     <!-- @TODO 补充详情弹窗 -->
+<<<<<<< HEAD
     
+=======
+
+>>>>>>> b14b9dd1366e279bb016eabe5d84271fe8fbc513
     <el-dialog :title="dialogName" :visible.sync="dialogFormVisible" :close-on-click-modal="closeOnClickModal" width="45%" v-if="dialogFormVisible">
       <hm-complex-form :schema="HmComplexForm.formSchema"
                        :columns="HmComplexForm.showUserColumns"
