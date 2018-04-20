@@ -28,8 +28,8 @@
         </div>
       </div>
       <div v-if="show" class="incident">
-        <!--<p>{{currentDate}}</p>-->
-        <!--<span>{{event}}</span>-->
+        <p>{{currentDate}}</p>
+        <span>{{event}}</span>
         <span class="close" @click="closeEvent">X</span>
       </div>
     </el-dialog>
@@ -246,10 +246,13 @@
         componentW: '', // 组件宽度
         showTimeData: '', // 展示时间,时间戳格式
         dateItems: '', // 当前月份所有日期的数据
-        dialogTableVisible: false
+        dialogTableVisible: false,
+        show: false,
+        currentDate: '',
+        event: ''
       }
     },
-    props: ['width', 'schedules', 'initTime', 'showActive', 'show'],
+    props: ['width', 'schedules', 'initTime', 'showActive'],
     computed: {
       showTimeStr() {
         var result = ''
@@ -365,6 +368,7 @@
         this.dateItems = arr
       },
       dateChange(dateItem) {
+        this.show = true
         // console.log(dateItem)
         var dateObj = new Date(this.showTimeData)
         var year = dateObj.getFullYear()
@@ -378,6 +382,12 @@
         }
         if (!dateItem.schedule) { // 点击没有行程的，不作反应
           console.log(result)
+          if (result.schedule) {
+            const currentTime = this.timestampToTime(result.schedule.date)
+            console.log(currentTime)
+            this.currentDate = currentTime
+            this.event = result.schedule.title
+          }
           // this.$emit('dateChange', result)
           return
         } else {
@@ -409,6 +419,12 @@
             }
             // 向上发送本次点击的行程数据
             console.log(result)
+            if (result.schedule) {
+              const currentTime = this.timestampToTime(result.schedule.date)
+              console.log(currentTime)
+              this.currentDate = currentTime
+              this.event = result.schedule.title
+            }
             // this.$emit('dateChange', result)
           } else { // 已激活行程提示的，不作反应
             return
@@ -430,6 +446,13 @@
       },
       closeEvent() {
         this.show = false
+      },
+      timestampToTime(timestamp) {
+        var date = new Date(timestamp) // 时间戳为10位需*1000，时间戳为13位的话不需乘1000
+        const Y = date.getFullYear() + '年'
+        const M = (date.getMonth() + 1 < 10 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1) + '月'
+        const D = date.getDate() + '日'
+        return Y + M + D
       }
     },
     mounted() {
