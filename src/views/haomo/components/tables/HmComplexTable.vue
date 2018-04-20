@@ -1,4 +1,4 @@
-<template>
+<template xmlns="http://www.w3.org/1999/html">
   <div class="app-container calendar-list-container">
     <!-- 过滤 -->
     <div class="filter-container">
@@ -51,7 +51,7 @@
         <!--自定义-->
         <span v-if="definedOperate.length" v-for="operate in definedOperate">
           <!--自定义按钮-->
-          <el-button v-if="operate.type == 'button'" class="filter-item" type="primary" v-waves :icon="operate.icon" @click="operate.func">{{operate.label}}</el-button>
+          <el-button v-if="operate.type == 'button'" :style="operate.style" class="filter-item" type="primary" v-waves :icon="operate.icon" @click="operate.func">{{operate.label}}</el-button>
           <!--自定义下拉选择-->
           <el-form-item v-if="operate.type == 'select'" :label="operate.label">
             <el-select v-model="operate.value" :placeholder="operate.placeholder" clearable>
@@ -81,19 +81,19 @@
 
         <!--预定义按钮-->
         <el-button-group v-if="buttonGroup">
-          <el-button class="filter-item" type="primary" v-waves icon="el-icon-search" v-if="isShowSearch" @click="handleFilter">搜索</el-button>
-          <el-button class="filter-item" type="primary" :loading="downloadLoading" v-waves icon="el-icon-download" v-if="isShowExport" @click="handleDownload">导出</el-button>
-          <el-button class="filter-item" type="primary" v-waves icon="el-icon-plus" v-if="isShowNewButton" @click="openDialog('newData')">新建</el-button>
-          <el-button class="filter-item" type="primary" v-waves icon="el-icon-refresh" v-if="isShowRefresh" @click="refreshList">刷新</el-button>
-          <el-button class="filter-item" type="primary" v-waves icon="el-icon-close" v-if="multipleSelection.length" @click="BatchRemove">批量删除</el-button>
+          <el-button class="filter-item" :style="titleButtonStyle" type="primary" v-waves icon="el-icon-search" v-if="isShowSearch" @click="handleFilter">搜索</el-button>
+          <el-button class="filter-item" :style="titleButtonStyle" type="primary" :loading="downloadLoading" v-waves icon="el-icon-download" v-if="isShowExport" @click="handleDownload">导出</el-button>
+          <el-button class="filter-item" :style="titleButtonStyle" type="primary" v-waves icon="el-icon-plus" v-if="isShowNewButton" @click="openDialog('newData')">新建</el-button>
+          <el-button class="filter-item" :style="titleButtonStyle" type="primary" v-waves icon="el-icon-refresh" v-if="isShowRefresh" @click="refreshList">刷新</el-button>
+          <el-button class="filter-item" :style="titleButtonStyle" type="primary" v-waves icon="el-icon-close" v-if="multipleSelection.length" @click="BatchRemove">批量删除</el-button>
         </el-button-group>
 
         <span v-if="!buttonGroup">
-          <el-button class="filter-item" type="primary" v-waves icon="el-icon-search" v-if="isShowSearch" @click="handleFilter">搜索</el-button>
-          <el-button class="filter-item" type="primary" :loading="downloadLoading" v-waves icon="el-icon-download" v-if="isShowExport" @click="handleDownload">导出</el-button>
-          <el-button class="filter-item" type="primary" v-waves icon="el-icon-plus" v-if="isShowNewButton" @click="openDialog('newData')">新建</el-button>
-          <el-button class="filter-item" type="primary" v-waves icon="el-icon-refresh" v-if="isShowRefresh" @click="refreshList">刷新</el-button>
-          <el-button class="filter-item" type="primary" v-waves icon="el-icon-close" v-if="multipleSelection.length" @click="BatchRemove">批量删除</el-button>
+          <el-button class="filter-item" :style="titleButtonStyle" type="primary" v-waves icon="el-icon-search" v-if="isShowSearch" @click="handleFilter">搜索</el-button>
+          <el-button class="filter-item" :style="titleButtonStyle" type="primary" :loading="downloadLoading" v-waves icon="el-icon-download" v-if="isShowExport" @click="handleDownload">导出</el-button>
+          <el-button class="filter-item" :style="titleButtonStyle" type="primary" v-waves icon="el-icon-plus" v-if="isShowNewButton" @click="openDialog('newData')">新建</el-button>
+          <el-button class="filter-item" :style="titleButtonStyle" type="primary" v-waves icon="el-icon-refresh" v-if="isShowRefresh" @click="refreshList">刷新</el-button>
+          <el-button class="filter-item" :style="titleButtonStyle" type="primary" v-waves icon="el-icon-close" v-if="multipleSelection.length" @click="BatchRemove">批量删除</el-button>
         </span>
         <hm-full-calendar style="display: inline;margin-left: 10px;" :schema="HmFullCalendar.calendarSchema" :demoEvents="HmFullCalendar.demoEvents" v-if="HmFullCalendar.calendarSchema"></hm-full-calendar>
 
@@ -114,12 +114,14 @@
           <span v-if='column.render' v-html="column.render(scope)"></span>
         </template>
       </el-table-column>
-      <el-table-column fixed="right" label="操作" :width="operationWidth" v-if="isShowEditDataButton || isShowDeleteButton || definedOperation.length">
+      <el-table-column fixed="right" label="操作" :width="operationWidth" v-if="isShowEditDataButton || isShowDeleteButton || definedOperation.length || isShowDetail">
         <template slot-scope="scope">
           <el-button @click="openDialog('editData',scope.row)" v-if="isShowEditDataButton" type="text" size="small">编辑</el-button>
           <el-button @click="deleteData(scope.row)" type="text" v-if="isShowDeleteButton" size="small">删除</el-button>
           <el-button @click="openDialog('detail',scope.row)" type="text" v-if="isShowDetail" size="small">详情</el-button>
-          <el-button @click="operation.func(scope.row)" type="text" v-if="definedOperation.length" size="small" v-for="operation in definedOperation">{{operation.label}}</el-button>
+          <el-button @click="operation.func(scope.row)" type="text" v-if="definedOperation.length" size="small"
+                     v-for="operation in definedOperation">{{statusFunc(scope.row, operation)}}
+          </el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -135,8 +137,8 @@
 
     <!-- 弹窗 -->
     <!-- @TODO 补充详情弹窗 -->
-
-    <el-dialog :title="dialogName" :visible.sync="dialogFormVisible" :close-on-click-modal="closeOnClickModal" width="dialogWidth" v-if="dialogFormVisible">
+    
+    <el-dialog :title="dialogName" :visible.sync="dialogFormVisible" :close-on-click-modal="closeOnClickModal" width="45%" v-if="dialogFormVisible">
       <hm-complex-form :schema="HmComplexForm.formSchema"
                        :columns="HmComplexForm.showUserColumns"
                        :buttons="HmComplexForm.showUserButtons"
@@ -335,7 +337,7 @@
        *      { type: 'select', label:'', placeholder: '', options:[{label: '', code: ''}], value:''}, // 自定义多选框
        *      { type: 'input', label:'', placeholder: '', code:'', value:''}, // 自定义输入框
        *      { type: 'datetime', label:'', placeholder: '', code:'', value:''},  // 自定义时间选择器
-       *      { type: 'button', label:'', icon:'', func: this.dropDown}] // 自定义按钮
+       *      { type: 'button', label:'', icon:'', func: this.dropDown, style:{}] // 自定义按钮
        *    }
        *    definedOperation: [] // 自定义操作
        *    definedEdit(){} // 自定义操作中编辑
@@ -382,6 +384,7 @@
         isShowPagination: true, // 是否显示分页
         isShowSearch: true, // 是否显示搜索按钮
         cellStyle: {}, // 自定义表格单元格的样式
+        titleButtonStyle: {}, // 头部按钮样式
         HmComplexForm: { // 设置form组件
           formSchema: {}, // form弹窗的Schema定义
           showUserColumns: [], // form弹窗的Columns定义
@@ -707,6 +710,13 @@
 
         self.dialogFormVisible = true
       },
+      statusFunc(row, operation) {
+        if (operation.statusFunc) {
+          return operation.statusFunc(row)
+        } else {
+          return operation.label
+        }
+      },
       // 表单的提交
       formConfirm() {
         this.dialogFormVisible = false
@@ -840,6 +850,9 @@
         }
         if (self.options.HmFullCalendar) { // 当内容过长被隐藏时显示 tooltip
           self.HmFullCalendar = self.options.HmFullCalendar
+        }
+        if (self.options.titleButtonStyle) { // 自定义表格顶部按钮样式
+          self.titleButtonStyle = self.options.titleButtonStyle
         }
       },
       toggleSelection(value) {
