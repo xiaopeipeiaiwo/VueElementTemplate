@@ -1,30 +1,40 @@
 <template>
-  <div class="datebook-root" :style='componentW?"width:"+componentW+";":""'>
-    <div class='top-panel'>
-      <ul>
-        <li class='btn left-btn' @click='monthChange(-1)'></li>
-        <li class='show-wrap'>{{showTimeStr}}</li>
-        <li class='btn right-btn' @click='monthChange(1)'></li>
-      </ul>
-    </div>
-    <div class='item-wrap'>
-      <div class="week-day">
-        <span>日</span>
-        <span>一</span>
-        <span>二</span>
-        <span>三</span>
-        <span>四</span>
-        <span>五</span>
-        <span>六</span>
+  <div class="calendarlist">
+    <i class="el-icon-date" @click="dialogTableVisible = true"></i>
+    <el-dialog :visible.sync="dialogTableVisible">
+      <div class="datebook-root" :style='componentW?"width:"+componentW+";":""'>
+        <div class='top-panel'>
+          <ul>
+            <li class='btn left-btn' @click='monthChange(-1)'></li>
+            <li class='show-wrap'>{{showTimeStr}}</li>
+            <li class='btn right-btn' @click='monthChange(1)'></li>
+          </ul>
+        </div>
+        <div class='item-wrap'>
+          <div class="week-day">
+            <span>日</span>
+            <span>一</span>
+            <span>二</span>
+            <span>三</span>
+            <span>四</span>
+            <span>五</span>
+            <span>六</span>
+          </div>
+          <ul class="date-item-wrap">
+            <li v-for='(day,index) in dateItems' :class="'date-item '+day.classStr" :key='"day_"+index' @click='dateChange(day)'>
+              <span class='item-content'>{{day.content}}</span>
+            </li>
+          </ul>
+        </div>
       </div>
-      <ul class="date-item-wrap">
-        <li v-for='(day,index) in dateItems' :class="'date-item '+day.classStr" :key='"day_"+index' @click='dateChange(day)'>
-          <span class='item-content'>{{day.content}}</span>
-        </li>
-      
-      </ul>
-    </div>
+      <div v-if="show" class="incident">
+        <!--<p>{{currentDate}}</p>-->
+        <!--<span>{{event}}</span>-->
+        <span class="close" @click="closeEvent">X</span>
+      </div>
+    </el-dialog>
   </div>
+  
 </template>
 <style>
   ul li{
@@ -166,6 +176,47 @@
   .datebook-root .date-item.schedule.active:after{
     background: #2db7f5 ;
   }
+  .incident{
+    top: -350px;
+    left:270px;
+    display:inline-block;
+    position:relative;
+    background-color:#202020;
+    width:180px;
+    padding:20px;
+    color:#CCC;
+    text-align:center;
+    font-size:14px;
+    font-family:微软雅黑;
+    border-radius:10px;
+    margin:50px;
+    box-shadow:1px 1px 2px #202020;
+    -o-box-shadow:1px 1px 2px #202020;
+    -moz-box-shadow:1px 1px 2px #202020;
+    -webkit-border-shadow:1px 1px 2px #202020;
+  }
+  .close{
+    position: absolute;
+    top:0;
+    cursor: pointer;
+    right:0;
+  }
+  .incident span {
+    font-size: 10px;
+    padding: 10px 20px;
+  }
+  .incident:before{
+    content:'';
+    position:absolute;
+    width:0;
+    height:0;
+    border:15px solid;
+    color:transparent;
+    border-right-color:#202020;
+    left:-30px;
+    top:50%;
+    margin-top:-15px;
+  }
 </style>
 <script>
   /**
@@ -194,10 +245,11 @@
       return {
         componentW: '', // 组件宽度
         showTimeData: '', // 展示时间,时间戳格式
-        dateItems: '' // 当前月份所有日期的数据
+        dateItems: '', // 当前月份所有日期的数据
+        dialogTableVisible: false
       }
     },
-    props: ['width', 'schedules', 'initTime', 'showActive'],
+    props: ['width', 'schedules', 'initTime', 'showActive', 'show'],
     computed: {
       showTimeStr() {
         var result = ''
@@ -325,7 +377,8 @@
           schedule: dateItem.schedule
         }
         if (!dateItem.schedule) { // 点击没有行程的，不作反应
-          this.$emit('dateChange', result)
+          console.log(result)
+          // this.$emit('dateChange', result)
           return
         } else {
           if (!dateItem.active) { // 未激活行程提示的，则激活该行程，其他行程不激活
@@ -355,7 +408,8 @@
               dateItem.active = !dateItem.active
             }
             // 向上发送本次点击的行程数据
-            this.$emit('dateChange', result)
+            console.log(result)
+            // this.$emit('dateChange', result)
           } else { // 已激活行程提示的，不作反应
             return
           }
@@ -373,6 +427,9 @@
         var begin = new Date(year, month, 1, 0, 0, 0)
         var end = new Date(year, month, totalDays, 23, 59, 59)
         this.$emit('monthChange', [begin.getTime(), end.getTime()])
+      },
+      closeEvent() {
+        this.show = false
       }
     },
     mounted() {

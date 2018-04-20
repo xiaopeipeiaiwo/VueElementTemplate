@@ -5,12 +5,13 @@
       :schedules="schedules"
       @dateChange="datechange"
       @monthChange="monthchange"
+      :show="show"
     ></hm-full-calendar>
-    <div v-if="show" class="incident">
-      <p>{{currentDate}}</p>
-      <span>{{event}}</span>
-      <span class="close" @click="closeEvent">X</span>
-    </div>
+    <!--<div v-if="show" class="incident">-->
+      <!--<p>{{currentDate}}</p>-->
+      <!--<span>{{event}}</span>-->
+      <!--<span class="close" @click="closeEvent">X</span>-->
+    <!--</div>-->
   </div>
 </template>
 
@@ -50,9 +51,6 @@
           this.event = data.schedule.title
         }
       },
-      closeEvent() {
-        this.show = false
-      },
       monthchange(data) {
         console.log(data, '--------')
       },
@@ -67,46 +65,6 @@
   }
 </script>
 <style>
-  .calendar-list-container .incident{
-    top: -350px;
-    left:270px;
-    display:inline-block;
-    position:relative;
-    background-color:#202020;
-    width:180px;
-    padding:20px;
-    color:#CCC;
-    text-align:center;
-    font-size:14px;
-    font-family:微软雅黑;
-    border-radius:10px;
-    margin:50px;
-    box-shadow:1px 1px 2px #202020;
-    -o-box-shadow:1px 1px 2px #202020;
-    -moz-box-shadow:1px 1px 2px #202020;
-    -webkit-border-shadow:1px 1px 2px #202020;
-  }
-  .close{
-    position: absolute;
-    top:0;
-    cursor: pointer;
-    right:0;
-  }
-  .incident span {
-    font-size: 10px;
-    padding: 10px 20px;
-  }
-  .incident:before{
-    content:'';
-    position:absolute;
-    width:0;
-    height:0;
-    border:15px solid;
-    color:transparent;
-    border-right-color:#202020;
-    left:-30px;
-    top:50%;
-    margin-top:-15px;
-  }
+
 </style>
 
