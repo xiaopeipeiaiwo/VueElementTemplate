@@ -96,11 +96,11 @@
           <el-button class="filter-item" :style="titleButtonStyle" type="primary" v-waves icon="el-icon-close" v-if="multipleSelection.length" @click="BatchRemove">批量删除</el-button>
         </span>
         <hm-full-calendar style="display: inline;margin-left: 10px;" :schema="HmFullCalendar.calendarSchema" :demoEvents="HmFullCalendar.demoEvents" v-if="HmFullCalendar.calendarSchema"></hm-full-calendar>
-
+      
       </el-form>
     </div>
     <!-- end 过滤 -->
-
+    
     <!-- 表格 -->
     <el-table :data="list" v-loading="listLoading" element-loading-text="给我一点时间" border fit highlight-current-row :cell-style="cellStyle" ref="multipleTable"
               :style="tableStyle" @selection-change="handleSelectionChange" @sort-change="sortChange" @current-change="tableCurrentChange">
@@ -110,7 +110,7 @@
                        :prop="column.codeCamel" :sortable="column.isSort" :width="column.width" :show-overflow-tooltip="showOverflowTooltip">
         <template slot-scope="scope">
           <span v-if="(scope.row[column.codeCamel] !== false && scope.row[column.codeCamel] !== true )&& !column.render">{{ scope.row[column.codeCamel] }}</span>
-          <el-checkbox v-if="(scope.row[column.codeCamel] === false || scope.row[column.codeCamel] === true) && !column.render" v-model="scope.row[column.codeCamel]"></el-checkbox>
+          <el-checkbox v-if="(scope.row[column.codeCamel] === false || scope.row[column.codeCamel] === true) && !column.render" v-model="scope.row[column.codeCamel]" @change="column.checkbox(scope)"></el-checkbox>
           <span v-if='column.render' v-html="column.render(scope)"></span>
         </template>
       </el-table-column>
@@ -151,9 +151,9 @@
                        :relates="HmComplexForm.formRelates" >
       </hm-complex-form>
     </el-dialog>
-
+    
     <!-- end 弹窗 -->
-
+  
   </div>
 </template>
 
@@ -166,7 +166,7 @@
   import { Button, Table, TableColumn, Pagination, Loading } from 'element-ui'
   import HmComplexForm from '../forms/HmComplexForm.vue'
   import HmFullCalendar from '../calendar/HmFullCalendar.vue'
-
+  
   /**
    * 毫末科技的表格组件.
    *
@@ -472,6 +472,7 @@
 
       init() {
         const self = this
+        self.operationWidth = 0
         // 处理要显示的列
         if (!self.columns || !self.columns.length) {
           _.each(self.schema['columns'], function(column) {
@@ -513,7 +514,6 @@
           delete filters[tableName]['isShow']
           self.$set(self.listQuery, 'filters', filters)
         }
-
         if (!request.defaults.baseURL) {
           request.defaults.baseURL = '/org/api'
         }
@@ -567,33 +567,37 @@
         request(self.schema.modelUnderscorePlural, {
           params: params
         }).then(resp => {
+          let respList = []
           if (resp.data.length !== 0 && resp.data[0].superior !== undefined && resp.data[0].includes !== undefined &&
             resp.data[0].refers !== undefined && resp.data[0].relates !== undefined) {
-            self.list = []
+            respList = []
             _.each(resp.data, function(item, index) {
-              self.list.push(item.superior)
+              respList.push(item.superior)
             })
           } else {
-            self.list = resp.data
+            respList = _.cloneDeep(resp.data)
           }
-
+          self.total = parseInt(resp.headers.total)
           // 数据处理
           if (self.options && self.options.dataProcessing) {
             console.log('NO-[object Promise]')
-            self.list = self.options.dataProcessing(resp.data, params, self.definedOperate)
+            respList = self.options.dataProcessing(resp.data, params, self.definedOperate)
           }
           if (self.options && self.options.promiseProcessing) {
             self.options.promiseProcessing(resp.data, params, self.definedOperate).then(function(dataList) {
+              if (self.options && self.options.changeValue) {
+                respList = self.changeValue(respList)
+              }
               self.list = dataList
+              self.listLoading = false
             })
+            return false
           }
-
           // 数据库字段转化显示
           if (self.options && self.options.changeValue) {
-            self.list = self.changeValue(self.list)
+            respList = self.changeValue(respList)
           }
-
-          self.total = parseInt(resp.headers.total)
+          self.list = respList
           self.listLoading = false
         })
       },
