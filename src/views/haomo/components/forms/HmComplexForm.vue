@@ -243,7 +243,6 @@
        * 如果需要取消提交，将cancelSubmit值改为true
        * type=2，执行组件的重置方法,如果用户传入了method，会作为重置方法的回调函数执行
        * type=3，直接执行用户传入的方法
-       * 如果要传入了确定/取消的回调函数，请先传入对应的按钮
        * 示例：[
        *        {text: '确定', type: 1, method: method1, beforeSubmit: this.processData},
        *        {text: '重置', type: 2, method: method2},
@@ -317,13 +316,18 @@
         required: false
       },
       /**
-       * 编辑时，涉及主查外，返回数据后渲染前对数据进行处理,beforeRender函数接受两个参数，第一个参数为主查外的数据，
-       * 第二个参数为表单的绑定对象formModel，该函数需要将主查外的数据绑定到formModel，并返回formModel
+       * 函数对象 键为固定值，值为函数
+       * 属性beforeRender,编辑数据时，涉及主查外，返回数据后渲染前执行，可对数据进行处理,beforeRender函数接受两个参数
+       * 第一个参数为主查外的数据，第二个参数为表单的绑定对象formModel，该函数需要将主查外的数据绑定到formModel，并返回formModel
+       * 属性uploadFun,上传文件的回调函数，第一个参数为文件上传成功的返回值response，第二个参数为表单的绑定对象formModel
        * 格式为: 属性beforeRender为固定键
        *  {
        *    beforeRender: function(resp.data, formModel) {
        *      do something
        *      return formModel
+       *    }，
+       *    uploadFun: function(response, formModel) {
+       *      do something
        *    }
        *  }
        */
@@ -488,12 +492,18 @@
       // }, 3000)
       // console.log(this.buttons)
     },
+    watch: {
+      'formModel.avatar': function(newVal, oldVal) {
+        console.log('watch', newVal)
+        console.log('watch', oldVal)
+      }
+    },
     methods: {
       // 上传成功的回调函数
       uploadSuccess(response, file, fileList) {
         const self = this
-        // console.log('上传成功')
-        // console.log(response)
+        console.log('上传成功')
+        console.log(response)
         // console.log('fileList', fileList)
         console.log('formModel', self.formModel)
         for (var i = 0, len = self.showUserColumns.length; i < len; i++) {
@@ -511,6 +521,9 @@
             }
             break
           }
+        }
+        if (self.funObject && self.funObject.uploadFun) {
+          self.funObject.uploadFun(response, self.formModel)
         }
       },
       // inputChange(val) {
@@ -673,7 +686,7 @@
           // 如果联查了外表
           if (resp.data.length > 0 && resp.data[0].superior !== undefined && !self.isEmptyObject(resp.data[0].superior) && resp.data[0].refers !== undefined && !self.isEmptyObject(resp.data[0].refers)) {
             console.log(resp.data)
-            if (self.funObject && !self.isEmptyObject(self.funObject)) {
+            if (self.funObject && !self.isEmptyObject(self.funObject) && self.funObject.beforeRender) {
               self.formModel = self.funObject.beforeRender(resp.data, self.formModel)
             }
           } else if (resp.data.length > 0) {

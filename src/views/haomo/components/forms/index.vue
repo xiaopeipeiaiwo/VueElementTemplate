@@ -6,9 +6,7 @@
                      :layout="layout"
                      :tips="tips"
                      :funObject="funObject"
-                     :refers="userRefers"
-                     :foreignFormFields="foreignFormFields"
-                     :relates="userRelates">
+    >
       <!-- foreignFormFields 主查外的外表显示字段  和userRefers连用-->
       <!-- :relates="userRelates" 中间表和间接关联表-->
       <!--  :refers="userRefers" 主查外的外表和外键字段 和foreignFormFields；连用-->
@@ -75,7 +73,7 @@
             ], // default: 1
             change: this.inputChange },
           // 8文件 change: this.uploadChange
-          { name: '选择头像', codeCamel: 'avatar', widgetType: 8, url: '/api/upload', param: 'picture', accept: 'image/*' } // url是后台接口地址
+          { name: '选择头像', codeCamel: 'avatar', widgetType: 8, url: '/api/upload', param: 'picture' } // url是后台接口地址
         ],
         // CcSubject示例
         showUserColumns2: [
@@ -120,7 +118,8 @@
           { text: '取消', type: 3, method: this.method3 }
         ],
         funObject: {
-          beforeRender: this.beforeRender
+          beforeRender: this.beforeRender,
+          uploadFun: this.uploadFun
         },
         // showUserButtons: []
         // 布局方式
@@ -184,7 +183,7 @@
         // formModel.email = val.length
       },
       processData(object, isCancel) {
-        isCancel.cancelSubmit = false // 如果要取消提交，设为true
+        // isCancel.cancelSubmit = false // 如果要取消提交，设为true
         console.log(125, object)
         return object // 将数据返回
       },
@@ -211,6 +210,12 @@
         // console.log(111, data)
         // console.log(112, formModel)
         return formModel
+      },
+      uploadFun: function(response, formModel) {
+        console.log(215, response)
+        console.log(216, formModel)
+        // 修改其他表单的值
+        formModel.email = response.visitName
       }
     }
   }
