@@ -253,7 +253,7 @@
         show: false,
         currentDate: '',
         event: '',
-        schedules1: []
+        schedules: []
       }
     },
     props: {
@@ -272,10 +272,6 @@
         required: false
       },
       event: {
-        required: false
-      },
-      schedules: {
-        type: Array,
         required: false
       }
     },
@@ -490,9 +486,9 @@
             const event = {}
             event.date = moment(item.createTime).format('X') * 1000
             event.title = item.username
-            self.schedules1.push(event)
+            self.schedules.push(event)
           })
-          console.log(self.schedules1)
+          console.log(self.schedules)
         })
       }
     },
