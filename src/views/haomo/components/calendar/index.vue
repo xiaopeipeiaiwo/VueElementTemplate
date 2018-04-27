@@ -3,7 +3,7 @@
     <hm-full-calendar
       :width="width"
       :schedules="schedules"
-      :schema="schema['HmUser']"
+      :schema="schema['CcDuty']"
       @dateChange="datechange"
       @monthChange="monthchange"
     ></hm-full-calendar>

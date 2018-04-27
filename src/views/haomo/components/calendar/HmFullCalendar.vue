@@ -240,7 +240,7 @@
 		*dateChange事件：用户点击一个带有日程安排的日期时触发（重复点击同一日期仅触发一次），将返回该日程数据；
 		*monthChange事件，切换月份时触发，刷新日历显示，并传回当前月份的数组，包含该月第一天的0:0:0 和 该月最后一天的23:59:59 的时间戳，例如，7月，返回 [1498838400000,1501516799000] ,对应：Sat Jul 01 2017 00:00:00 GMT+0800 (中国标准时间) 和 Mon Jul 31 2017 23:59:59 GMT+0800 (中国标准时间)
 	 */
-  // import request from '@/utils/request'
+  import request from '@/utils/request'
   export default{
     data() {
       return {
@@ -473,7 +473,9 @@
       },
       getDailyEvent() {
         const self = this
-        console.log(self.schema)
+        request(self.schema.modelUnderscorePlural).then(resp => {
+          console.log(resp.data, '---------')
+        })
       }
     },
     created() {
