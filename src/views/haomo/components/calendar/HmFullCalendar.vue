@@ -271,7 +271,7 @@
       title: {
         required: false
       },
-      event: {
+      date: {
         required: false
       }
     },
@@ -484,8 +484,8 @@
           console.log(resp.data, '=========')
           _.each(resp.data, function(item) {
             const event = {}
-            event.date = moment(item.createTime).format('X') * 1000
-            event.title = item.username
+            event.date = moment(item[this.date]).format('X') * 1000
+            event.title = item[this.title]
             self.schedules.push(event)
           })
           console.log(self.schedules)

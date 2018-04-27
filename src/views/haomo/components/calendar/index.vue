@@ -5,7 +5,7 @@
       :schedules="schedules"
       :schema="schema['HmUser']"
       :title="title"
-      :event="event"
+      :date="date"
       @dateChange="datechange"
       @monthChange="monthchange"
     ></hm-full-calendar>
