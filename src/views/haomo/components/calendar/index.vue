@@ -27,8 +27,8 @@
       return {
         show: false,
         width: '300px',
-        title: '',
-        event: ''
+        title: 'username',
+        date: 'createTime'
       }
     },
     filters: {

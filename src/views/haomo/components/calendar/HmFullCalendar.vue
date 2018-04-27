@@ -484,8 +484,8 @@
           console.log(resp.data, '=========')
           _.each(resp.data, function(item) {
             const event = {}
-            event.date = moment(item[this.date]).format('X') * 1000
-            event.title = item[this.title]
+            event.date = moment(item[self.date]).format('X') * 1000
+            event.title = item[self.title]
             self.schedules.push(event)
           })
           console.log(self.schedules)
