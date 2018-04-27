@@ -473,6 +473,7 @@
       },
       getDailyEvent() {
         const self = this
+        console.log(self.schema)
         request(self.schema.modelUnderscorePlural).then(resp => {
           console.log(resp.data, '---------')
         })
