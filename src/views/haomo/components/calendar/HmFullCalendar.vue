@@ -274,6 +274,9 @@
       title: {
         required: false
       },
+      events: {
+        required: false
+      },
       date: {
         required: false
       }
@@ -443,12 +446,12 @@
               dateItem.active = !dateItem.active
             }
             // 向上发送本次点击的行程数据
-            console.log(result)
+            console.log(result, '--------------------')
             if (result.schedule) {
               const currentTime = this.timestampToTime(result.schedule.date)
               console.log(currentTime)
               this.currentDate = currentTime
-              this.event = result.schedule.title
+              this.event = result.schedule.event
             }
             // this.$emit('dateChange', result)
           } else { // 已激活行程提示的，不作反应
@@ -490,18 +493,20 @@
             item.time = moment(item[self.date]).format('YYYY-MM-DD')
             item.date = moment(item[self.date]).format('X') * 1000
             item.title = item[self.title]
+            item.allEvents = item[self.events]
             if (saveTime === item.time) {
-              self.schedules[self.schedules.length - 1].event.push(item)
+              self.schedules[self.schedules.length - 1].allEvents.push(item.allEvents)
             } else {
               saveTime = item.time
               self.schedules.push({
                 date: item.date,
                 title: item.title,
-                event: [item]
+                allEvents: [item.allEvents]
               })
             }
           })
         })
+        console.log(self.schedules, '+++++最终+++++++++')
       }
     },
     created() {
