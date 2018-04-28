@@ -228,6 +228,9 @@
 			* 		date:12212220000,//日期时间戳
 			* 		title:'xxxxxx',//行程标题
 			* 		//更多其他字段，随意，事件发生时将全部回传。
+			* 	  event:[{
+			*
+			* 	  }]
 			* 	},
 			* 	{
 			* 		date:12242220000,//日期时间戳
@@ -391,7 +394,7 @@
       },
       dateChange(dateItem) {
         this.show = true
-        // console.log(dateItem)
+        console.log(dateItem, '-=-=-=-=-=-=-=-=-')
         var dateObj = new Date(this.showTimeData)
         var year = dateObj.getFullYear()
         var month = dateObj.getMonth()
@@ -478,18 +481,26 @@
       },
       getDailyEvent() {
         const self = this
+        var saveTime = ''
         request(self.schema.modelUnderscorePlural, {
-          params: {}
+          params: { 'sortItem': 'create_time', 'pageSize': 10000 }
         }).then(resp => {
           console.log(resp.data, '=========')
           _.each(resp.data, function(item) {
-            const event = {}
-            event.date = moment(item[self.date]).format('X') * 1000
-            event.title = item[self.title]
-            // event.title2 = item.loginid
-            self.schedules.push(event)
+            item.time = moment(item[self.date]).format('YYYY-MM-DD')
+            item.date = moment(item[self.date]).format('X') * 1000
+            item.title = item[self.title]
+            if (saveTime === item.time) {
+              self.schedules[self.schedules.length - 1].event.push(item)
+            } else {
+              saveTime = item.time
+              self.schedules.push({
+                date: item.date,
+                title: item.title,
+                event: [item]
+              })
+            }
           })
-          console.log(self.schedules)
         })
       }
     },
