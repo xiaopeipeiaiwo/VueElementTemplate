@@ -28,7 +28,7 @@
         show: false,
         width: '300px',
         // title为需要传入的事件名所对应的的字段名，date为时间所对应的字段，events为事件所对应的字段，都不是必传
-        title: '',
+        title: 'loginid',
         date: 'createTime',
         events: 'email'
       }
