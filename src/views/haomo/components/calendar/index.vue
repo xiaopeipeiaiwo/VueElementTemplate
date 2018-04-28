@@ -2,7 +2,6 @@
   <div class="app-container calendar-list-container">
     <hm-full-calendar
       :width="width"
-      :schedules="schedules"
       :schema="schema['HmUser']"
       :title="title"
       :date="date"

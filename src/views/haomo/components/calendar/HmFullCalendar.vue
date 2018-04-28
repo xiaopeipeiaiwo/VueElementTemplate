@@ -403,7 +403,7 @@
           schedule: dateItem.schedule
         }
         if (!dateItem.schedule) { // 点击没有行程的，不作反应
-          console.log(result)
+          // console.log(result,'-=-=-=-=')
           if (result.schedule) {
             const currentTime = this.timestampToTime(result.schedule.date)
             // console.log(currentTime)
