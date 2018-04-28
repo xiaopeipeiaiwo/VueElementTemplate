@@ -406,7 +406,7 @@
           console.log(result)
           if (result.schedule) {
             const currentTime = this.timestampToTime(result.schedule.date)
-            console.log(currentTime)
+            // console.log(currentTime)
             this.currentDate = currentTime
             this.event = result.schedule.title
           }
@@ -486,6 +486,7 @@
             const event = {}
             event.date = moment(item[self.date]).format('X') * 1000
             event.title = item[self.title]
+            // event.title2 = item.loginid
             self.schedules.push(event)
           })
           console.log(self.schedules)

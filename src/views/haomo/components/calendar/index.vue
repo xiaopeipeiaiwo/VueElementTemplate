@@ -27,6 +27,7 @@
       return {
         show: false,
         width: '300px',
+        // title为需要传入的事件所对应的的字段名，date为时间所对应的字段
         title: 'username',
         date: 'createTime'
       }
