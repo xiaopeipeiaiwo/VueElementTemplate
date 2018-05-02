@@ -228,6 +228,9 @@
 			* 		date:12212220000,//日期时间戳
 			* 		title:'xxxxxx',//行程标题
 			* 		//更多其他字段，随意，事件发生时将全部回传。
+			* 	  event:[{
+			*
+			* 	  }]
 			* 	},
 			* 	{
 			* 		date:12242220000,//日期时间戳
@@ -240,7 +243,9 @@
 		*dateChange事件：用户点击一个带有日程安排的日期时触发（重复点击同一日期仅触发一次），将返回该日程数据；
 		*monthChange事件，切换月份时触发，刷新日历显示，并传回当前月份的数组，包含该月第一天的0:0:0 和 该月最后一天的23:59:59 的时间戳，例如，7月，返回 [1498838400000,1501516799000] ,对应：Sat Jul 01 2017 00:00:00 GMT+0800 (中国标准时间) 和 Mon Jul 31 2017 23:59:59 GMT+0800 (中国标准时间)
 	 */
-  // import request from '@/utils/request'
+  import request from '@/utils/request'
+  import _ from 'lodash'
+  import moment from 'moment'
   export default{
     data() {
       return {
@@ -250,7 +255,8 @@
         dialogTableVisible: false,
         show: false,
         currentDate: '',
-        event: ''
+        event: '',
+        schedules: []
       }
     },
     props: {
@@ -265,8 +271,13 @@
       initTime: {
         required: false
       },
-      schedules: {
-        type: Array,
+      title: {
+        required: false
+      },
+      events: {
+        required: false
+      },
+      date: {
         required: false
       }
     },
@@ -386,7 +397,7 @@
       },
       dateChange(dateItem) {
         this.show = true
-        // console.log(dateItem)
+        console.log(dateItem, '-=-=-=-=-=-=-=-=-')
         var dateObj = new Date(this.showTimeData)
         var year = dateObj.getFullYear()
         var month = dateObj.getMonth()
@@ -398,10 +409,10 @@
           schedule: dateItem.schedule
         }
         if (!dateItem.schedule) { // 点击没有行程的，不作反应
-          console.log(result)
+          // console.log(result,'-=-=-=-=')
           if (result.schedule) {
             const currentTime = this.timestampToTime(result.schedule.date)
-            console.log(currentTime)
+            // console.log(currentTime)
             this.currentDate = currentTime
             this.event = result.schedule.title
           }
@@ -435,12 +446,12 @@
               dateItem.active = !dateItem.active
             }
             // 向上发送本次点击的行程数据
-            console.log(result)
+            console.log(result, '--------------------')
             if (result.schedule) {
               const currentTime = this.timestampToTime(result.schedule.date)
               console.log(currentTime)
               this.currentDate = currentTime
-              this.event = result.schedule.title
+              this.event = result.schedule.event
             }
             // this.$emit('dateChange', result)
           } else { // 已激活行程提示的，不作反应
@@ -473,7 +484,29 @@
       },
       getDailyEvent() {
         const self = this
-        console.log(self.schema)
+        var saveTime = ''
+        request(self.schema.modelUnderscorePlural, {
+          params: { 'sortItem': 'create_time', 'pageSize': 10000 }
+        }).then(resp => {
+          console.log(resp.data, '=========')
+          _.each(resp.data, function(item) {
+            item.time = moment(item[self.date]).format('YYYY-MM-DD')
+            item.date = moment(item[self.date]).format('X') * 1000
+            item.title = item[self.title]
+            item.allEvents = item[self.events]
+            if (saveTime === item.time) {
+              self.schedules[self.schedules.length - 1].allEvents.push(item.allEvents)
+            } else {
+              saveTime = item.time
+              self.schedules.push({
+                date: item.date,
+                title: item.title,
+                allEvents: [item.allEvents]
+              })
+            }
+          })
+        })
+        console.log(self.schedules, '+++++最终+++++++++')
       }
     },
     created() {

@@ -2,8 +2,10 @@
   <div class="app-container calendar-list-container">
     <hm-full-calendar
       :width="width"
-      :schedules="schedules"
       :schema="schema['HmUser']"
+      :title="title"
+      :events="events"
+      :date="date"
       @dateChange="datechange"
       @monthChange="monthchange"
     ></hm-full-calendar>
@@ -25,7 +27,10 @@
       return {
         show: false,
         width: '300px',
-        schedules: [{ date: 1524043625000, title: '个梵蒂是的舞蹈服可接受的看似简单计算的话束带结发会计师对海口市记得回复是框架的看就好山东矿机会计师发送的甲方是看得见看见的说法开始冈地方' }, { date: 1523955299000, title: '个梵蒂冈地方' }]
+        // title为需要传入的事件名所对应的的字段名，date为时间所对应的字段，events为事件所对应的字段，都不是必传
+        title: 'loginid',
+        date: 'createTime',
+        events: 'email'
       }
     },
     filters: {
