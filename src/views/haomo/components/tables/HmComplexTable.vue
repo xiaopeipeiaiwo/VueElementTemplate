@@ -54,7 +54,7 @@
           <el-button v-if="operate.type == 'button'" :style="operate.style" class="filter-item" type="primary" v-waves :icon="operate.icon" @click="operate.func">{{operate.label}}</el-button>
           <!--自定义下拉选择-->
           <el-form-item v-if="operate.type == 'select'" :label="operate.label">
-            <el-select v-model="operate.value" :placeholder="operate.placeholder" clearable>
+            <el-select v-model="operate.value" :placeholder="operate.placeholder" @change="selectChange(operate.func, operate.value)" clearable>
               <el-option v-for="o in operate.options" :label="o.label" :value="o.code"></el-option>
             </el-select>
           </el-form-item>
@@ -272,7 +272,7 @@
             console.warn(`传入的columns不符合要求，必须是数组`)
             return false
           }
-
+  
           return true
         }
       },
@@ -399,12 +399,12 @@
         },
         showOverflowTooltip: false, // 设置当内容过长被隐藏时显示 tooltip
         HmFullCalendar: {}, //
-
+  
         isShowRefresh: false,
         buttonGroup: false,
         operationWidth: 0, // 操作栏的宽度
         isShowDetail: false, // 是否显示详情按钮
-
+  
         definedOperate: [], // 自定义操作
         definedOperation: []
       }
@@ -416,18 +416,18 @@
         if (!ret) {
           return ret
         }
-
+  
         if (!ret[self.schema['modelUnderscore']]) {
           return ret
         }
-
+  
         _.each(Object.keys(ret[self.schema['modelUnderscore']]), function(column) {
           const operValue = ret[self.schema['modelUnderscore']][column]
           if (Object.keys(operValue)[0] === 'like') {
             ret[self.schema['modelUnderscore']][column]['like'] = '%' + ret[self.schema['modelUnderscore']][column]['like'] + '%'
           }
         })
-
+  
         return ret
       }
     },
@@ -457,7 +457,7 @@
           if (!item) {
             return 0
           }
-
+  
           if (typeof item !== 'string' && typeof item !== 'object') {
             console.error(`传入的columns不符合要求，数组元素必须是字符串或对象`)
           }
@@ -469,7 +469,7 @@
           }
         })
       },
-
+  
       init() {
         const self = this
         self.operationWidth = 0
@@ -498,7 +498,7 @@
             item.isSort = item.isSort === undefined ? false : item.isSort === true ? 'custom' : false
           })
         }
-
+  
         // 处理过滤条件
         if (self.filters) {
           const tableName = self.schema['modelUnderscore']
@@ -523,7 +523,7 @@
         if (self.userDefined) {
           self.setDefinedOperate()
         }
-
+  
         console.log(request.defaults)
         console.log(`request.defaults.baseURL: ${request.defaults.baseURL}`)
       },
@@ -538,6 +538,12 @@
           self.definedOperation = self.userDefined.definedOperation
         }
       },
+      // 自定义下拉选择执行函数
+      selectChange(func, value) {
+        if (typeof (func) === 'function') {
+          return func(value)
+        }
+      },
       // 排序
       sortChange(row) {
         this.listQuery.sortItem = row.prop.replace(/([A-Z])/g, '_$1').toLowerCase()
@@ -547,23 +553,23 @@
       getList() {
         const self = this
         self.listLoading = true
-
+  
         // 处理过滤条件
         let params = JSON.parse(JSON.stringify(self.listQuery))
         params.filters = self.filterParams
         params.filters = this.deleteFilter(params.filters)
-
+  
         if (self.includes) {
           params.includes = self.includes
         }
         if (self.refers) {
           params.refers = self.refers
         }
-
+  
         if (self.userDefined && self.userDefined.definedParams) {
           params = self.userDefined.definedParams(params, self.definedOperate)
         }
-
+  
         request(self.schema.modelUnderscorePlural, {
           params: params
         }).then(resp => {
@@ -695,7 +701,7 @@
         }
         if (type === 'detail') {
           self.dialogName = '详情'
-
+  
           if (self.options.showDetail.showUserButtons) {
             self.HmComplexForm.showUserButtons = self.options.showDetail.showUserButtons
           }
@@ -710,7 +716,7 @@
           self.options.showDetail.formRelates ? self.HmComplexForm.formRelates = self.options.showDetail.formRelates : ''
           self.HmComplexForm.tableId = data.id
         }
-
+  
         self.dialogFormVisible = true
       },
       statusFunc(row, operation) {
@@ -758,7 +764,7 @@
           filters: {}
         }
         this.init()
-
+  
         this.getList()
       },
       // 批量删除
@@ -906,7 +912,7 @@
           }
         }))
       },
-
+  
       getFilterColumn(filter) {
         const keys = Object.keys(filter)
         let column = null
