@@ -29,7 +29,7 @@
       </div>
       <div v-if="show" class="incident">
         <p>{{currentDate}}</p>
-        <span>{{event}}</span>
+        <p v-for="event in allEvents">{{event}}</p>
         <span class="close" @click="closeEvent">X</span>
       </div>
     </el-dialog>
@@ -183,6 +183,7 @@
     position:relative;
     background-color:#202020;
     width:180px;
+    height:;
     padding:20px;
     color:#CCC;
     text-align:center;
@@ -254,8 +255,9 @@
         dateItems: '', // 当前月份所有日期的数据
         dialogTableVisible: false,
         show: false,
+        eventTitle: '',
         currentDate: '',
-        event: '',
+        allEvents: '',
         schedules: []
       }
     },
@@ -449,9 +451,9 @@
             console.log(result, '--------------------')
             if (result.schedule) {
               const currentTime = this.timestampToTime(result.schedule.date)
-              console.log(currentTime)
               this.currentDate = currentTime
-              this.event = result.schedule.event
+              this.eventTitle = result.schedule.title
+              this.allEvents = result.schedule.allEvents
             }
             // this.$emit('dateChange', result)
           } else { // 已激活行程提示的，不作反应
