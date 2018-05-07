@@ -423,13 +423,14 @@
   
         _.map(ret, function(item) {
           _.forEach(item, function(value, key) {
-            if (value.lessThanOrEqualTo !== undefined && value.greaterThanOrEqualTo !== undefined && value.lessThanOrEqualTo === '' && value.greaterThanOrEqualTo === '') {
+            if (value.lessThanOrEqualTo !== undefined && value.greaterThanOrEqualTo !== undefined &&
+              (value.greaterThanOrEqualTo === '' || value.greaterThanOrEqualTo === null) && (value.lessThanOrEqualTo === '' || value.lessThanOrEqualTo === null)) {
               delete item[key]
             }
-            if (value.greaterThanOrEqualTo !== undefined && value.greaterThanOrEqualTo === '' && value.lessThanOrEqualTo) {
+            if (value.greaterThanOrEqualTo !== undefined && (value.greaterThanOrEqualTo === '' || value.greaterThanOrEqualTo === null) && value.lessThanOrEqualTo) {
               delete item[key].greaterThanOrEqualTo
             }
-            if (value.lessThanOrEqualTo !== undefined && value.lessThanOrEqualTo === '' && value.greaterThanOrEqualTo) {
+            if (value.lessThanOrEqualTo !== undefined && (value.lessThanOrEqualTo === '' || value.lessThanOrEqualTo === null) && value.greaterThanOrEqualTo) {
               delete item[key].lessThanOrEqualTo
             }
           })
