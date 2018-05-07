@@ -421,6 +421,20 @@
           return ret
         }
   
+        _.map(ret, function(item) {
+          _.forEach(item, function(value, key) {
+            if (value.lessThanOrEqualTo !== undefined && value.greaterThanOrEqualTo !== undefined && value.lessThanOrEqualTo === '' && value.greaterThanOrEqualTo === '') {
+              delete item[key]
+            }
+            if (value.greaterThanOrEqualTo !== undefined && value.greaterThanOrEqualTo === '' && value.lessThanOrEqualTo) {
+              delete item[key].greaterThanOrEqualTo
+            }
+            if (value.lessThanOrEqualTo !== undefined && value.lessThanOrEqualTo === '' && value.greaterThanOrEqualTo) {
+              delete item[key].lessThanOrEqualTo
+            }
+          })
+        })
+  
         _.each(Object.keys(ret[self.schema['modelUnderscore']]), function(column) {
           const operValue = ret[self.schema['modelUnderscore']][column]
           if (Object.keys(operValue)[0] === 'like') {
@@ -534,7 +548,9 @@
           self.definedOperate = self.userDefined.definedOperate
         }
         if (self.userDefined.definedOperation) {
-          self.operationWidth += 50 * self.userDefined.definedOperation.length
+          _.each(self.userDefined.definedOperation, function(item) {
+            self.operationWidth += 22 * item.label.length
+          })
           self.definedOperation = self.userDefined.definedOperation
         }
       },
@@ -797,7 +813,7 @@
           }).then(resp => {
             if (resp.data.message === 'delete success') {
               self.$message({
-                message: resp.data.message,
+                message: '删除成功',
                 type: 'success'
               })
               self.getList()
