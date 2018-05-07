@@ -616,7 +616,7 @@
         const self = this
         console.log('上传成功')
         console.log(response)
-        console.log(self.currentFile)
+        // console.log(self.currentFile)
         // console.log(file)
         // console.log('fileList', fileList)
         console.log('formModel', self.formModel)
