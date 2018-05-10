@@ -13,7 +13,7 @@
                  element-loading-text="加载中"
                  :label-width="formStyle && formStyle.formOptions && formStyle.formOptions.labelWidth || '163px'"
                  :model="formModel"
-                 :rules="rules"
+                 :rules="myRules"
                  :style=" formStyle && formStyle.formOptions && formStyle.formOptions.style || {width:'100%'}">
           <el-form-item v-for="column in showUserColumns"
                         v-show="!column.hide"
@@ -85,7 +85,7 @@
                           :ref="column.ref || ''" :disabled="column.disabled"
                           v-model="formModel[column.codeCamel]"
                           :style="formStyle && formStyle.quillEditor && formStyle.quillEditor.style || {width:'70%'}"
-                          :options="editorOption"
+                          :options="column.options || editorOption"
                           @blur="onEditorBlur($event)"
                           @focus="onEditorFocus($event)"
                           @change="column.change && column.change($event)"
@@ -94,6 +94,7 @@
             <!-- 6 单选框 -->
             <el-radio-group v-else-if="column.widgetType === 7"
                             :disabled="column.disabled"
+                            :readonly="column.readonly"
                             @change="column.change && column.change($event, formModel)"
                             v-model="formModel[column.codeCamel]">
               <el-radio v-for="option in column.options"
@@ -110,21 +111,21 @@
                        :file-list="fileList"
                        ref="upload"
                        :on-success="uploadSuccess">
-              <el-button slot="trigger" size="small" type="primary"
+              <el-button slot="trigger" size="small" type="primary" @click="currentFile = column.codeCamel"
                          :disabled="column.disabled">选取文件</el-button>
             </el-upload>
             <!-- 8树形图 -->
             <!--:default-expanded-keys="[2, 3]"-->
             <!--:default-checked-keys="[5]"-->
-            <div @click="currentTree = column.codeCamel" v-else-if="column.widgetType === 9"
-            >
+            <div @mouseenter="currentTree = column.codeCamel" v-else-if="column.widgetType === 9">
               <el-tree :data="column.options"
-                       @click="currentTree = column.codeCamel"
                        ref="tree"
                        show-checkbox
                        node-key="id"
                        @node-click="handleNodeChange"
                        @check-change="handleCheckChange"
+                       :default-expanded-keys='column.expanded'
+                       :default-checked-keys='column.checked'
                        :props="defaultProps">
               </el-tree>
             </div>
@@ -433,6 +434,25 @@
       formStyle: {
         type: Object,
         required: false
+      },
+      /**
+       * 自定义验证规则的第二种方式（第一种是在column数组的对象中传rule）
+       * 格式为:
+       *  userRules: {
+       *     pass: [
+       *       { validator: validatePass, trigger: 'blur' }
+       *     ],
+       *     checkPass: [
+       *       { validator: validatePass2, trigger: 'blur' }
+       *     ],
+       *     age: [
+       *       { validator: checkAge, trigger: 'blur' }
+       *     ]
+       *   }
+       */
+      rules: {
+        type: Object,
+        required: false
       }
     },
     data() {
@@ -484,7 +504,7 @@
         form: null,
         formModel: {}, // 双向绑定的数据变量
         showUserColumns: [], // 要显示的字段
-        rules: {
+        myRules: {
           // username: [
           //   { validator: validateUsername, trigger: 'change' }
           // { required: true, message: '请输入用户名', trigger: 'blur' },
@@ -617,8 +637,8 @@
         console.log('上传成功')
         console.log(response)
         // console.log(self.currentFile)
-        // console.log(file)
-        // console.log('fileList', fileList)
+        console.log(file)
+        console.log('fileList', fileList)
         console.log('formModel', self.formModel)
         for (var i = 0, len = self.showUserColumns.length; i < len; i++) {
           // && !self.showUserColumns[i].edited
@@ -630,7 +650,11 @@
                 // 张家口
                 // self.formModel[key] = response.visitName + response.fileName
                 // 通用
-                self.formModel[key] = response.visitName + '/' + response.saveName
+                if (response.visitName && response.saveName) {
+                  self.formModel[key] = response.visitName + '' + response.saveName
+                } else if (response.message) {
+                  self.formModel[key] = file.name + '_' + response.message
+                }
                 break
               }
             }
@@ -641,14 +665,17 @@
           self.funObject.uploadFun(response, self.formModel)
         }
       },
+      mouseenter() {
+        console.log(222)
+      },
       // 树形选择器
       handleCheckChange(data, checked, indeterminate) {
         // console.log(data, checked, indeterminate)
         const self = this
-        console.log(1)
+        console.log('handleCheckChange函数')
         console.log(this.$refs.tree[0].getCheckedNodes(true))
         console.log(this.$refs.tree[0].getCheckedKeys(true))
-        console.log(self.currentTree)
+        console.log('currentTree:', self.currentTree)
         for (var i = 0, len = self.showUserColumns.length; i < len; i++) {
           // && !self.showUserColumns[i].edited
           if (self.showUserColumns[i].widgetType === 9) {
@@ -670,6 +697,9 @@
       // 树形选择器
       handleNodeChange(data, node, com) {
         console.log(com)
+      },
+      treeCheck(data1, data2) {
+        console.log(this.currentTree)
       },
       // inputChange(val) {
       //   // console.log(event)
@@ -819,6 +849,8 @@
         const filters = {}
         const params = {}
         filters[self.schema.modelUnderscore] = { 'id': { 'equalTo': self.tableId }}
+        // self.$set(filters, self.schema.modelUnderscore, { 'id': { 'equalTo': self.tableId }})
+        params.filters = filters
         // 主查外
         if (self.refers && !self.isEmptyObject(self.refers)) {
           params.refers = self.refers
@@ -827,8 +859,7 @@
         if (self.includes && !self.isEmptyObject(self.includes)) {
           params.includes = self.includes
         }
-        params.filters = filters
-        // console.log('params', params)
+        console.log('params', params)
         // 获取数据  + '/' + self.tableId
         request(self.schema.modelUnderscorePlural, {
           params: params
@@ -836,8 +867,15 @@
           self.Loading = false
           // console.log(self.formModel)
           // console.log('获取成功', resp.data)
-          // 如果是外查主
-          if (resp.data.length > 0 && resp.data[0].superior !== undefined && !self.isEmptyObject(resp.data[0].superior) && resp.data[0].includes !== undefined && !self.isEmptyObject(resp.data[0].includes)) {
+          // 如果是既有外查主又有主查外
+          if (resp.data.length > 0 && resp.data[0].superior !== undefined && !self.isEmptyObject(resp.data[0].superior) && resp.data[0].refers !== undefined && !self.isEmptyObject(resp.data[0].refers) && resp.data[0].includes !== undefined && !self.isEmptyObject(resp.data[0].includes)) {
+            console.log('主外联查', resp.data)
+            // 渲染之前执行用户的beforeRender方法对数据进行处理
+            if (self.funObject && !self.isEmptyObject(self.funObject)) {
+              self.formModel = self.funObject.beforeRender(resp.data, self.formModel)
+            }
+            // 如果是外查主
+          } else if (resp.data.length > 0 && resp.data[0].superior !== undefined && !self.isEmptyObject(resp.data[0].superior) && resp.data[0].includes !== undefined && !self.isEmptyObject(resp.data[0].includes)) {
             console.log('外查主', resp.data)
             self.foreighId = resp.data[0].includes[_.keys(self.includes)[0]].id
             // 渲染之前执行用户的beforeRender方法对数据进行处理
@@ -853,7 +891,7 @@
             }
             // 如果只是单表
           } else if (resp.data.length > 0) {
-            // console.log('获取成功', resp.data)
+            console.log('单表查询', resp.data)
             var formArray = _.keys(self.formModel) // 提取formModel的属性到数组
             if (resp.data[0].superior && !self.isEmptyObject(resp.data[0].superior)) {
               self.formModel = _.pick(resp.data[0].superior, formArray) // 根据数组中的属性提取出data中对应的数据
@@ -861,11 +899,12 @@
               self.formModel = _.pick(resp.data[0], formArray)
             }
             // 渲染之前执行用户的beforeRender方法对数据进行处理
-            if (self.funObject && !self.isEmptyObject(self.funObject)) {
+            if (self.funObject && typeof (self.funObject.beforeRender) === 'function') {
               self.formModel = self.funObject.beforeRender(resp.data, self.formModel)
             }
             // console.log('获取到数据', self.formModel)
             // 处理返回来的数据
+            console.log('getList处理多选前', self.formModel)
             _.each(self.columns, function(item, index) {
               // 下拉框多选时将字符串转为数组 column.widgetType === 3 && !column.options
               if (item.widgetType === 2 && item.multiple === true) {
@@ -992,15 +1031,26 @@
             // 存在tableId 则修改信息
             if (self.tableId) {
               // 外查主 从formModel中分离本表、外表数据
-              _.each(self.formModel, function(val, idx) {
-                if (idx.slice(-1) === 'C') {
-                  idx = idx.slice(0, idx.length - 1)
-                  self.nativeFormModel[idx] = val
-                } else {
-                  idx = idx.slice(0, idx.length - 1)
-                  self.foreignFormModel[idx] = val
-                }
-              })
+              if (self.includes && !self.isEmptyObject(self.includes)) {
+                _.each(self.formModel, function(val, idx) {
+                  // 后缀带O是非本表 连带查出来的表 并非就是指外表
+                  // if (idx.slice(-1) === 'O') {
+                  //   idx = idx.slice(0, idx.length - 1)
+                  //   self.foreignFormModel[idx] = val
+                  // } else {
+                  //   // 不带后缀是本表
+                  //   idx = idx.slice(0, idx.length - 1)
+                  //   self.nativeFormModel[idx] = val
+                  // }
+                  if (idx.slice(-1) === 'C') {
+                    idx = idx.slice(0, idx.length - 1)
+                    self.nativeFormModel[idx] = val
+                  } else {
+                    idx = idx.slice(0, idx.length - 1)
+                    self.foreignFormModel[idx] = val
+                  }
+                })
+              }
               console.log(879, self.nativeFormModel)
               console.log(880, self.foreignFormModel)
               // 修改本表数据
@@ -1032,7 +1082,7 @@
 
                 // 修改成功执行用户回调
                 if (typeof (callback) === 'function') {
-                  callback(resp.data)
+                  callback(resp.data, self.formModel)
                 }
               }).catch(err => {
                 console.log(err)
@@ -1217,7 +1267,7 @@
                 }
                 // 新建成功执行用户回调
                 if (typeof (callback) === 'function') {
-                  callback(resp.data)
+                  callback(resp.data, self.formModel)
                 }
                 // 清空上传文件和树形菜单的codeComel
                 self.currentFile = ''
@@ -1232,6 +1282,7 @@
                 }
               })
             }
+            self.close()
           } else {
             console.log('提交失败!!')
             self.$message({
@@ -1265,6 +1316,7 @@
         if (typeof (callback) === 'function') {
           callback()
         }
+        this.close()
       },
       // 取消的回调函数
       cancel(callback) {
@@ -1272,6 +1324,10 @@
         if (typeof (callback) === 'function') {
           callback(self.formModel)
         }
+        self.close()
+      },
+      close() {
+        this.$emit('formVisible')
       }
     }
 
@@ -1294,6 +1350,7 @@
     border-color: rgba(153, 153, 153, 0.6);
   }
   .hm-form .el-tree{
+    border-radius: 4px;
     border: 1px solid red;
     height: 150px;
     overflow-y: auto;
