@@ -32,7 +32,7 @@
         userFilters: [
           { placeholder: '过滤手机号', 'mobile': { 'like': '' }, isShow: true },
           { placeholder: '过滤用户名', 'username': { 'equalTo': '' }, isShow: true },
-          { placeholder: ['安全级别大于', '安全级别小于'], 'create_time': { 'greaterThanOrEqualTo': '', 'lessThanOrEqualTo': '' }, isShow: true }
+          { placeholder: ['安全级别大于', '安全级别小于'], 'security_level': { 'greaterThanOrEqualTo': '', 'lessThanOrEqualTo': '' }, isShow: true }
         ],
         userIncludes: {
           'hm_user': {

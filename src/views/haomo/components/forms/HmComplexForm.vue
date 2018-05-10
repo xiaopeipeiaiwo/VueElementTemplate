@@ -13,7 +13,7 @@
                  element-loading-text="加载中"
                  :label-width="formStyle && formStyle.formOptions && formStyle.formOptions.labelWidth || '163px'"
                  :model="formModel"
-                 :rules="rules"
+                 :rules="myRules"
                  :style=" formStyle && formStyle.formOptions && formStyle.formOptions.style || {width:'100%'}">
           <el-form-item v-for="column in showUserColumns"
                         v-show="!column.hide"
@@ -23,7 +23,7 @@
                         :prop="column.codeCamel">
             <!--el-input<el-input v-if="column.codeCamel==='password'" type="password"
                       v-model="formModel[column.codeCamel]"></el-input>-->
-            <!-- 2 日期选择 -->
+            <!-- 1 日期选择 -->
             <!-- -->
             <el-date-picker v-if="column.widgetType === 6 || column.type === 'datetime' || column.type === 'date'"
                             v-model="formModel[column.codeCamel]"
@@ -36,14 +36,16 @@
                             :value-format="column.dateFormate || 'yyyy-MM-dd'"
                             :picker-options="pickerOptions">
             </el-date-picker>
-            <!-- 3 下拉框 -->
+            <!-- 2 下拉框 -->
             <el-select v-else-if="column.widgetType === 2"
                        :ref="column.ref || ''"
                        v-model="formModel[column.codeCamel]"
-                       @change="column.change && column.change($event)"
+                       @change="column.change && column.change($event, formModel)"
                        :style="formStyle && formStyle.select && formStyle.select.style || {width: '70%'}"
                        :multiple="column.multiple"
                        :disabled="column.disabled"
+                       filterable
+                       :allowCreate="column.allowCreate"
                        style="width: 50%"
                        clearable>
               <el-option v-for="(item,key) in column.options"
@@ -52,7 +54,7 @@
                          :value="item.value">
               </el-option>
             </el-select>
-            <!-- 4 文本域 -->
+            <!-- 3 文本域 -->
             <el-input v-else-if="column.widgetType === 4"
                       :ref="column.ref || ''"
                       :readonly="column.readonly"
@@ -60,10 +62,10 @@
                       v-model="formModel[column.codeCamel]"
                       type="textarea" :disabled="column.disabled"
                       :resize="formStyle && formStyle.textarea && formStyle.textarea.resize || 'vertical'"
-                      :autosize="formStyle && formStyle.textarea && formStyle.textarea.autosize || { minRows: 4, maxRows: 6}"
+                      :autosize="formStyle && formStyle.textarea && formStyle.textarea.autosize || { minRows: 4, maxRows: 8}"
                       :rows="formStyle && formStyle.textarea && formStyle.textarea.rows || 4" @change="column.change && column.change($event)">
             </el-input>
-            <!-- 5 复选框 -->
+            <!-- 4 复选框 -->
             <el-checkbox v-else-if="column.widgetType === 3 && !column.options"
                          v-model="formModel[column.codeCamel]"
                          :ref="column.ref || ''"
@@ -78,40 +80,71 @@
               <el-checkbox v-for="option in column.options"
                            :label="option" :key="option">{{option}}</el-checkbox>
             </el-checkbox-group>
-            <!-- 6 富文本 -->
+            <!-- 5 富文本 -->
             <quill-editor v-else-if="column.widgetType === 5"
                           :ref="column.ref || ''" :disabled="column.disabled"
                           v-model="formModel[column.codeCamel]"
                           :style="formStyle && formStyle.quillEditor && formStyle.quillEditor.style || {width:'70%'}"
-                          :options="editorOption"
+                          :options="column.options || editorOption"
                           @blur="onEditorBlur($event)"
                           @focus="onEditorFocus($event)"
                           @change="column.change && column.change($event)"
                           @ready="onEditorReady($event)">
             </quill-editor>
-            <!-- 7 单选框 -->
+            <!-- 6 单选框 -->
             <el-radio-group v-else-if="column.widgetType === 7"
                             :disabled="column.disabled"
-                            @change="column.change && column.change($event)"
+                            :readonly="column.readonly"
+                            @change="column.change && column.change($event, formModel)"
                             v-model="formModel[column.codeCamel]">
               <el-radio v-for="option in column.options"
                         :key="option.label" :label="option.label">{{option.value}}</el-radio>
             </el-radio-group>
-            <!-- 8 文件 -->
+            <!-- 7 文件 :multiple="column.multiple || false"-->
             <el-upload v-else-if="column.widgetType === 8"
                        :accept="column.accept || '*/*'"
                        :name="column.param || 'picture'"
                        :action=" column.url || '/api/upload'"
                        :on-remove="handleRemove"
+                       :limit="column.limit || 3"
                        :on-change="column.change || handleChange"
                        :file-list="fileList"
-                       :multiple="column.multiple"
                        ref="upload"
                        :on-success="uploadSuccess">
-              <el-button slot="trigger" size="small" type="primary"
+              <el-button slot="trigger" size="small" type="primary" @click="currentFile = column.codeCamel"
                          :disabled="column.disabled">选取文件</el-button>
             </el-upload>
-            <!-- 1 普通input  || {width:'65%'}-->
+            <!-- 8树形图 -->
+            <!--:default-expanded-keys="[2, 3]"-->
+            <!--:default-checked-keys="[5]"-->
+            <div @mouseenter="currentTree = column.codeCamel" v-else-if="column.widgetType === 9">
+              <el-tree :data="column.options"
+                       ref="tree"
+                       show-checkbox
+                       node-key="id"
+                       @node-click="handleNodeChange"
+                       @check-change="handleCheckChange"
+                       :default-expanded-keys='column.expanded'
+                       :default-checked-keys='column.checked'
+                       :props="defaultProps">
+              </el-tree>
+            </div>
+            <!-- 9 级联下拉框v-model="formModel[column.codeCamel]"-->
+            <el-cascader v-else-if="column.widgetType === 10"
+                         expand-trigger="hover"
+                         :options="column.options"
+                         v-model="formModel[column.codeCamel]"
+                         :style="formStyle && formStyle.cascader && formStyle.cascader.style || {width: '70%'}"
+                         @change="column.change && column.change($event)">
+            </el-cascader>
+            <!-- 10 普通input  || {width:'65%'}-->
+            <el-input v-else-if="column.widgetType === 1 && column.rule && column.rule.type && column.rule.type === 'number'"
+                      :style="formStyle && formStyle.input && formStyle.input.style || {width:'70%'}"
+                      v-model.number="formModel[column.codeCamel]"
+                      :disabled="column.disabled"
+                      :readonly="column.readonly"
+                      :ref="column.ref || ''"
+                      @change="column.change && column.change($event,formModel)"></el-input>
             <el-input v-else
                       :style="formStyle && formStyle.input && formStyle.input.style || {width:'70%'}"
                       v-model="formModel[column.codeCamel]"
@@ -121,7 +154,7 @@
                       @change="column.change && column.change($event,formModel)"></el-input>
           </el-form-item>
           <!--按钮-->
-          <el-form-item v-if="buttons && buttons.length > 0">
+          <el-form-item v-if="buttons && buttons.length > 0" style="margin-top: 40px">
             <el-col :span="24/buttons.length" v-for="(btn,key) in buttons" :key="key">
               <el-button v-if="btn.type === 1"
                          type="primary"
@@ -180,13 +213,14 @@
        * codeCamel属性，表示要显示的表单字段, 如果其他字段都不需要传，可以只写codeCamel的值，比如['username','departmentId']
        * name属性可选，表示自定义的字段名，如果不传，默认为数据库中的字段名，
        * change属性可选，值为函数类型，表示input的change事件的执行方法，参数即为input输入内容
-       * default属性可选(复选框不支持)，设置默认值，取值规范参考form/index.vue
+       * default属性可选(复选框不支持)，设置默认值，取值规范参考form/videoconferencing.vue
        * hide属性可选，设置该表单字段是否显示,值为boolean
        * ref属性可选，用来获取当前表单dom节点
        * param属性可选，当表单类型为文件类型时，可传入param字段，值为后台规定必传参数，默认值为picture
        * accept属性可选,当表单类型为文件类型时，可传入accept字段，限制限制上传文件类型，取值规范参考w3c
        * widgetType属性可选，表示该字段要显示的表单类型(普通输入框、文本域、富文本、下拉框...)，不传默认为普通input
-       * 取值1-8(1表示普通输入框,2表示下拉框,3表示复选框,4表示文本域,5表示富文本,6表示日期，7表示单选框，8表示文件上传)，
+       * 取值1-10(1表示普通输入框,2表示普通下拉框,3表示复选框,4表示文本域,5表示富文本,6表示日期，7表示单选框，8表示文件上传,
+       * 9表示树状控件，10表示级联下拉框)，
        * 若表单类型为下拉框/复选框/单选框，还需传入options字段，值为数组(数组元素是下拉框/复选框/单选框的选项），
        * 对于复选框，如果只有一个备选项则不必传options,
        * 若表单类型为下拉框，还可传入multiple字段，取值boolean类型，true/false，表示是否多选，默认false
@@ -219,6 +253,36 @@
        { codeCamel: 'password', widgetType: 4 },
        { name: '新建时间', codeCamel: 'createTime', widgetType: 6, dateType: 'datetime', dateFormate: 'yyyy-MM-dd HH:mm:ss' },
        { name: '登陆id', codeCamel: 'loginid', widgetType: 7, options: ['会员', '访客'] },
+       { name: '人员', codeCamel: 'people', widgetType: 9,
+         options:[
+           { value: 'zhinan',label: '指南',
+             children: [
+               {
+                 value: 'shejiyuanze',label: '设计原则',
+                 children: [
+                   {value: 'yizhi',label: '一致'},
+                   {value: 'fankui',label: '反馈'},
+                   {value: 'xiaolv',label: '效率'},
+                   {value: 'kekong',label: '可控'}
+                 ]
+               }
+             ]
+           },
+           { value: 'zhinan',label: '指南',
+             children: [
+               {
+                 value: 'shejiyuanze',label: '设计原则',
+                 children: [
+                   {value: 'yizhi',label: '一致'},
+                   {value: 'fankui',label: '反馈'},
+                   {value: 'xiaolv',label: '效率'},
+                   {value: 'kekong',label: '可控'}
+                 ]
+               }
+             ]
+           }
+         ]
+       },
        { name: '选择头像', codeCamel: 'avatar', widgetType: 8 }
        ]
        */
@@ -242,11 +306,11 @@
        * 该函数可以在提交之前对表单数据进行处理，并返回数据；对象isCancel包含一个值为false的属性cancelSubmit
        * 如果需要取消提交，将cancelSubmit值改为true
        * type=2，执行组件的重置方法,如果用户传入了method，会作为重置方法的回调函数执行
-       * type=3，直接执行用户传入的方法
-       * 如果要传入了确定/取消的回调函数，请先传入对应的按钮
+       * type=3，取消，直接执行用户传入的方法
        * 示例：[
        *        {text: '确定', type: 1, method: method1, beforeSubmit: this.processData},
        *        {text: '重置', type: 2, method: method2},
+       *        {text: '取消', type: 3, method: method3},
        *        {text: '取消', type: 3, method: method3}
        *      ]
        */
@@ -271,7 +335,7 @@
         required: false
       },
       /**
-       * 用来将本表的外链字段(table_id类似的字段)指向的外链表相关联, 格式为:
+       * 外查主 用来将本表的外链字段(table_id类似的字段)指向的外链表相关联, 格式为:
        *  {
        *    "hm_user": {    //外链表 表名 本表所对应的主键表）
        *      includes:['user_id'] // 与主表所对应的外键
@@ -284,7 +348,7 @@
         required: false
       },
       /**
-       * 用来将其他表的外链字段指向本表关联，同时返回数据, 格式为:
+       * 主查外 用来将其他表的外链字段指向本表关联，同时返回数据, 格式为:
        *  {
        *    'auth_token': {          //主键id所对应的外键表 表名1 （本表所对应的外键表）
        *      includes: ['user_id']   //外键表的外键字段
@@ -317,13 +381,18 @@
         required: false
       },
       /**
-       * 编辑时，涉及主查外，返回数据后渲染前对数据进行处理,beforeRender函数接受两个参数，第一个参数为主查外的数据，
-       * 第二个参数为表单的绑定对象formModel，该函数需要将主查外的数据绑定到formModel，并返回formModel
+       * 函数对象 键为固定值，值为函数
+       * 属性beforeRender,编辑/修改数据时，请求数据后表单渲染前执行，可对数据进行处理,beforeRender函数接受两个参数
+       * 第一个参数为请求的数据，第二个参数为表单的绑定对象formModel，该函数需要将请求的数据绑定到formModel，并返回formModel
+       * 属性uploadFun,上传文件的回调函数，第一个参数为文件上传成功的返回值response，第二个参数为表单的绑定对象formModel
        * 格式为: 属性beforeRender为固定键
        *  {
        *    beforeRender: function(resp.data, formModel) {
        *      do something
        *      return formModel
+       *    }，
+       *    uploadFun: function(response, formModel) {
+       *      do something
        *    }
        *  }
        */
@@ -365,6 +434,25 @@
       formStyle: {
         type: Object,
         required: false
+      },
+      /**
+       * 自定义验证规则的第二种方式（第一种是在column数组的对象中传rule）
+       * 格式为:
+       *  userRules: {
+       *     pass: [
+       *       { validator: validatePass, trigger: 'blur' }
+       *     ],
+       *     checkPass: [
+       *       { validator: validatePass2, trigger: 'blur' }
+       *     ],
+       *     age: [
+       *       { validator: checkAge, trigger: 'blur' }
+       *     ]
+       *   }
+       */
+      rules: {
+        type: Object,
+        required: false
       }
     },
     data() {
@@ -402,9 +490,12 @@
       //   }
       // }
       return {
+        currentFile: '', // 上传文件时当前选中的codeComel值
+        currentTree: '', // 当前选中的树形菜单
         foreignArray: [], // 批量创建或删除的多条外表数据
         nativeFormModel: {}, // 有外表时 本表数据  从formModel中提取
-        foreignFormModel: {}, // 字段相同的多条外表数据 从formModel中提取
+        foreighId: '', // 外表id即 与本表某个id对应
+        foreignFormModel: {}, // 字段相同的多条外表数据/外表数据 从formModel中提取
         foreignForm: {}, // 单条外表数据 只包含键，值为空 从foreignFormFields中提取
         partPropModel: {}, // 外表中从属于foreignFormModel的属性 从formModel中提取
         indirectData: '', // 间接关联表数据
@@ -413,7 +504,7 @@
         form: null,
         formModel: {}, // 双向绑定的数据变量
         showUserColumns: [], // 要显示的字段
-        rules: {
+        myRules: {
           // username: [
           //   { validator: validateUsername, trigger: 'change' }
           // { required: true, message: '请输入用户名', trigger: 'blur' },
@@ -446,6 +537,57 @@
             ]
           }
         },
+        data2: [{
+          id: 1,
+          label: '一级 1',
+          children: [{
+            id: 4,
+            label: '二级 1-1',
+            children: [{
+              id: 9,
+              label: '三级 1-1-1'
+            }, {
+              id: 10,
+              label: '三级 1-1-2'
+            }]
+          }]
+        }, {
+          id: 2,
+          label: '一级 2',
+          children: [{
+            id: 5,
+            label: '二级 2-1'
+          }, {
+            id: 6,
+            label: '二级 2-2'
+          }]
+        }, {
+          id: 3,
+          label: '一级 3',
+          children: [{
+            id: 7,
+            label: '二级 3-1'
+          }, {
+            id: 8,
+            label: '二级 3-2'
+          }]
+        }],
+        defaultProps: {
+          children: 'children',
+          label: 'label'
+        },
+        cascaderData: [
+          {
+            value: 1000,
+            label: '接通',
+            children: [{
+              label: '已报价',
+              value: 1100,
+              children: [],
+              multiple: true // 可忽略项，当为true时该项为多选
+            }]
+          }
+        ],
         // 日期选项配置
         pickerOptions: {
           // disabledDate(time) {
@@ -489,29 +631,75 @@
       // console.log(this.buttons)
     },
     methods: {
-      // 上传成功的回调函数
+      // 上传文件成功的回调函数
       uploadSuccess(response, file, fileList) {
         const self = this
-        // console.log('上传成功')
-        // console.log(response)
-        // console.log('fileList', fileList)
+        console.log('上传成功')
+        console.log(response)
+        // console.log(self.currentFile)
+        console.log(file)
+        console.log('fileList', fileList)
         console.log('formModel', self.formModel)
         for (var i = 0, len = self.showUserColumns.length; i < len; i++) {
-          if (self.showUserColumns[i].widgetType === 8 && !self.showUserColumns[i].edited) {
-            self.$set(self.showUserColumns[i], 'edited', true)
+          // && !self.showUserColumns[i].edited
+          if (self.showUserColumns[i].widgetType === 8) {
+            // self.$set(self.showUserColumns[i], 'edited', true)
             for (var key in self.formModel) {
-              if (self.showUserColumns[i].codeCamel === key) {
+              if (key === self.currentFile && self.showUserColumns[i].codeCamel === self.currentFile) {
+                // self.formModel[key] = response.message || response.visitName
+                // 张家口
+                // self.formModel[key] = response.visitName + response.fileName
+                // 通用
+                if (response.visitName && response.saveName) {
+                  self.formModel[key] = response.visitName + '' + response.saveName
+                } else if (response.message) {
+                  self.formModel[key] = file.name + '_' + response.message
+                }
+                break
+              }
+            }
+            // break
+          }
+        }
+        if (self.funObject && self.funObject.uploadFun) {
+          self.funObject.uploadFun(response, self.formModel)
+        }
+      },
+      mouseenter() {
+        console.log(222)
+      },
+      // 树形选择器
+      handleCheckChange(data, checked, indeterminate) {
+        // console.log(data, checked, indeterminate)
+        const self = this
+        console.log('handleCheckChange函数')
+        console.log(this.$refs.tree[0].getCheckedNodes(true))
+        console.log(this.$refs.tree[0].getCheckedKeys(true))
+        console.log('currentTree:', self.currentTree)
+        for (var i = 0, len = self.showUserColumns.length; i < len; i++) {
+          // && !self.showUserColumns[i].edited
+          if (self.showUserColumns[i].widgetType === 9) {
+            // self.$set(self.showUserColumns[i], 'edited', true)
+            for (var key in self.formModel) {
+              if (key === self.currentTree && self.showUserColumns[i].codeCamel === self.currentTree) {
                 // self.formModel[key] = response.message || response.visitName
                 // 张家口
                 // self.formModel[key] = response.visitName + response.fileName
                 // org
-                self.formModel[key] = response.visitName + '/' + response.saveName
+                self.formModel[key] = self.$refs.tree[0].getCheckedKeys(true)
                 break
               }
             }
-            break
+            // break
           }
         }
+      },
+      // 树形选择器
+      handleNodeChange(data, node, com) {
+        console.log(com)
+      },
+      treeCheck(data1, data2) {
+        console.log(this.currentTree)
       },
       // inputChange(val) {
       //   // console.log(event)
@@ -556,6 +744,9 @@
       handleChange(file, fileList) {
         // console.log(file, fileList)
         // console.log('自己的')
+      },
+      cascaderChange(value) {
+        console.log(value)
       },
       // 判断是否一个对象的所有属性都为空
       // 可判断空对象或者属性值为null、空数组、空字符串，属性值为空对象无法判断
@@ -658,33 +849,62 @@
         const filters = {}
         const params = {}
         filters[self.schema.modelUnderscore] = { 'id': { 'equalTo': self.tableId }}
-        if (self.refers) {
+        // self.$set(filters, self.schema.modelUnderscore, { 'id': { 'equalTo': self.tableId }})
+        params.filters = filters
+        // 主查外
+        if (self.refers && !self.isEmptyObject(self.refers)) {
           params.refers = self.refers
         }
-        params.filters = filters
-        // console.log('params', params)
+        // 外查主
+        if (self.includes && !self.isEmptyObject(self.includes)) {
+          params.includes = self.includes
+        }
+        console.log('params', params)
         // 获取数据  + '/' + self.tableId
         request(self.schema.modelUnderscorePlural, {
           params: params
         }).then(resp => {
           self.Loading = false
           // console.log(self.formModel)
-          console.log('获取成功', resp.data)
-          // 如果联查了外表
-          if (resp.data.length > 0 && resp.data[0].superior !== undefined && !self.isEmptyObject(resp.data[0].superior) && resp.data[0].refers !== undefined && !self.isEmptyObject(resp.data[0].refers)) {
-            console.log(resp.data)
+          // console.log('获取成功', resp.data)
+          // 如果是既有外查主又有主查外
+          if (resp.data.length > 0 && resp.data[0].superior !== undefined && !self.isEmptyObject(resp.data[0].superior) && resp.data[0].refers !== undefined && !self.isEmptyObject(resp.data[0].refers) && resp.data[0].includes !== undefined && !self.isEmptyObject(resp.data[0].includes)) {
+            console.log('主外联查', resp.data)
+            // 渲染之前执行用户的beforeRender方法对数据进行处理
             if (self.funObject && !self.isEmptyObject(self.funObject)) {
               self.formModel = self.funObject.beforeRender(resp.data, self.formModel)
             }
+            // 如果是外查主
+          } else if (resp.data.length > 0 && resp.data[0].superior !== undefined && !self.isEmptyObject(resp.data[0].superior) && resp.data[0].includes !== undefined && !self.isEmptyObject(resp.data[0].includes)) {
+            console.log('外查主', resp.data)
+            self.foreighId = resp.data[0].includes[_.keys(self.includes)[0]].id
+            // 渲染之前执行用户的beforeRender方法对数据进行处理
+            if (self.funObject && !self.isEmptyObject(self.funObject)) {
+              self.formModel = self.funObject.beforeRender(resp.data, self.formModel)
+            }
+            // 如果是主查外
+          } else if (resp.data.length > 0 && resp.data[0].superior !== undefined && !self.isEmptyObject(resp.data[0].superior) && resp.data[0].refers !== undefined && !self.isEmptyObject(resp.data[0].refers)) {
+            console.log('主查外', resp.data)
+            // 渲染之前执行用户的beforeRender方法对数据进行处理
+            if (self.funObject && !self.isEmptyObject(self.funObject)) {
+              self.formModel = self.funObject.beforeRender(resp.data, self.formModel)
+            }
+            // 如果只是单表
           } else if (resp.data.length > 0) {
+            console.log('单表查询', resp.data)
             var formArray = _.keys(self.formModel) // 提取formModel的属性到数组
             if (resp.data[0].superior && !self.isEmptyObject(resp.data[0].superior)) {
               self.formModel = _.pick(resp.data[0].superior, formArray) // 根据数组中的属性提取出data中对应的数据
             } else {
               self.formModel = _.pick(resp.data[0], formArray)
             }
+            // 渲染之前执行用户的beforeRender方法对数据进行处理
+            if (self.funObject && typeof (self.funObject.beforeRender) === 'function') {
+              self.formModel = self.funObject.beforeRender(resp.data, self.formModel)
+            }
             // console.log('获取到数据', self.formModel)
             // 处理返回来的数据
+            console.log('getList处理多选前', self.formModel)
             _.each(self.columns, function(item, index) {
               // 下拉框多选时将字符串转为数组 column.widgetType === 3 && !column.options
               if (item.widgetType === 2 && item.multiple === true) {
@@ -781,6 +1001,14 @@
       onSubmit(callback, processData) {
         const self = this
         console.log('点击了提交函数', self.formModel)
+        // 如果所有值都为空 禁止提交
+        if (self.isEmpty(self.formModel)) {
+          self.$message({
+            message: '不能都为空',
+            type: 'error'
+          })
+          return
+        }
         // 对表单数据进行处理
         self.formModel = processData ? processData(self.formModel, self.isCancel) : self.formModel
         // console.log(self.formModel)
@@ -795,28 +1023,41 @@
           }
           return
         }
-        // self.formModel = JSON.stringify(self.formModel)
-        // var params = _.cloneDeep(self.formModel)
-        // params = JSON.stringify(params)
-        // console.log(self.formModel)
-        // 如果所有值都为空 禁止提交
-        if (self.isEmpty(self.formModel)) {
-          self.$message({
-            message: '不能都为空',
-            type: 'error'
-          })
-          return
-        }
+
         // 验证、提交
         self.$refs.form.validate((valid) => {
           if (valid) {
             // console.log('valid通过!')
             // 存在tableId 则修改信息
             if (self.tableId) {
+              // 外查主 从formModel中分离本表、外表数据
+              if (self.includes && !self.isEmptyObject(self.includes)) {
+                _.each(self.formModel, function(val, idx) {
+                  // 后缀带O是非本表 连带查出来的表 并非就是指外表
+                  // if (idx.slice(-1) === 'O') {
+                  //   idx = idx.slice(0, idx.length - 1)
+                  //   self.foreignFormModel[idx] = val
+                  // } else {
+                  //   // 不带后缀是本表
+                  //   idx = idx.slice(0, idx.length - 1)
+                  //   self.nativeFormModel[idx] = val
+                  // }
+                  if (idx.slice(-1) === 'C') {
+                    idx = idx.slice(0, idx.length - 1)
+                    self.nativeFormModel[idx] = val
+                  } else {
+                    idx = idx.slice(0, idx.length - 1)
+                    self.foreignFormModel[idx] = val
+                  }
+                })
+              }
+              console.log(879, self.nativeFormModel)
+              console.log(880, self.foreignFormModel)
+              // 修改本表数据
               request(self.schema.modelUnderscorePlural + '/' + self.tableId + '/edit', {
                 method: 'post',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
-                data: self.formModel,
+                data: self.isEmptyObject(self.nativeFormModel) ? self.formModel : self.nativeFormModel,
                 transformRequest:
                   function(obj) {
                     var str = []
@@ -830,7 +1071,7 @@
                     return str.join('&')
                   }
               }).then(resp => {
-                console.log('修改成功')
+                console.log('修改本表成功', resp)
                 // self.resetForm()
                 if (self.tips && !self.isEmptyObject(self.tips) && !self.tips.hidde) {
                   self.$message({
@@ -838,9 +1079,10 @@
                     type: 'success'
                   })
                 }
-                // self.formModel = {} // 新建完成清空数据
+
+                // 修改成功执行用户回调
                 if (typeof (callback) === 'function') {
-                  callback(resp.data)
+                  callback(resp.data, self.formModel)
                 }
               }).catch(err => {
                 console.log(err)
@@ -851,6 +1093,29 @@
                   })
                 }
               })
+
+              // 修改本表完成后拿到id再修改外表数据
+              if (self.includes && !self.isEmptyObject(self.includes) && !self.isEmptyObject(self.foreignFormModel)) {
+                request(_.keys(self.includes)[0] + 's/' + self.foreighId + '/edit', {
+                  method: 'post',
+                  headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+                  data: self.foreignFormModel,
+                  transformRequest:
+                    function(obj) {
+                      var str = []
+                      // 删除空值的属性
+                      obj = _.omitBy(obj, function(value) {
+                        return value === null // 删除value=null的属性，剩下的返回给新对象
+                      })
+                      for (var p in obj) {
+                        str.push(encodeURIComponent(p) + '=' + encodeURIComponent(obj[p]))
+                      }
+                      return str.join('&')
+                    }
+                }).then(resp => {
+                  console.log('修改外表成功', resp)
+                })
+              }
             } else {
               // 不存在tableId 则创建一条数据
               // console.log(self.formModel)
@@ -1000,10 +1265,13 @@
                     type: 'success'
                   })
                 }
-                // self.resetForm()
+                // 新建成功执行用户回调
                 if (typeof (callback) === 'function') {
-                  callback(resp.data)
+                  callback(resp.data, self.formModel)
                 }
+                // 清空上传文件和树形菜单的codeComel
+                self.currentFile = ''
+                self.currentTree = ''
               }).catch(err => {
                 console.log(err)
                 if (self.tips && !self.isEmptyObject(self.tips) && !self.tips.hidde) {
@@ -1014,6 +1282,7 @@
                 }
               })
             }
+            self.close()
           } else {
             console.log('提交失败!!')
             self.$message({
@@ -1047,6 +1316,7 @@
         if (typeof (callback) === 'function') {
           callback()
         }
+        this.close()
       },
       // 取消的回调函数
       cancel(callback) {
@@ -1054,6 +1324,10 @@
         if (typeof (callback) === 'function') {
           callback(self.formModel)
         }
+        self.close()
+      },
+      close() {
+        this.$emit('formVisible')
       }
     }
 
@@ -1071,5 +1345,14 @@
   }
   .hm-form .ql-toolbar.ql-snow{
     padding: 7px;
+  }
+  .hm-form .el-input__inner:hover {
+    border-color: rgba(153, 153, 153, 0.6);
+  }
+  .hm-form .el-tree{
+    border-radius: 4px;
+    border: 1px solid red;
+    height: 150px;
+    overflow-y: auto;
   }
 </style>

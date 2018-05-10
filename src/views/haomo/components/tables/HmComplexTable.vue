@@ -96,11 +96,11 @@
           <el-button class="filter-item" :style="titleButtonStyle" type="primary" v-waves icon="el-icon-close" v-if="multipleSelection.length" @click="BatchRemove">批量删除</el-button>
         </span>
         <hm-full-calendar style="display: inline;margin-left: 10px;" :schema="HmFullCalendar.calendarSchema" :demoEvents="HmFullCalendar.demoEvents" v-if="HmFullCalendar.calendarSchema"></hm-full-calendar>
-      
+
       </el-form>
     </div>
     <!-- end 过滤 -->
-    
+
     <!-- 表格 -->
     <el-table :data="list" v-loading="listLoading" element-loading-text="给我一点时间" border fit highlight-current-row :cell-style="cellStyle" ref="multipleTable"
               :style="tableStyle" @selection-change="handleSelectionChange" @sort-change="sortChange" @current-change="tableCurrentChange">
@@ -147,13 +147,16 @@
                        :formStyle="HmComplexForm.formStyle"
                        :funObject="HmComplexForm.funObject"
                        :refers="HmComplexForm.formRefers"
+                       :includes="HmComplexForm.formIncludes"
                        :foreignFormFields="HmComplexForm.foreignFormFields"
-                       :relates="HmComplexForm.formRelates" >
+                       :relates="HmComplexForm.formRelates"
+                       :rules="HmComplexForm.rules"
+                       v-on:formVisible='dialogClose'>
       </hm-complex-form>
     </el-dialog>
-    
+
     <!-- end 弹窗 -->
-  
+
   </div>
 </template>
 
@@ -166,7 +169,7 @@
   import { Button, Table, TableColumn, Pagination, Loading } from 'element-ui'
   import HmComplexForm from '../forms/HmComplexForm.vue'
   import HmFullCalendar from '../calendar/HmFullCalendar.vue'
-  
+
   /**
    * 毫末科技的表格组件.
    *
@@ -272,7 +275,7 @@
             console.warn(`传入的columns不符合要求，必须是数组`)
             return false
           }
-  
+
           return true
         }
       },
@@ -394,17 +397,21 @@
           formStyle: {},
           funObject: {},
           formRefers: {},
+          formIncludes: {},
           foreignFormFields: [],
-          formRelates: []
+          formRelates: [],
+          rules: {
+
+          }
         },
         showOverflowTooltip: false, // 设置当内容过长被隐藏时显示 tooltip
         HmFullCalendar: {}, //
-  
+
         isShowRefresh: false,
         buttonGroup: false,
-        operationWidth: 0, // 操作栏的宽度
+        operationWidth: 20, // 操作栏的宽度
         isShowDetail: false, // 是否显示详情按钮
-  
+
         definedOperate: [], // 自定义操作
         definedOperation: []
       }
@@ -416,18 +423,33 @@
         if (!ret) {
           return ret
         }
-  
+
         if (!ret[self.schema['modelUnderscore']]) {
           return ret
         }
-  
+
+        _.map(ret, function(item) {
+          _.forEach(item, function(value, key) {
+            if (value.lessThanOrEqualTo !== undefined && value.greaterThanOrEqualTo !== undefined &&
+              (value.greaterThanOrEqualTo === '' || value.greaterThanOrEqualTo === null) && (value.lessThanOrEqualTo === '' || value.lessThanOrEqualTo === null)) {
+              delete item[key]
+            }
+            if (value.greaterThanOrEqualTo !== undefined && (value.greaterThanOrEqualTo === '' || value.greaterThanOrEqualTo === null) && value.lessThanOrEqualTo) {
+              delete item[key].greaterThanOrEqualTo
+            }
+            if (value.lessThanOrEqualTo !== undefined && (value.lessThanOrEqualTo === '' || value.lessThanOrEqualTo === null) && value.greaterThanOrEqualTo) {
+              delete item[key].lessThanOrEqualTo
+            }
+          })
+        })
+
         _.each(Object.keys(ret[self.schema['modelUnderscore']]), function(column) {
           const operValue = ret[self.schema['modelUnderscore']][column]
           if (Object.keys(operValue)[0] === 'like') {
             ret[self.schema['modelUnderscore']][column]['like'] = '%' + ret[self.schema['modelUnderscore']][column]['like'] + '%'
           }
         })
-  
+
         return ret
       }
     },
@@ -435,6 +457,7 @@
       // this.validate()
       const self = this
       if (this.userDefined && this.userDefined.pretreatment) {
+        self.init()
         self.userDefined.pretreatment().then(function() {
           self.init()
           self.getList()
@@ -457,7 +480,7 @@
           if (!item) {
             return 0
           }
-  
+
           if (typeof item !== 'string' && typeof item !== 'object') {
             console.error(`传入的columns不符合要求，数组元素必须是字符串或对象`)
           }
@@ -469,10 +492,10 @@
           }
         })
       },
-  
+
       init() {
         const self = this
-        self.operationWidth = 0
+        self.operationWidth = 20
         // 处理要显示的列
         if (!self.columns || !self.columns.length) {
           _.each(self.schema['columns'], function(column) {
@@ -498,7 +521,7 @@
             item.isSort = item.isSort === undefined ? false : item.isSort === true ? 'custom' : false
           })
         }
-  
+
         // 处理过滤条件
         if (self.filters) {
           const tableName = self.schema['modelUnderscore']
@@ -523,7 +546,7 @@
         if (self.userDefined) {
           self.setDefinedOperate()
         }
-  
+
         console.log(request.defaults)
         console.log(`request.defaults.baseURL: ${request.defaults.baseURL}`)
       },
@@ -534,7 +557,20 @@
           self.definedOperate = self.userDefined.definedOperate
         }
         if (self.userDefined.definedOperation) {
-          self.operationWidth += 50 * self.userDefined.definedOperation.length
+          _.each(self.userDefined.definedOperation, function(item, index) {
+            _.each(item.label, function(value) {
+              if (!isNaN(Number(value))) {
+                self.operationWidth += 8 // 如果是数字+8
+              } else {
+                self.operationWidth += 13 // 如果是汉字加13
+              }
+            })
+            if (self.userDefined.definedOperation.length > 1 && index > 1) {
+              self.operationWidth += 13 // 每添加一条需加上margin
+            } else {
+              self.operationWidth += 5
+            }
+          })
           self.definedOperation = self.userDefined.definedOperation
         }
       },
@@ -553,23 +589,23 @@
       getList() {
         const self = this
         self.listLoading = true
-  
+
         // 处理过滤条件
         let params = JSON.parse(JSON.stringify(self.listQuery))
         params.filters = self.filterParams
         params.filters = this.deleteFilter(params.filters)
-  
+
         if (self.includes) {
           params.includes = self.includes
         }
         if (self.refers) {
           params.refers = self.refers
         }
-  
+
         if (self.userDefined && self.userDefined.definedParams) {
           params = self.userDefined.definedParams(params, self.definedOperate)
         }
-  
+
         request(self.schema.modelUnderscorePlural, {
           params: params
         }).then(resp => {
@@ -664,6 +700,7 @@
           formStyle: {},
           funObject: {},
           formRefers: {},
+          formIncludes: {},
           foreignFormFields: [],
           formRelates: []
         }
@@ -681,6 +718,7 @@
           self.options.editData.formStyle ? self.HmComplexForm.formStyle = self.options.editData.formStyle : ''
           self.options.editData.funObject ? self.HmComplexForm.funObject = self.options.editData.funObject : ''
           self.options.editData.formRefers ? self.HmComplexForm.formRefers = self.options.editData.formRefers : ''
+          self.options.editData.formIncludes ? self.HmComplexForm.formIncludes = self.options.editData.formIncludes : ''
           self.options.editData.foreignFormFields ? self.HmComplexForm.foreignFormFields = self.options.editData.foreignFormFields : ''
           self.options.editData.formRelates ? self.HmComplexForm.formRelates = self.options.editData.formRelates : ''
         }
@@ -696,12 +734,13 @@
           self.options.newData.formStyle ? self.HmComplexForm.formStyle = self.options.newData.formStyle : ''
           self.options.newData.funObject ? self.HmComplexForm.funObject = self.options.newData.funObject : ''
           self.options.newData.formRefers ? self.HmComplexForm.formRefers = self.options.newData.formRefers : ''
+          self.options.newData.formIncludes ? self.HmComplexForm.formIncludes = self.options.newData.formIncludes : ''
           self.options.newData.foreignFormFields ? self.HmComplexForm.foreignFormFields = self.options.newData.foreignFormFields : ''
           self.options.newData.formRelates ? self.HmComplexForm.formRelates = self.options.newData.formRelates : ''
         }
         if (type === 'detail') {
           self.dialogName = '详情'
-  
+
           if (self.options.showDetail.showUserButtons) {
             self.HmComplexForm.showUserButtons = self.options.showDetail.showUserButtons
           }
@@ -712,11 +751,17 @@
           self.options.showDetail.formStyle ? self.HmComplexForm.formStyle = self.options.showDetail.formStyle : ''
           self.options.showDetail.funObject ? self.HmComplexForm.funObject = self.options.showDetail.funObject : ''
           self.options.showDetail.formRefers ? self.HmComplexForm.formRefers = self.options.showDetail.formRefers : ''
+          self.options.showDetail.formIncludes ? self.HmComplexForm.formIncludes = self.options.showDetail.formIncludes : ''
           self.options.showDetail.foreignFormFields ? self.HmComplexForm.foreignFormFields = self.options.showDetail.foreignFormFields : ''
           self.options.showDetail.formRelates ? self.HmComplexForm.formRelates = self.options.showDetail.formRelates : ''
           self.HmComplexForm.tableId = data.id
+
+          // wk 2018年05月09日11:57:06
+          if (self.options.showDetail.funCallback) {
+            self.options.showDetail.funCallback(data)
+          }
         }
-  
+
         self.dialogFormVisible = true
       },
       statusFunc(row, operation) {
@@ -764,7 +809,7 @@
           filters: {}
         }
         this.init()
-  
+
         this.getList()
       },
       // 批量删除
@@ -797,7 +842,7 @@
           }).then(resp => {
             if (resp.data.message === 'delete success') {
               self.$message({
-                message: resp.data.message,
+                message: '删除成功',
                 type: 'success'
               })
               self.getList()
@@ -820,7 +865,7 @@
         }
         if (self.options.editData && self.options.editData.isShow) { // 判断是否显示编辑按钮
           self.isShowEditDataButton = self.options.editData.isShow
-          self.operationWidth += 50
+          self.operationWidth += 30
         }
         if (self.options.showRefresh) { // 判断是否显示刷新按钮
           self.isShowRefresh = self.options.showRefresh
@@ -839,14 +884,14 @@
         }
         if (self.options.showDeleteButton) { // 判断是否显示删除按钮
           self.isShowDeleteButton = self.options.showDeleteButton
-          self.operationWidth += 50
+          self.operationWidth += 30
         }
         if (self.options.buttonGroup) { // 设置按钮是否以按钮组呈现
           self.buttonGroup = self.options.buttonGroup
         }
         if (self.options.showDetail && self.options.showDetail.isShow) { // 设置按钮是否以按钮组呈现
           self.isShowDetail = self.options.showDetail.isShow
-          self.operationWidth += 50
+          self.operationWidth += 30
         }
         if (self.options.showSelection) { // 设置是否显示多选
           self.isShowSelection = self.options.showSelection
@@ -912,7 +957,7 @@
           }
         }))
       },
-  
+
       getFilterColumn(filter) {
         const keys = Object.keys(filter)
         let column = null
@@ -930,6 +975,10 @@
       },
       getFilterOperTwin(filter) {
         return Object.keys(filter[this.getFilterColumn(filter)])[1]
+      },
+      dialogClose() {
+        this.dialogFormVisible = false
+        this.getList()
       }
     }
   }

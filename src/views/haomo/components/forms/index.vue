@@ -6,9 +6,7 @@
                      :layout="layout"
                      :tips="tips"
                      :funObject="funObject"
-                     :refers="userRefers"
-                     :foreignFormFields="foreignFormFields"
-                     :relates="userRelates">
+    >
       <!-- foreignFormFields 主查外的外表显示字段  和userRefers连用-->
       <!-- :relates="userRelates" 中间表和间接关联表-->
       <!--  :refers="userRefers" 主查外的外表和外键字段 和foreignFormFields；连用-->
@@ -48,15 +46,16 @@
             // ]
           },
           // 2下拉框
-          { name: '用户名称', codeCamel: 'username', widgetType: 2, multiple: false,
-            change: this.inputChange, // default: [1], 如果开启多选，默认选中项用数组[1]、[1,2,3]
-            options: [
-              { value: '1', label: '企业' }, // 下拉框的label是选项文字，value是选中值
-              { value: '2', label: '代理商' },
-              { value: '3', label: '会员' },
-              { value: '4', label: '访客' }
-            ]
-          },
+          // { name: '用户名称', codeCamel: 'username', widgetType: 2, multiple: false,
+          //   change: this.selectChange, // default: [1], 如果开启多选，默认选中项用数组[1]、[1,2,3]
+          //   allowCreate: true,
+          //   options: [
+          //     { value: '1', label: '企业' }, // 下拉框的label是选项文字，value是选中值
+          //     { value: '2', label: '代理商' },
+          //     { value: '3', label: '会员' },
+          //     { value: '4', label: '访客' }
+          //   ]
+          // },
           // 3多选 不支持默认值
           { name: '部门ID', codeCamel: 'departmentId', widgetType: 3, options: ['美女', '帅哥'], change: this.inputChange },
           // 4密码
@@ -73,9 +72,11 @@
               { label: 1, value: '会员' }, // 单选的value是选项文字，label是选中值
               { label: 2, value: '访客' } // 如果数据库中存的数据类型是number，label值写number如1，如果为string，label值写string ,如'1'
             ], // default: 1
-            change: this.inputChange },
+            change: this.inputChange
+          },
           // 8文件 change: this.uploadChange
-          { name: '选择头像', codeCamel: 'avatar', widgetType: 8, url: '/api/upload', param: 'picture', accept: 'image/*' } // url是后台接口地址
+          { name: '选择头像', codeCamel: 'avatar', widgetType: 8, url: '/api/upload', param: 'picture' }, // url是后台接口地址
+          { name: '用户名称', codeCamel: 'username', widgetType: 8, url: '/api/upload', param: 'picture' } // url是后台接口地址
         ],
         // CcSubject示例
         showUserColumns2: [
@@ -105,11 +106,12 @@
             includes: ['ccSubjectId']
           }
         },
-        // userIncludes: {
-        //   'hm_user': {
-        //     includes: ['user_id']
-        //   }
-        // },
+        // 外查主
+        userIncludes: {
+          'hm_user': {
+            includes: ['user_id']
+          }
+        },
         // 要显示按钮
         showUserButtons: [
           { text: '确定', type: 1, method: this.method1, beforeSubmit: this.processData },
@@ -120,7 +122,8 @@
           { text: '取消', type: 3, method: this.method3 }
         ],
         funObject: {
-          beforeRender: this.beforeRender
+          beforeRender: this.beforeRender,
+          uploadFun: this.uploadFun
         },
         // showUserButtons: []
         // 布局方式
@@ -143,6 +146,7 @@
           datePicker: { style: { width: '60%' }},
           input: { style: { width: '60%' }},
           select: { style: { width: '60%' }},
+          cascader: { style: { width: '60%' }},
           textarea: {
             style: { width: '60%' },
             resize: 'none',
@@ -179,9 +183,12 @@
     },
     methods: {
       inputChange(val, formModel) {
-        console.log(val)
-        console.log(formModel)
+        // console.log(val)
+        // console.log(formModel)
         // formModel.email = val.length
+      },
+      selectChange(val, formModel) {
+        console.log('下拉框change', val, formModel)
       },
       processData(object, isCancel) {
         isCancel.cancelSubmit = false // 如果要取消提交，设为true
@@ -211,6 +218,12 @@
         // console.log(111, data)
         // console.log(112, formModel)
         return formModel
+      },
+      uploadFun: function(response, formModel) {
+        // console.log(215, response)
+        // console.log(216, formModel)
+        // 修改其他表单的值
+        formModel.email = response.visitName
       }
     }
   }
