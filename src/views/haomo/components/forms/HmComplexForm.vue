@@ -117,7 +117,7 @@
             <!-- 8树形图 -->
             <!--:default-expanded-keys="[2, 3]"-->
             <!--:default-checked-keys="[5]"-->
-            <div @mouseenter="currentTree = column.codeCamel" v-else-if="column.widgetType === 9">
+            <div class="hm-form_form_div" @mouseenter="currentTree = column.codeCamel" v-else-if="column.widgetType === 9" :style="formStyle && formStyle.quillEditor && formStyle.quillEditor.style || {width:'70%'}">
               <el-tree :data="column.options"
                        ref="tree"
                        show-checkbox
@@ -1365,13 +1365,19 @@
   .hm-form .ql-toolbar.ql-snow{
     padding: 7px;
   }
-  .hm-form .el-input__inner:hover {
+  .hm-form .el-input__inner:hover{
     border-color: rgba(153, 153, 153, 0.6);
   }
-  .hm-form .el-tree{
+  .hm-form .hm-form_form_div{
     border-radius: 4px;
-    border: 1px solid red;
-    height: 150px;
-    overflow-y: auto;
+    border: 1px solid #dcdfe6;
+    max-height: 150px;
+    overflow-y: scroll;
+  }
+  .hm-form .hm-form_form_div:hover{
+    border-color: rgba(153, 153, 153, 0.6);
+  }
+  .hm-form .hm-form_form_div::-webkit-scrollbar{
+    display: none;
   }
 </style>

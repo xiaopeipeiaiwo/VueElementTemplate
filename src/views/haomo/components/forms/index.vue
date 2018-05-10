@@ -32,7 +32,7 @@
         showUserColumns: [
           // 1普通input
           { name: '选择人员', codeCamel: 'type', widgetType: 9, disabled: false,
-            change: this.inputChange, options: [
+            options: [
               {
                 id: 1,
                 label: '公诉处',
@@ -154,7 +154,7 @@
         },
         // showUserButtons: []
         // 布局方式
-        layout: { left: 2, middle: 20, right: 2 },
+        layout: { left: 4, middle: 16, right: 4 },
         // 自定义提示消息
         tips: {
           hidde: false, // 是否显示提示，默认false显示
