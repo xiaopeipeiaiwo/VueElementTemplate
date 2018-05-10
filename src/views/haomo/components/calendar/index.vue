@@ -6,6 +6,7 @@
       :title="title"
       :events="events"
       :date="date"
+      :timeOrder="timeOrder"
       @dateChange="datechange"
       @monthChange="monthchange"
     ></hm-full-calendar>
@@ -30,7 +31,9 @@
         // title为需要传入的事件名所对应的的字段名，date为时间所对应的字段，events为事件所对应的字段，都不是必传
         title: 'loginid',
         date: 'createTime',
-        events: 'email'
+        events: 'email',
+        // timeOrder为所有所有事件按照数据库的哪个字段排序，为下划线格式
+        timeOrder: 'create_time'
       }
     },
     filters: {
