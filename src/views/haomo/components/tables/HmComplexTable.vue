@@ -78,7 +78,7 @@
             </el-date-picker>
           </el-form-item>
         </span>
-
+        
         <!--预定义按钮-->
         <el-button-group v-if="buttonGroup">
           <el-button class="filter-item" :style="titleButtonStyle" type="primary" v-waves icon="el-icon-search" v-if="isShowSearch" @click="handleFilter">搜索</el-button>
@@ -87,7 +87,7 @@
           <el-button class="filter-item" :style="titleButtonStyle" type="primary" v-waves icon="el-icon-refresh" v-if="isShowRefresh" @click="refreshList">刷新</el-button>
           <el-button class="filter-item" :style="titleButtonStyle" type="primary" v-waves icon="el-icon-close" v-if="multipleSelection.length" @click="BatchRemove">批量删除</el-button>
         </el-button-group>
-
+        
         <span v-if="!buttonGroup">
           <el-button class="filter-item" :style="titleButtonStyle" type="primary" v-waves icon="el-icon-search" v-if="isShowSearch" @click="handleFilter">搜索</el-button>
           <el-button class="filter-item" :style="titleButtonStyle" type="primary" :loading="downloadLoading" v-waves icon="el-icon-download" v-if="isShowExport" @click="handleDownload">导出</el-button>
@@ -126,7 +126,7 @@
       </el-table-column>
     </el-table>
     <!-- end 表格 -->
-
+    
     <!-- 翻页 -->
     <div class="pagination-container" v-if="isShowPagination">
       <el-pagination background @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page.sync="listQuery.pageNo"
@@ -134,7 +134,7 @@
       </el-pagination>
     </div>
     <!-- end翻页 -->
-
+    
     <!-- 弹窗 -->
     <!-- @TODO 补充详情弹窗 -->
     <el-dialog :title="dialogName" :visible.sync="dialogFormVisible" :close-on-click-modal="closeOnClickModal" width="45%" v-if="dialogFormVisible">
@@ -147,8 +147,11 @@
                        :formStyle="HmComplexForm.formStyle"
                        :funObject="HmComplexForm.funObject"
                        :refers="HmComplexForm.formRefers"
+                       :includes="HmComplexForm.formIncludes"
                        :foreignFormFields="HmComplexForm.foreignFormFields"
-                       :relates="HmComplexForm.formRelates" >
+                       :relates="HmComplexForm.formRelates"
+                       :rules="HmComplexForm.rules"
+                       v-on:formVisible='dialogClose'>
       </hm-complex-form>
     </el-dialog>
     
@@ -248,7 +251,7 @@
         type: Object,
         required: false
       },
-
+  
       /**
        * 指定要显示的列。默认为根据schema得到的所有列。完整示例为：
        *  [
@@ -394,15 +397,19 @@
           formStyle: {},
           funObject: {},
           formRefers: {},
+          formIncludes: {},
           foreignFormFields: [],
-          formRelates: []
+          formRelates: [],
+          rules: {
+  
+          }
         },
         showOverflowTooltip: false, // 设置当内容过长被隐藏时显示 tooltip
         HmFullCalendar: {}, //
   
         isShowRefresh: false,
         buttonGroup: false,
-        operationWidth: 0, // 操作栏的宽度
+        operationWidth: 20, // 操作栏的宽度
         isShowDetail: false, // 是否显示详情按钮
   
         definedOperate: [], // 自定义操作
@@ -450,6 +457,7 @@
       // this.validate()
       const self = this
       if (this.userDefined && this.userDefined.pretreatment) {
+        self.init()
         self.userDefined.pretreatment().then(function() {
           self.init()
           self.getList()
@@ -487,7 +495,7 @@
   
       init() {
         const self = this
-        self.operationWidth = 0
+        self.operationWidth = 20
         // 处理要显示的列
         if (!self.columns || !self.columns.length) {
           _.each(self.schema['columns'], function(column) {
@@ -549,8 +557,19 @@
           self.definedOperate = self.userDefined.definedOperate
         }
         if (self.userDefined.definedOperation) {
-          _.each(self.userDefined.definedOperation, function(item) {
-            self.operationWidth += 22 * item.label.length
+          _.each(self.userDefined.definedOperation, function(item, index) {
+            _.each(item.label, function(value) {
+              if (!isNaN(Number(value))) {
+                self.operationWidth += 8 // 如果是数字+8
+              } else {
+                self.operationWidth += 13 // 如果是汉字加13
+              }
+            })
+            if (self.userDefined.definedOperation.length > 1 && index > 1) {
+              self.operationWidth += 13 // 每添加一条需加上margin
+            } else {
+              self.operationWidth += 5
+            }
           })
           self.definedOperation = self.userDefined.definedOperation
         }
@@ -681,6 +700,7 @@
           formStyle: {},
           funObject: {},
           formRefers: {},
+          formIncludes: {},
           foreignFormFields: [],
           formRelates: []
         }
@@ -698,6 +718,7 @@
           self.options.editData.formStyle ? self.HmComplexForm.formStyle = self.options.editData.formStyle : ''
           self.options.editData.funObject ? self.HmComplexForm.funObject = self.options.editData.funObject : ''
           self.options.editData.formRefers ? self.HmComplexForm.formRefers = self.options.editData.formRefers : ''
+          self.options.editData.formIncludes ? self.HmComplexForm.formIncludes = self.options.editData.formIncludes : ''
           self.options.editData.foreignFormFields ? self.HmComplexForm.foreignFormFields = self.options.editData.foreignFormFields : ''
           self.options.editData.formRelates ? self.HmComplexForm.formRelates = self.options.editData.formRelates : ''
         }
@@ -713,6 +734,7 @@
           self.options.newData.formStyle ? self.HmComplexForm.formStyle = self.options.newData.formStyle : ''
           self.options.newData.funObject ? self.HmComplexForm.funObject = self.options.newData.funObject : ''
           self.options.newData.formRefers ? self.HmComplexForm.formRefers = self.options.newData.formRefers : ''
+          self.options.newData.formIncludes ? self.HmComplexForm.formIncludes = self.options.newData.formIncludes : ''
           self.options.newData.foreignFormFields ? self.HmComplexForm.foreignFormFields = self.options.newData.foreignFormFields : ''
           self.options.newData.formRelates ? self.HmComplexForm.formRelates = self.options.newData.formRelates : ''
         }
@@ -729,9 +751,15 @@
           self.options.showDetail.formStyle ? self.HmComplexForm.formStyle = self.options.showDetail.formStyle : ''
           self.options.showDetail.funObject ? self.HmComplexForm.funObject = self.options.showDetail.funObject : ''
           self.options.showDetail.formRefers ? self.HmComplexForm.formRefers = self.options.showDetail.formRefers : ''
+          self.options.showDetail.formIncludes ? self.HmComplexForm.formIncludes = self.options.showDetail.formIncludes : ''
           self.options.showDetail.foreignFormFields ? self.HmComplexForm.foreignFormFields = self.options.showDetail.foreignFormFields : ''
           self.options.showDetail.formRelates ? self.HmComplexForm.formRelates = self.options.showDetail.formRelates : ''
           self.HmComplexForm.tableId = data.id
+  
+          // wk 2018年05月09日11:57:06
+          if (self.options.showDetail.funCallback) {
+            self.options.showDetail.funCallback(data)
+          }
         }
   
         self.dialogFormVisible = true
@@ -837,7 +865,7 @@
         }
         if (self.options.editData && self.options.editData.isShow) { // 判断是否显示编辑按钮
           self.isShowEditDataButton = self.options.editData.isShow
-          self.operationWidth += 50
+          self.operationWidth += 30
         }
         if (self.options.showRefresh) { // 判断是否显示刷新按钮
           self.isShowRefresh = self.options.showRefresh
@@ -856,14 +884,14 @@
         }
         if (self.options.showDeleteButton) { // 判断是否显示删除按钮
           self.isShowDeleteButton = self.options.showDeleteButton
-          self.operationWidth += 50
+          self.operationWidth += 30
         }
         if (self.options.buttonGroup) { // 设置按钮是否以按钮组呈现
           self.buttonGroup = self.options.buttonGroup
         }
         if (self.options.showDetail && self.options.showDetail.isShow) { // 设置按钮是否以按钮组呈现
           self.isShowDetail = self.options.showDetail.isShow
-          self.operationWidth += 50
+          self.operationWidth += 30
         }
         if (self.options.showSelection) { // 设置是否显示多选
           self.isShowSelection = self.options.showSelection
@@ -941,12 +969,16 @@
         })
         return column.toLowerCase()
       },
-
+  
       getFilterOper(filter) {
         return Object.keys(filter[this.getFilterColumn(filter)])[0]
       },
       getFilterOperTwin(filter) {
         return Object.keys(filter[this.getFilterColumn(filter)])[1]
+      },
+      dialogClose() {
+        this.dialogFormVisible = false
+        this.getList()
       }
     }
   }
