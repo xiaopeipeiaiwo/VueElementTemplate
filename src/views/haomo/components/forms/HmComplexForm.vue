@@ -218,6 +218,7 @@
        * ref属性可选，用来获取当前表单dom节点
        * param属性可选，当表单类型为文件类型时，可传入param字段，值为后台规定必传参数，默认值为picture
        * accept属性可选,当表单类型为文件类型时，可传入accept字段，限制限制上传文件类型，取值规范参考w3c
+       * fileData属性可选，当表单类型为文件类型时，取值为all(表示返回路径+文件名)，取值为filePath(表示只返回路径)，取值fileName(表示只返回文件名),如果不传，默认只返回路径
        * widgetType属性可选，表示该字段要显示的表单类型(普通输入框、文本域、富文本、下拉框...)，不传默认为普通input
        * 取值1-10(1表示普通输入框,2表示普通下拉框,3表示复选框,4表示文本域,5表示富文本,6表示日期，7表示单选框，8表示文件上传,
        * 9表示树状控件，10表示级联下拉框)，
@@ -651,9 +652,17 @@
                 // self.formModel[key] = response.visitName + response.fileName
                 // 通用
                 if (response.visitName && response.saveName) {
-                  self.formModel[key] = response.visitName + '' + response.saveName
+                  // 如果fileData值为all 则存路径+名称
+                  if (self.showUserColumns[i].fileData === 'all') {
+                    self.formModel[key] = response.visitName + '' + response.fileName + '_' + response.saveName
+                  } else if (self.showUserColumns[i].fileData === 'fileName') {
+                    self.formModel[key] = response.saveName
+                  } else {
+                    self.formModel[key] = response.visitName + '' + response.fileName
+                  }
                 } else if (response.message) {
                   self.formModel[key] = file.name + '_' + response.message
+                  // self.formModel[key].push(file.name + '_' + response.message)
                 }
                 break
               }
@@ -665,8 +674,25 @@
           self.funObject.uploadFun(response, self.formModel)
         }
       },
-      mouseenter() {
-        console.log(222)
+      // 删除文件时的回调函数
+      handleRemove(file, fileList) {
+        const self = this
+        console.log('文件删除', file, fileList)
+        console.log('删除后前', self.formModel)
+        // var reg = new RegExp('^' + file.response.message + '$', 'g')
+        // console.log(reg)
+        // _.each(self.formModel[self.currentFile], function(item, index) {
+        //   if (_.endsWith(item, file.response.message)) {
+        //     self.$delete(self.formModel[self.currentFile], index)
+        //   }
+        // })
+        self.formModel[self.currentFile] = ''
+        console.log('删除后', self.formModel)
+      },
+      // 文件状态改变时的回调函数
+      handleChange(file, fileList) {
+        // console.log('文件状态改变', file, fileList)
+        // console.log('自己的')
       },
       // 树形选择器
       handleCheckChange(data, checked, indeterminate) {
@@ -737,13 +763,6 @@
       },
       onEditorReady(val) {
         // console.log('editor ready!')
-      },
-      handleRemove(file, fileList) {
-        // console.log(self.formModel)
-      },
-      handleChange(file, fileList) {
-        // console.log(file, fileList)
-        // console.log('自己的')
       },
       cascaderChange(value) {
         console.log(value)

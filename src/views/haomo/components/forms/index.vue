@@ -31,8 +31,35 @@
         // widgetType值 1：普通input 2：下拉框 (如果是下拉框 再传一个options表示下拉框选项)3：复选框 4：文本域 5：富文本 6：日期 7：单选框 8: 文件上传
         showUserColumns: [
           // 1普通input
-          { name: '选择类型', codeCamel: 'type', widgetType: 1, disabled: false,
-            change: this.inputChange
+          { name: '选择人员', codeCamel: 'type', widgetType: 9, disabled: false,
+            change: this.inputChange, options: [
+              {
+                id: 1,
+                label: '公诉处',
+                children: [
+                  {
+                    id: 4,
+                    label: '刘云山'
+                  }
+                ]
+              },
+              {
+                id: 2,
+                label: '监察部',
+                children: [
+                  { id: 5, label: '毛晓东' },
+                  { id: 6, label: '方建国' }
+                ]
+              },
+              {
+                id: 3,
+                label: '办公室',
+                children: [
+                  { id: 7, label: '司马南' },
+                  { id: 8, label: '褚随山' }
+                ]
+              }
+            ]
             // rule: { required: true, message: '用户名不能为空', trigger: 'blur' }
             //  hide: true
             //  default: '默认值',
