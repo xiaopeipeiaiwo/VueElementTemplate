@@ -482,8 +482,9 @@
       getDailyEvent() {
         const self = this
         var saveTime = ''
+        var filterparams = self.demoEvent.filterparams
         request(self.schema.modelUnderscorePlural, {
-          params: { 'sortItem': self.demoEvent.timeOrder, 'pageSize': 10000 }
+          params: { 'sortItem': self.demoEvent.timeOrder, 'pageSize': 10000, filters: { filterparams }}
         }).then(resp => {
           console.log(resp.data, '=========')
           _.each(resp.data, function(item) {
