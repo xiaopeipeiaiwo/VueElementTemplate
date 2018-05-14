@@ -1,6 +1,6 @@
 <template>
   <div class="calendarlist">
-    <i class="el-icon-date" @click="dialogTableVisible = true"></i>
+    <i class="el-icon-date" @click="dialogTableVisible = true" :style="demoEvent.iconStyle"></i>
     <el-dialog :visible.sync="dialogTableVisible">
       <div class="datebook-root" :style='componentW?"width:"+componentW+";":""'>
         <div class='top-panel'>
@@ -484,7 +484,7 @@
         var saveTime = ''
         var filterparams = self.demoEvent.filterparams
         request(self.schema.modelUnderscorePlural, {
-          params: { 'sortItem': self.demoEvent.timeOrder, 'pageSize': 10000, filters: { filterparams }}
+          params: { 'sortItem': self.demoEvent.timeOrder, 'pageSize': 10000, filters: filterparams }
         }).then(resp => {
           console.log(resp.data, '=========')
           _.each(resp.data, function(item) {
