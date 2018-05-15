@@ -1,6 +1,6 @@
 <template>
   <div class="calendarlist">
-    <i class="el-icon-date" @click="dialogTableVisible = true"></i>
+    <i class="el-icon-date" @click="dialogTableVisible = true" :style="demoEvent.iconStyle"></i>
     <el-dialog :visible.sync="dialogTableVisible">
       <div class="datebook-root" :style='componentW?"width:"+componentW+";":""'>
         <div class='top-panel'>
@@ -269,23 +269,12 @@
         type: Object,
         required: true
       },
-      width: {
-        type: String,
-        required: false
-      },
+
       initTime: {
         required: false
       },
-      title: {
-        required: false
-      },
-      events: {
-        required: false
-      },
-      timeOrder: {
-        required: false
-      },
-      date: {
+      demoEvent: {
+        type: Object,
         required: false
       }
     },
@@ -493,15 +482,16 @@
       getDailyEvent() {
         const self = this
         var saveTime = ''
+        var filterparams = self.demoEvent.filterparams
         request(self.schema.modelUnderscorePlural, {
-          params: { 'sortItem': self.timeOrder, 'pageSize': 10000 }
+          params: { 'sortItem': self.demoEvent.timeOrder, 'pageSize': 10000, filters: filterparams }
         }).then(resp => {
           console.log(resp.data, '=========')
           _.each(resp.data, function(item) {
-            item.time = moment(item[self.date]).format('YYYY-MM-DD')
-            item.date = moment(item[self.date]).format('X') * 1000
-            item.title = item[self.title]
-            item.allEvents = item[self.events]
+            item.time = moment(item[self.demoEvent.date]).format('YYYY-MM-DD')
+            item.date = moment(item[self.demoEvent.date]).format('X') * 1000
+            item.title = item[self.demoEvent.title]
+            item.allEvents = item[self.demoEvent.events]
             if (saveTime === item.time) {
               self.schedules[self.schedules.length - 1].allEvents.push(item.allEvents)
             } else {

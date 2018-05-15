@@ -1,12 +1,8 @@
 <template>
   <div class="app-container calendar-list-container">
     <hm-full-calendar
-      :width="width"
       :schema="schema['HmUser']"
-      :title="title"
-      :events="events"
-      :date="date"
-      :timeOrder="timeOrder"
+      :demoEvent="demoEvent"
       @dateChange="datechange"
       @monthChange="monthchange"
     ></hm-full-calendar>
@@ -27,13 +23,17 @@
     data() {
       return {
         show: false,
-        width: '300px',
+        demoEvent: {
+          width: '300px',
+          title: 'loginid',
+          date: 'createTime',
+          events: 'email',
+          timeOrder: 'create_time',
+          filterparams: '',
+          iconStyle: 'color: #00BF8B'
+        }
         // title为需要传入的事件名所对应的的字段名，date为时间所对应的字段，events为事件所对应的字段，都不是必传
-        title: 'loginid',
-        date: 'createTime',
-        events: 'email',
         // timeOrder为所有所有事件按照数据库的哪个字段排序，为下划线格式
-        timeOrder: 'create_time'
       }
     },
     filters: {
