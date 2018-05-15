@@ -14,7 +14,7 @@
                  :label-width="formStyle && formStyle.formOptions && formStyle.formOptions.labelWidth || '163px'"
                  :model="formModel"
                  :rules="myRules"
-                 :style=" formStyle && formStyle.formOptions && formStyle.formOptions.style || {width:'100%'}">
+                 :style=" formStyle && formStyle.formOptions && formStyle.formOptions.style || {width:'100%',border:'1px solid red'}">
           <el-form-item v-for="column in showUserColumns"
                         v-show="!column.hide"
                         :key="column.id"
@@ -41,6 +41,7 @@
                        :ref="column.ref || ''"
                        v-model="formModel[column.codeCamel]"
                        @change="column.change && column.change($event, formModel)"
+                       @focus="column.focus && column.focus($event, formModel)"
                        :style="formStyle && formStyle.select && formStyle.select.style || {width: '70%'}"
                        :multiple="column.multiple"
                        :disabled="column.disabled"
@@ -84,7 +85,7 @@
             <quill-editor v-else-if="column.widgetType === 5"
                           :ref="column.ref || ''" :disabled="column.disabled"
                           v-model="formModel[column.codeCamel]"
-                          :style="formStyle && formStyle.quillEditor && formStyle.quillEditor.style || {width:'70%'}"
+                          :style="formStyle && formStyle.quillEditor && formStyle.quillEditor.style || {width: '70%'}"
                           :options="column.options || editorOption"
                           @blur="onEditorBlur($event)"
                           @focus="onEditorFocus($event)"
@@ -117,15 +118,16 @@
             <!-- 8树形图 -->
             <!--:default-expanded-keys="[2, 3]"-->
             <!--:default-checked-keys="[5]"-->
-            <div class="hm-form_form_div" @mouseenter="currentTree = column.codeCamel" v-else-if="column.widgetType === 9" :style="formStyle && formStyle.quillEditor && formStyle.quillEditor.style || {width:'70%'}">
+            <div class="hm-form_form_div" @mouseenter="currentTree = column.codeCamel;treeComponent = column.ref" v-else-if="column.widgetType === 9">
               <el-tree :data="column.options"
-                       ref="tree"
+                       :ref="column.ref || 'tree'"
                        show-checkbox
                        node-key="id"
+                       accordion
                        @node-click="handleNodeChange"
                        @check-change="handleCheckChange"
-                       :default-expanded-keys='column.expanded'
-                       :default-checked-keys='column.checked'
+                       :default-expanded-keys="column.expanded || []"
+                       :default-checked-keys="column.checked || []"
                        :props="defaultProps">
               </el-tree>
             </div>
@@ -154,7 +156,7 @@
                       @change="column.change && column.change($event,formModel)"></el-input>
           </el-form-item>
           <!--按钮-->
-          <el-form-item v-if="buttons && buttons.length > 0" style="margin-top: 40px">
+          <el-form-item v-if="buttons && buttons.length > 0" class="hm-form_btn" style="margin-top: 40px">
             <el-col :span="24/buttons.length" v-for="(btn,key) in buttons" :key="key">
               <el-button v-if="btn.type === 1"
                          type="primary"
@@ -215,7 +217,7 @@
        * change属性可选，值为函数类型，表示input的change事件的执行方法，参数即为input输入内容
        * default属性可选(复选框不支持)，设置默认值，取值规范参考form/videoconferencing.vue
        * hide属性可选，设置该表单字段是否显示,值为boolean
-       * ref属性可选，用来获取当前表单dom节点
+       * ref属性树形控件必传，其他可选，用来获取当前表单dom节点
        * param属性可选，当表单类型为文件类型时，可传入param字段，值为后台规定必传参数，默认值为picture
        * accept属性可选,当表单类型为文件类型时，可传入accept字段，限制限制上传文件类型，取值规范参考w3c
        * fileData属性可选，当表单类型为文件类型时，取值为all(表示返回路径+文件名)，取值为filePath(表示只返回路径)，取值fileName(表示只返回文件名),如果不传，默认只返回路径
@@ -492,7 +494,8 @@
       // }
       return {
         currentFile: '', // 上传文件时当前选中的codeComel值
-        currentTree: '', // 当前选中的树形菜单
+        currentTree: '', // 当前选中的树形菜单的codeCamel
+        treeComponent: '', // 当前的树形菜单组件
         foreignArray: [], // 批量创建或删除的多条外表数据
         nativeFormModel: {}, // 有外表时 本表数据  从formModel中提取
         foreighId: '', // 外表id即 与本表某个id对应
@@ -538,41 +541,34 @@
             ]
           }
         },
-        data2: [{
-          id: 1,
-          label: '一级 1',
-          children: [{
-            id: 4,
-            label: '二级 1-1',
-            children: [{
-              id: 9,
-              label: '三级 1-1-1'
-            }, {
-              id: 10,
-              label: '三级 1-1-2'
-            }]
-          }]
-        }, {
-          id: 2,
-          label: '一级 2',
-          children: [{
-            id: 5,
-            label: '二级 2-1'
-          }, {
-            id: 6,
-            label: '二级 2-2'
-          }]
-        }, {
-          id: 3,
-          label: '一级 3',
-          children: [{
-            id: 7,
-            label: '二级 3-1'
-          }, {
-            id: 8,
-            label: '二级 3-2'
-          }]
-        }],
+        data2: [
+          {
+            id: 1,
+            label: '公诉处',
+            children: [
+              {
+                id: 4,
+                label: '刘云山'
+              }
+            ]
+          },
+          {
+            id: 2,
+            label: '监察部',
+            children: [
+              { id: 5, label: '毛晓东' },
+              { id: 6, label: '方建国' }
+            ]
+          },
+          {
+            id: 3,
+            label: '办公室',
+            children: [
+              { id: 7, label: '司马南' },
+              { id: 8, label: '褚随山' }
+            ]
+          }
+        ],
         defaultProps: {
           children: 'children',
           label: 'label'
@@ -699,9 +695,11 @@
         // console.log(data, checked, indeterminate)
         const self = this
         console.log('handleCheckChange函数')
-        console.log(this.$refs.tree[0].getCheckedNodes(true))
-        console.log(this.$refs.tree[0].getCheckedKeys(true))
-        console.log('currentTree:', self.currentTree)
+        // console.log(this.$refs.tree[0].getCheckedNodes(true))
+        console.log('当前选择的codecamel:', self.currentTree)
+        console.log('当前选择的tree组件', self.treeComponent)
+        console.log(self.$refs[self.treeComponent][0].getCheckedKeys(true))
+        // console.log(this.$refs.treeComponent[1].getCheckedKeys(true))
         for (var i = 0, len = self.showUserColumns.length; i < len; i++) {
           // && !self.showUserColumns[i].edited
           if (self.showUserColumns[i].widgetType === 9) {
@@ -712,7 +710,7 @@
                 // 张家口
                 // self.formModel[key] = response.visitName + response.fileName
                 // org
-                self.formModel[key] = self.$refs.tree[0].getCheckedKeys(true)
+                self.formModel[key] = self.$refs[self.treeComponent][0].getCheckedKeys(true)
                 break
               }
             }
@@ -964,7 +962,8 @@
       init() {
         const self = this
         if (self.columns && self.columns.length) {
-          self.showUserColumns = _.cloneDeep(self.columns)
+          // self.showUserColumns = _.cloneDeep(self.columns)
+          self.showUserColumns = self.columns
           // console.log(504, self.showUserColumns)
           // console.log(514, self.formModel)
           // 处理传来的表单字段
@@ -1040,6 +1039,7 @@
               type: 'error'
             })
           }
+          self.isCancel.cancelSubmit = false
           return
         }
 
@@ -1301,7 +1301,7 @@
                 }
               })
             }
-            self.close()
+            // self.close()
           } else {
             console.log('提交失败!!')
             self.$message({
@@ -1335,7 +1335,7 @@
         if (typeof (callback) === 'function') {
           callback()
         }
-        this.close()
+        // this.close()
       },
       // 取消的回调函数
       cancel(callback) {
@@ -1343,7 +1343,7 @@
         if (typeof (callback) === 'function') {
           callback(self.formModel)
         }
-        self.close()
+        // self.close()
       },
       close() {
         this.$emit('formVisible')
@@ -1380,4 +1380,10 @@
   .hm-form .hm-form_form_div::-webkit-scrollbar{
     display: none;
   }
+  /*.hm-form .el-tree{*/
+  /*border-radius: 4px;*/
+  /*border: 1px solid red;*/
+  /*height: 150px;*/
+  /*overflow-y: auto;*/
+  /*}*/
 </style>
