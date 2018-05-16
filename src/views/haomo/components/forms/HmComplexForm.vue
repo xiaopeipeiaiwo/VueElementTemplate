@@ -1,5 +1,5 @@
 <template>
-  <!--class="app-container documentation-container"-->
+  <!--1class="app-container documentation-container"-->
   <div>
     <!--v-loading="Loading"-->
     <el-row type="flex" class="hm-form" style="margin-top: 12px" >
@@ -14,7 +14,7 @@
                  :label-width="formStyle && formStyle.formOptions && formStyle.formOptions.labelWidth || '163px'"
                  :model="formModel"
                  :rules="myRules"
-                 :style=" formStyle && formStyle.formOptions && formStyle.formOptions.style || {width:'100%',border:'1px solid red'}">
+                 :style=" formStyle && formStyle.formOptions && formStyle.formOptions.style || {width:'100%'}">
           <el-form-item v-for="column in showUserColumns"
                         v-show="!column.hide"
                         :key="column.id"
@@ -85,7 +85,7 @@
             <quill-editor v-else-if="column.widgetType === 5"
                           :ref="column.ref || ''" :disabled="column.disabled"
                           v-model="formModel[column.codeCamel]"
-                          :style="formStyle && formStyle.quillEditor && formStyle.quillEditor.style || {width: '70%'}"
+                          :style="formStyle && formStyle.quillEditor && formStyle.quillEditor.style || {width:'70%'}"
                           :options="column.options || editorOption"
                           @blur="onEditorBlur($event)"
                           @focus="onEditorFocus($event)"
@@ -118,7 +118,7 @@
             <!-- 8树形图 -->
             <!--:default-expanded-keys="[2, 3]"-->
             <!--:default-checked-keys="[5]"-->
-            <div class="hm-form_form_div" @mouseenter="currentTree = column.codeCamel;treeComponent = column.ref" v-else-if="column.widgetType === 9">
+            <div class="hm-form_form_div" @mouseenter="currentTree = column.codeCamel;treeComponent = column.ref" v-else-if="column.widgetType === 9" :style="formStyle && formStyle.elTree && formStyle.elTree.style || {width: '70%'}">
               <el-tree :data="column.options"
                        :ref="column.ref || 'tree'"
                        show-checkbox
@@ -126,18 +126,21 @@
                        accordion
                        @node-click="handleNodeChange"
                        @check-change="handleCheckChange"
-                       :default-expanded-keys="column.expanded || []"
-                       :default-checked-keys="column.checked || []"
-                       :props="defaultProps">
+                       :default-checked-keys="defaultKeys || formModel[column.codeCamel]"
+                       :props="column.props || treeProps">
               </el-tree>
             </div>
             <!-- 9 级联下拉框v-model="formModel[column.codeCamel]"-->
             <el-cascader v-else-if="column.widgetType === 10"
                          expand-trigger="hover"
+                         placeholder="搜索"
                          :options="column.options"
+                         filterable clearable
+                         :show-all-levels="false"
                          v-model="formModel[column.codeCamel]"
+                         :props="column.props || cascaderProps"
                          :style="formStyle && formStyle.cascader && formStyle.cascader.style || {width: '70%'}"
-                         @change="column.change && column.change($event)">
+                         @change="column.change && column.change($event, formModel)">
             </el-cascader>
             <!-- 10 普通input  || {width:'65%'}-->
             <el-input v-else-if="column.widgetType === 1 && column.rule && column.rule.type && column.rule.type === 'number'"
@@ -493,8 +496,8 @@
       //   }
       // }
       return {
-        currentFile: '', // 上传文件时当前选中的codeComel值
-        currentTree: '', // 当前选中的树形菜单的codeCamel
+        currentFile: '', // 上传文件时当前选中的codeCamel值
+        currentTree: '', // 当前选中的树形菜单的codeCamel值
         treeComponent: '', // 当前的树形菜单组件
         foreignArray: [], // 批量创建或删除的多条外表数据
         nativeFormModel: {}, // 有外表时 本表数据  从formModel中提取
@@ -506,7 +509,10 @@
         relateData: {}, // 中间表数据
         Loading: true, // 加载等待
         form: null,
-        formModel: {}, // 双向绑定的数据变量
+        defaultKeys: [], // 默认选中项
+        formModel: {}, // 双向绑定的数据对象
+        formModelDeal: {}, // 新建或编辑时，提交之前用户对formModel处理之后的数据对象。原因：以级联表单为例，
+        // 级联表单v-model绑定的是数组，而往数据库中存储的是数组中的某一个字符串，如果把v-model的值经processData处理之后(数组--->字符串)，仍然用formModel接收，Vue监听会报错(expected Array，got string)，此时需要用formModealDeal接收并提交，不改变表单绑定的数据对象formModel
         showUserColumns: [], // 要显示的字段
         myRules: {
           // username: [
@@ -540,6 +546,18 @@
               ['image']
             ]
           }
+        },
+        // 树形选项配置
+        treeProps: {
+          label: 'label',
+          // value: 'value',
+          children: 'children'
+        },
+        // 级联下拉选项配置
+        cascaderProps: {
+          label: 'label',
+          value: 'value',
+          children: 'children'
         },
         data2: [
           {
@@ -618,14 +636,10 @@
     },
     created() {
       // this.validate()
+      // this.$set(this.defaultKeys, 0, 161)
       this.init()
       this.getData()
       this.getList()
-      // setTimeout(function() {
-      //   var url = _.keys(self.refers)[0] + 's' + '/create/batch'
-      //   console.log(url)
-      // }, 3000)
-      // console.log(this.buttons)
     },
     methods: {
       // 上传文件成功的回调函数
@@ -696,10 +710,10 @@
         const self = this
         console.log('handleCheckChange函数')
         // console.log(this.$refs.tree[0].getCheckedNodes(true))
-        console.log('当前选择的codecamel:', self.currentTree)
-        console.log('当前选择的tree组件', self.treeComponent)
+        // console.log('当前选择的codecamel:', self.currentTree)
+        // console.log('当前选择的tree组件', self.treeComponent)
         console.log(self.$refs[self.treeComponent][0].getCheckedKeys(true))
-        // console.log(this.$refs.treeComponent[1].getCheckedKeys(true))
+        // console.log('默认选中', self.defaultKeys)
         for (var i = 0, len = self.showUserColumns.length; i < len; i++) {
           // && !self.showUserColumns[i].edited
           if (self.showUserColumns[i].widgetType === 9) {
@@ -909,6 +923,8 @@
             // 如果只是单表
           } else if (resp.data.length > 0) {
             console.log('单表查询', resp.data)
+            self.defaultKeys.push(parseInt(resp.data[0].departmentId))
+            console.log(self.defaultKeys)
             var formArray = _.keys(self.formModel) // 提取formModel的属性到数组
             if (resp.data[0].superior && !self.isEmptyObject(resp.data[0].superior)) {
               self.formModel = _.pick(resp.data[0].superior, formArray) // 根据数组中的属性提取出data中对应的数据
@@ -951,6 +967,15 @@
                   }
                 })
               }
+              // 树形控件，将请求回来的字符串放数组中
+              if (item.widgetType === 9) {
+                _.forEach(self.formModel, function(value, key) {
+                  if (item.codeCamel === key) {
+                    // console.log(11111, self.formModel[key])
+                    self.formModel[key] = self.formModel[key].split(',')
+                  }
+                })
+              }
             })
           }
           console.log('getList', self.formModel)
@@ -964,8 +989,6 @@
         if (self.columns && self.columns.length) {
           // self.showUserColumns = _.cloneDeep(self.columns)
           self.showUserColumns = self.columns
-          // console.log(504, self.showUserColumns)
-          // console.log(514, self.formModel)
           // 处理传来的表单字段
           _.each(self.showUserColumns, function(column, index) {
             if (typeof column === 'string') {
@@ -988,13 +1011,13 @@
           // console.log('self.showUserColumns', self.showUserColumns)
           // 提取v-model绑定的变量
           _.each(self.showUserColumns, function(item) {
-            if (item.widgetType === 8 || (item.widgetType === 3 && item.options && item.options.length > 0)) {
+            if (item.widgetType === 8 || item.widgetType === 10 || item.widgetType === 9 || (item.widgetType === 3 && item.options && item.options.length > 0)) {
               self.$set(self.formModel, item.codeCamel, [])
             } else {
               item.default ? self.$set(self.formModel, item.codeCamel, item.default) : self.$set(self.formModel, item.codeCamel, '')
             }
           })
-          // console.log('self.formModel', self.formModel)
+          console.log('初始化self.formModel', self.formModel)
           if (!request.defaults.baseURL) {
             request.defaults.baseURL = '/org/api'
           }
@@ -1027,9 +1050,10 @@
           })
           return
         }
-        // 对表单数据进行处理
-        self.formModel = processData ? processData(self.formModel, self.isCancel) : self.formModel
-        // console.log(self.formModel)
+        // 提交之前对表单数据进行处理
+        self.formModelDeal = processData ? processData(self.formModel, self.isCancel) : self.formModel
+        console.log('表单数据经过了处理', self.formModel)
+        debugger
         // 如果在processData中禁止提交了，显示提示信息
         if (self.isCancel.cancelSubmit) {
           console.log('取消提交')
@@ -1042,7 +1066,6 @@
           self.isCancel.cancelSubmit = false
           return
         }
-
         // 验证、提交
         self.$refs.form.validate((valid) => {
           if (valid) {
@@ -1076,7 +1099,7 @@
               request(self.schema.modelUnderscorePlural + '/' + self.tableId + '/edit', {
                 method: 'post',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
-                data: self.isEmptyObject(self.nativeFormModel) ? self.formModel : self.nativeFormModel,
+                data: self.isEmptyObject(self.nativeFormModel) ? self.formModelDeal : self.nativeFormModel,
                 transformRequest:
                   function(obj) {
                     var str = []
@@ -1101,7 +1124,7 @@
 
                 // 修改成功执行用户回调
                 if (typeof (callback) === 'function') {
-                  callback(resp.data, self.formModel)
+                  callback(resp.data, self.formModelDeal)
                 }
               }).catch(err => {
                 console.log(err)
@@ -1188,7 +1211,7 @@
               request(self.schema.modelUnderscorePlural + '/new', {
                 method: 'post',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
-                data: self.isEmptyObject(self.refers) ? self.formModel : self.nativeFormModel,
+                data: self.isEmptyObject(self.refers) ? self.formModelDeal : self.nativeFormModel,
                 transformRequest:
                   function(obj) {
                     var str = []
@@ -1286,7 +1309,7 @@
                 }
                 // 新建成功执行用户回调
                 if (typeof (callback) === 'function') {
-                  callback(resp.data, self.formModel)
+                  callback(resp.data, self.formModelDeal)
                 }
                 // 清空上传文件和树形菜单的codeComel
                 self.currentFile = ''
@@ -1341,7 +1364,7 @@
       cancel(callback) {
         const self = this
         if (typeof (callback) === 'function') {
-          callback(self.formModel)
+          callback(self.formModelDeal)
         }
         // self.close()
       },
@@ -1371,7 +1394,7 @@
   .hm-form .hm-form_form_div{
     border-radius: 4px;
     border: 1px solid #dcdfe6;
-    max-height: 150px;
+    max-height: 134px;
     overflow-y: scroll;
   }
   .hm-form .hm-form_form_div:hover{
