@@ -8,6 +8,7 @@
           <el-input @keyup.enter.native="handleFilter"
                     style="width: 200px;"
                     class="filter-item"
+                    clearable
                     :placeholder="filter.placeholder"
                     v-if="filter.isShow && isShowFilter(filter)"
                     v-model="listQuery.filters[schema['modelUnderscore']][getFilterColumn(filter)][getFilterOper(filter)]">
@@ -16,6 +17,7 @@
           <el-input @keyup.enter.native="handleFilter"
                     style="width: 200px;"
                     class="filter-item"
+                    clearable
                     :placeholder="filter.placeholder[0]"
                     v-if="filter.isShow && !isShowFilter(filter) && !isDatetimeFilter(filter)"
                     v-model="listQuery.filters[schema['modelUnderscore']][getFilterColumn(filter)][getFilterOper(filter)]">
@@ -23,6 +25,7 @@
           <el-input @keyup.enter.native="handleFilter"
                     style="width: 200px;"
                     class="filter-item"
+                    clearable
                     :placeholder="filter.placeholder[1]"
                     v-if="filter.isShow && !isShowFilter(filter) && !isDatetimeFilter(filter)"
                     v-model="listQuery.filters[schema['modelUnderscore']][getFilterColumn(filter)][getFilterOperTwin(filter)]">
@@ -62,17 +65,18 @@
           <el-form-item v-if="operate.type == 'input'" :label="operate.label">
             <el-input @keyup.enter.native="handleFilter"
                       style="width: 200px;"
+                      clearable
                       class="filter-item"
                       :placeholder="operate.placeholder"
                       v-model="operate.value">
             </el-input>
           </el-form-item>
           <!--自定义时间选择-->
-          <el-form-item v-if="operate.type == 'datetime'" :label="operate.label">
-            <el-date-picker type="datetime"
+          <el-form-item v-if="operate.type == 'datetime' || operate.type == 'date'" :label="operate.label">
+            <el-date-picker :type="operate.type || 'datetime'"
                             class="filter-item"
                             @keyup.enter.native="handleFilter"
-                            value-format="yyyy-MM-dd HH:mm:ss"
+                            :value-format="operate.valueFormate || 'yyyy-MM-dd HH:mm:ss'"
                             :placeholder="operate.placeholder"
                             v-model="operate.value">
             </el-date-picker>
@@ -95,7 +99,7 @@
           <el-button class="filter-item" :style="titleButtonStyle" type="primary" v-waves icon="el-icon-refresh" v-if="isShowRefresh" @click="refreshList">刷新</el-button>
           <el-button class="filter-item" :style="titleButtonStyle" type="primary" v-waves icon="el-icon-close" v-if="multipleSelection.length" @click="BatchRemove">批量删除</el-button>
         </span>
-        <hm-full-calendar style="display: inline;margin-left: 10px;" :schema="HmFullCalendar.calendarSchema" :demoEvents="HmFullCalendar.demoEvents" v-if="HmFullCalendar.calendarSchema"></hm-full-calendar>
+        <hm-full-calendar style="display: inline;margin-left: 10px;" :schema="HmFullCalendar.calendarSchema" :demoEvent="HmFullCalendar.demoEvents" v-if="HmFullCalendar.calendarSchema"></hm-full-calendar>
       
       </el-form>
     </div>
@@ -137,7 +141,10 @@
     
     <!-- 弹窗 -->
     <!-- @TODO 补充详情弹窗 -->
-    <el-dialog :title="dialogName" :visible.sync="dialogFormVisible" :close-on-click-modal="closeOnClickModal" width="45%" v-if="dialogFormVisible">
+    <el-dialog :title="dialogName"
+               :visible.sync="dialogFormVisible"
+               :close-on-click-modal="closeOnClickModal" width="45%"
+               v-if="dialogFormVisible" :before-close="options.handClose">
       <hm-complex-form :schema="HmComplexForm.formSchema"
                        :columns="HmComplexForm.showUserColumns"
                        :buttons="HmComplexForm.showUserButtons"
@@ -150,8 +157,8 @@
                        :includes="HmComplexForm.formIncludes"
                        :foreignFormFields="HmComplexForm.foreignFormFields"
                        :relates="HmComplexForm.formRelates"
-                       :rules="HmComplexForm.rules"
-                       v-on:formVisible='dialogClose'>
+                       ref="hmComplexForm"
+                       :rules="HmComplexForm.rules">
       </hm-complex-form>
     </el-dialog>
     
@@ -251,7 +258,6 @@
         type: Object,
         required: false
       },
-  
       /**
        * 指定要显示的列。默认为根据schema得到的所有列。完整示例为：
        *  [
@@ -275,7 +281,6 @@
             console.warn(`传入的columns不符合要求，必须是数组`)
             return false
           }
-  
           return true
         }
       },
@@ -565,7 +570,7 @@
                 self.operationWidth += 13 // 如果是汉字加13
               }
             })
-            if (self.userDefined.definedOperation.length > 1 && index > 1) {
+            if (self.userDefined.definedOperation.length > 1 && index > 0) {
               self.operationWidth += 13 // 每添加一条需加上margin
             } else {
               self.operationWidth += 5
@@ -589,23 +594,19 @@
       getList() {
         const self = this
         self.listLoading = true
-  
         // 处理过滤条件
         let params = JSON.parse(JSON.stringify(self.listQuery))
         params.filters = self.filterParams
         params.filters = this.deleteFilter(params.filters)
-  
         if (self.includes) {
           params.includes = self.includes
         }
         if (self.refers) {
           params.refers = self.refers
         }
-  
         if (self.userDefined && self.userDefined.definedParams) {
           params = self.userDefined.definedParams(params, self.definedOperate)
         }
-  
         request(self.schema.modelUnderscorePlural, {
           params: params
         }).then(resp => {
@@ -740,7 +741,6 @@
         }
         if (type === 'detail') {
           self.dialogName = '详情'
-  
           if (self.options.showDetail.showUserButtons) {
             self.HmComplexForm.showUserButtons = self.options.showDetail.showUserButtons
           }
@@ -755,13 +755,11 @@
           self.options.showDetail.foreignFormFields ? self.HmComplexForm.foreignFormFields = self.options.showDetail.foreignFormFields : ''
           self.options.showDetail.formRelates ? self.HmComplexForm.formRelates = self.options.showDetail.formRelates : ''
           self.HmComplexForm.tableId = data.id
-  
           // wk 2018年05月09日11:57:06
           if (self.options.showDetail.funCallback) {
             self.options.showDetail.funCallback(data)
           }
         }
-  
         self.dialogFormVisible = true
       },
       statusFunc(row, operation) {
@@ -809,7 +807,6 @@
           filters: {}
         }
         this.init()
-  
         this.getList()
       },
       // 批量删除
@@ -860,17 +857,17 @@
         self.options.pageSize ? this.listQuery.pageSize = self.options.pageSize : this.listQuery.pageSize // 配置pageSize
         self.options.sortItem ? this.listQuery.sortItem = self.options.sortItem : this.listQuery.sortItem // sortItem
         self.options.sortOrder ? this.listQuery.sortOrder = self.options.sortOrder : this.listQuery.sortOrder // sortOrder
-        if (self.options.newData && self.options.newData.isShow) { // 判断是否显示新建按钮
+        if (self.options.newData && self.options.newData.isShow !== undefined) { // 判断是否显示新建按钮
           self.isShowNewButton = self.options.newData.isShow
         }
-        if (self.options.editData && self.options.editData.isShow) { // 判断是否显示编辑按钮
+        if (self.options.editData && self.options.editData.isShow !== undefined) { // 判断是否显示编辑按钮
           self.isShowEditDataButton = self.options.editData.isShow
-          self.operationWidth += 30
+          self.operationWidth += 40
         }
-        if (self.options.showRefresh) { // 判断是否显示刷新按钮
+        if (self.options.showRefresh !== undefined) { // 判断是否显示刷新按钮
           self.isShowRefresh = self.options.showRefresh
         }
-        if (self.options.showExport) { // 判断是否显示导出按钮
+        if (self.options.showExport !== undefined) { // 判断是否显示导出按钮
           self.isShowExport = self.options.showExport
         }
         if (self.options.isShowSearch !== undefined) { // 判断是否显示刷新
@@ -882,24 +879,24 @@
         if (self.options.isShowPagination !== undefined) { // 判断是否显示分页
           self.isShowPagination = self.options.isShowPagination
         }
-        if (self.options.showDeleteButton) { // 判断是否显示删除按钮
+        if (self.options.showDeleteButton !== undefined) { // 判断是否显示删除按钮
           self.isShowDeleteButton = self.options.showDeleteButton
-          self.operationWidth += 30
+          self.operationWidth += 40
         }
-        if (self.options.buttonGroup) { // 设置按钮是否以按钮组呈现
+        if (self.options.buttonGroup !== undefined) { // 设置按钮是否以按钮组呈现
           self.buttonGroup = self.options.buttonGroup
         }
-        if (self.options.showDetail && self.options.showDetail.isShow) { // 设置按钮是否以按钮组呈现
+        if (self.options.showDetail && self.options.showDetail.isShow !== undefined) { // 设置按钮是否以按钮组呈现
           self.isShowDetail = self.options.showDetail.isShow
-          self.operationWidth += 30
+          self.operationWidth += 40
         }
-        if (self.options.showSelection) { // 设置是否显示多选
+        if (self.options.showSelection !== undefined) { // 设置是否显示多选
           self.isShowSelection = self.options.showSelection
         }
         if (self.options.tableStyle) { // 自定义table样式
           self.tableStyle = self.options.tableStyle
         }
-        if (self.options.showOverflowTooltip) { // 当内容过长被隐藏时显示 tooltip
+        if (self.options.showOverflowTooltip !== undefined) { // 当内容过长被隐藏时显示 tooltip
           self.showOverflowTooltip = self.options.showOverflowTooltip
         }
         if (self.options.HmFullCalendar) { // 当内容过长被隐藏时显示 tooltip
@@ -957,7 +954,6 @@
           }
         }))
       },
-  
       getFilterColumn(filter) {
         const keys = Object.keys(filter)
         let column = null
@@ -969,7 +965,6 @@
         })
         return column.toLowerCase()
       },
-  
       getFilterOper(filter) {
         return Object.keys(filter[this.getFilterColumn(filter)])[0]
       },

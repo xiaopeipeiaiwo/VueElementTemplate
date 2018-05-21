@@ -143,6 +143,9 @@
       },
       dropDown(value) {
         console.log('输出一些东西', value)
+      },
+      statusFunc() {
+  
       }
     }
   }
