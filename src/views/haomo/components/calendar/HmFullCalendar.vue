@@ -1,6 +1,6 @@
 <template>
   <div class="calendarlist">
-    <i class="el-icon-date" @click="dialogTableVisible = true"></i>
+    <i class="el-icon-date" @click="dialogTableVisible = true" :style="demoEvent.iconStyle"></i>
     <el-dialog :visible.sync="dialogTableVisible">
       <div class="datebook-root" :style='componentW?"width:"+componentW+";":""'>
         <div class='top-panel'>
@@ -44,6 +44,7 @@
     box-sizing:border-box;
     width: 280px;
     border:1px solid #ececec;
+    display: inline-block;
   }
   .datebook-root .top-panel{
     padding-top: 10px;
@@ -177,24 +178,25 @@
     background: #2db7f5 ;
   }
   .incident{
-    top: -350px;
-    left:270px;
+    vertical-align: top;
+    width: 300px;
     display:inline-block;
-    position:relative;
     background-color:#202020;
-    width:180px;
-    height:;
-    padding:20px;
+    height:428px;
+    position: relative;
+    overflow: scroll;
+    text-align: center;
+    /*padding:20px;*/
     color:#CCC;
-    text-align:center;
-    font-size:14px;
-    font-family:微软雅黑;
-    border-radius:10px;
-    margin:50px;
-    box-shadow:1px 1px 2px #202020;
-    -o-box-shadow:1px 1px 2px #202020;
-    -moz-box-shadow:1px 1px 2px #202020;
-    -webkit-border-shadow:1px 1px 2px #202020;
+    /*text-align:center;*/
+    /*font-size:14px;*/
+    /*font-family:微软雅黑;*/
+    /*border-radius:10px;*/
+    /*margin:50px;*/
+    /*box-shadow:1px 1px 2px #202020;*/
+    /*-o-box-shadow:1px 1px 2px #202020;*/
+    /*-moz-box-shadow:1px 1px 2px #202020;*/
+    /*-webkit-border-shadow:1px 1px 2px #202020;*/
   }
   .close{
     position: absolute;
@@ -203,20 +205,21 @@
     right:0;
   }
   .incident span {
+    color: white;
     font-size: 10px;
     padding: 10px 20px;
   }
   .incident:before{
-    content:'';
-    position:absolute;
-    width:0;
-    height:0;
-    border:15px solid;
-    color:transparent;
-    border-right-color:#202020;
-    left:-30px;
-    top:50%;
-    margin-top:-15px;
+    /*content:'';*/
+    /*position:absolute;*/
+    /*width:0;*/
+    /*height:0;*/
+    /*border:15px solid;*/
+    /*color:transparent;*/
+    /*border-right-color:#202020;*/
+    /*left:-30px;*/
+    /*top:50%;*/
+    /*margin-top:-15px;*/
   }
 </style>
 <script>
@@ -266,20 +269,12 @@
         type: Object,
         required: true
       },
-      width: {
-        type: String,
-        required: false
-      },
+
       initTime: {
         required: false
       },
-      title: {
-        required: false
-      },
-      events: {
-        required: false
-      },
-      date: {
+      demoEvent: {
+        type: Object,
         required: false
       }
     },
@@ -399,7 +394,7 @@
       },
       dateChange(dateItem) {
         this.show = true
-        console.log(dateItem, '-=-=-=-=-=-=-=-=-')
+        // console.log(dateItem, '-=-=-=-=-=-=-=-=-')
         var dateObj = new Date(this.showTimeData)
         var year = dateObj.getFullYear()
         var month = dateObj.getMonth()
@@ -448,7 +443,7 @@
               dateItem.active = !dateItem.active
             }
             // 向上发送本次点击的行程数据
-            console.log(result, '--------------------')
+            // console.log(result, '--------------------')
             if (result.schedule) {
               const currentTime = this.timestampToTime(result.schedule.date)
               this.currentDate = currentTime
@@ -487,15 +482,16 @@
       getDailyEvent() {
         const self = this
         var saveTime = ''
+        var filterparams = self.demoEvent.filterparams
         request(self.schema.modelUnderscorePlural, {
-          params: { 'sortItem': 'create_time', 'pageSize': 10000 }
+          params: { 'sortItem': self.demoEvent.timeOrder, 'pageSize': 10000, filters: filterparams }
         }).then(resp => {
           console.log(resp.data, '=========')
           _.each(resp.data, function(item) {
-            item.time = moment(item[self.date]).format('YYYY-MM-DD')
-            item.date = moment(item[self.date]).format('X') * 1000
-            item.title = item[self.title]
-            item.allEvents = item[self.events]
+            item.time = moment(item[self.demoEvent.date]).format('YYYY-MM-DD')
+            item.date = moment(item[self.demoEvent.date]).format('X') * 1000
+            item.title = item[self.demoEvent.title]
+            item.allEvents = item[self.demoEvent.events]
             if (saveTime === item.time) {
               self.schedules[self.schedules.length - 1].allEvents.push(item.allEvents)
             } else {
@@ -508,7 +504,7 @@
             }
           })
         })
-        console.log(self.schedules, '+++++最终+++++++++')
+        // console.log(self.schedules, '+++++最终+++++++++')
       }
     },
     created() {

@@ -31,12 +31,17 @@
         // widgetType值 1：普通input 2：下拉框 (如果是下拉框 再传一个options表示下拉框选项)3：复选框 4：文本域 5：富文本 6：日期 7：单选框 8: 文件上传
         showUserColumns: [
           // 1普通input
-          { name: '选择类型', codeCamel: 'type', widgetType: 1, disabled: false,
-            change: this.inputChange
+          { name: '选择类型', codeCamel: 'type', widgetType: 9, ref: 'type', options: []
             // rule: { required: true, message: '用户名不能为空', trigger: 'blur' }
             //  hide: true
             //  default: '默认值',
           },
+          // { name: '选择类型', codeCamel: 'type', widgetType: 1, disabled: false,
+          //   change: this.inputChange
+          //   // rule: { required: true, message: '用户名不能为空', trigger: 'blur' }
+          //   //  hide: true
+          //   //  default: '默认值',
+          // },
           // 5富文本
           { name: '电子邮件', codeCamel: 'email', widgetType: 5, disabled: false,
             change: this.inputChange, hide: false
@@ -46,16 +51,16 @@
             // ]
           },
           // 2下拉框
-          // { name: '用户名称', codeCamel: 'username', widgetType: 2, multiple: false,
-          //   change: this.selectChange, // default: [1], 如果开启多选，默认选中项用数组[1]、[1,2,3]
-          //   allowCreate: true,
-          //   options: [
-          //     { value: '1', label: '企业' }, // 下拉框的label是选项文字，value是选中值
-          //     { value: '2', label: '代理商' },
-          //     { value: '3', label: '会员' },
-          //     { value: '4', label: '访客' }
-          //   ]
-          // },
+          { name: '用户名称', codeCamel: 'username', widgetType: 2, multiple: false,
+            change: this.selectChange, // default: [1], 如果开启多选，默认选中项用数组[1]、[1,2,3]
+            allowCreate: true,
+            options: [
+              { value: '1', label: '企业' }, // 下拉框的label是选项文字，value是选中值
+              { value: '2', label: '代理商' },
+              { value: '3', label: '会员' },
+              { value: '4', label: '访客' }
+            ]
+          },
           // 3多选 不支持默认值
           { name: '部门ID', codeCamel: 'departmentId', widgetType: 3, options: ['美女', '帅哥'], change: this.inputChange },
           // 4密码
@@ -75,8 +80,7 @@
             change: this.inputChange
           },
           // 8文件 change: this.uploadChange
-          { name: '选择头像', codeCamel: 'avatar', widgetType: 8, url: '/api/upload', param: 'picture' }, // url是后台接口地址
-          { name: '用户名称', codeCamel: 'username', widgetType: 8, url: '/api/upload', param: 'picture' } // url是后台接口地址
+          { name: '选择头像', codeCamel: 'avatar', widgetType: 8, url: '/api/upload', param: 'picture' } // url是后台接口地址
         ],
         // CcSubject示例
         showUserColumns2: [
@@ -147,6 +151,7 @@
           input: { style: { width: '60%' }},
           select: { style: { width: '60%' }},
           cascader: { style: { width: '60%' }},
+          elTree: { style: { width: '60%' }},
           textarea: {
             style: { width: '60%' },
             resize: 'none',
@@ -183,8 +188,8 @@
     },
     methods: {
       inputChange(val, formModel) {
-        // console.log(val)
-        // console.log(formModel)
+        console.log(val)
+        console.log(formModel)
         // formModel.email = val.length
       },
       selectChange(val, formModel) {
@@ -220,8 +225,8 @@
         return formModel
       },
       uploadFun: function(response, formModel) {
-        // console.log(215, response)
-        // console.log(216, formModel)
+        console.log(215, response)
+        console.log(216, formModel)
         // 修改其他表单的值
         formModel.email = response.visitName
       }

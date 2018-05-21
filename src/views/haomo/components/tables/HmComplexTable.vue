@@ -82,7 +82,7 @@
             </el-date-picker>
           </el-form-item>
         </span>
-        
+
         <!--预定义按钮-->
         <el-button-group v-if="buttonGroup">
           <el-button class="filter-item" :style="titleButtonStyle" type="primary" v-waves icon="el-icon-search" v-if="isShowSearch" @click="handleFilter">搜索</el-button>
@@ -91,7 +91,7 @@
           <el-button class="filter-item" :style="titleButtonStyle" type="primary" v-waves icon="el-icon-refresh" v-if="isShowRefresh" @click="refreshList">刷新</el-button>
           <el-button class="filter-item" :style="titleButtonStyle" type="primary" v-waves icon="el-icon-close" v-if="multipleSelection.length" @click="BatchRemove">批量删除</el-button>
         </el-button-group>
-        
+
         <span v-if="!buttonGroup">
           <el-button class="filter-item" :style="titleButtonStyle" type="primary" v-waves icon="el-icon-search" v-if="isShowSearch" @click="handleFilter">搜索</el-button>
           <el-button class="filter-item" :style="titleButtonStyle" type="primary" :loading="downloadLoading" v-waves icon="el-icon-download" v-if="isShowExport" @click="handleDownload">导出</el-button>
@@ -99,12 +99,11 @@
           <el-button class="filter-item" :style="titleButtonStyle" type="primary" v-waves icon="el-icon-refresh" v-if="isShowRefresh" @click="refreshList">刷新</el-button>
           <el-button class="filter-item" :style="titleButtonStyle" type="primary" v-waves icon="el-icon-close" v-if="multipleSelection.length" @click="BatchRemove">批量删除</el-button>
         </span>
-        <hm-full-calendar style="display: inline;margin-left: 10px;" :schema="HmFullCalendar.calendarSchema" :demoEvent="HmFullCalendar.demoEvents" v-if="HmFullCalendar.calendarSchema"></hm-full-calendar>
-      
+        <hm-full-calendar style="display: inline;margin-left: 10px;" :schema="HmFullCalendar.calendarSchema" :demoEvents="HmFullCalendar.demoEvents" v-if="HmFullCalendar.calendarSchema"></hm-full-calendar>
       </el-form>
     </div>
     <!-- end 过滤 -->
-    
+
     <!-- 表格 -->
     <el-table :data="list" v-loading="listLoading" element-loading-text="给我一点时间" border fit highlight-current-row :cell-style="cellStyle" ref="multipleTable"
               :style="tableStyle" @selection-change="handleSelectionChange" @sort-change="sortChange" @current-change="tableCurrentChange">
@@ -130,7 +129,7 @@
       </el-table-column>
     </el-table>
     <!-- end 表格 -->
-    
+
     <!-- 翻页 -->
     <div class="pagination-container" v-if="isShowPagination">
       <el-pagination background @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page.sync="listQuery.pageNo"
@@ -138,7 +137,7 @@
       </el-pagination>
     </div>
     <!-- end翻页 -->
-    
+
     <!-- 弹窗 -->
     <!-- @TODO 补充详情弹窗 -->
     <el-dialog :title="dialogName"
@@ -161,9 +160,9 @@
                        :rules="HmComplexForm.rules">
       </hm-complex-form>
     </el-dialog>
-    
+
     <!-- end 弹窗 -->
-  
+
   </div>
 </template>
 
@@ -176,7 +175,7 @@
   import { Button, Table, TableColumn, Pagination, Loading } from 'element-ui'
   import HmComplexForm from '../forms/HmComplexForm.vue'
   import HmFullCalendar from '../calendar/HmFullCalendar.vue'
-  
+
   /**
    * 毫末科技的表格组件.
    *
@@ -447,14 +446,12 @@
             }
           })
         })
-  
         _.each(Object.keys(ret[self.schema['modelUnderscore']]), function(column) {
           const operValue = ret[self.schema['modelUnderscore']][column]
           if (Object.keys(operValue)[0] === 'like') {
             ret[self.schema['modelUnderscore']][column]['like'] = '%' + ret[self.schema['modelUnderscore']][column]['like'] + '%'
           }
         })
-  
         return ret
       }
     },
@@ -485,7 +482,6 @@
           if (!item) {
             return 0
           }
-  
           if (typeof item !== 'string' && typeof item !== 'object') {
             console.error(`传入的columns不符合要求，数组元素必须是字符串或对象`)
           }
@@ -497,7 +493,6 @@
           }
         })
       },
-  
       init() {
         const self = this
         self.operationWidth = 20
@@ -526,7 +521,7 @@
             item.isSort = item.isSort === undefined ? false : item.isSort === true ? 'custom' : false
           })
         }
-  
+
         // 处理过滤条件
         if (self.filters) {
           const tableName = self.schema['modelUnderscore']
@@ -551,7 +546,7 @@
         if (self.userDefined) {
           self.setDefinedOperate()
         }
-  
+
         console.log(request.defaults)
         console.log(`request.defaults.baseURL: ${request.defaults.baseURL}`)
       },
