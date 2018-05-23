@@ -21,8 +21,6 @@
                         :label="column.name"
                         :rules="column.rule?column.rule:null"
                         :prop="column.codeCamel">
-            <!--el-input<el-input v-if="column.codeCamel==='password'" type="password"
-                      v-model="formModel[column.codeCamel]"></el-input>-->
             <!-- 1 日期选择 -->
             <!-- -->
             <el-date-picker v-if="column.widgetType === 6 || column.type === 'datetime' || column.type === 'date'"
@@ -32,9 +30,9 @@
                             :readonly="column.readonly"
                             :type="column.dateType || 'date'"
                             align="right" :disabled="column.disabled"
-                            @change="column.change && column.change($event)"
+                            @change="column.change && column.change($event, formModel)"
                             :value-format="column.dateFormate || 'yyyy-MM-dd'"
-                            :picker-options="pickerOptions">
+                            :picker-options="column.pickerOptions || pickerOptions">
             </el-date-picker>
             <!-- 2 下拉框 -->
             <el-select v-else-if="column.widgetType === 2"
@@ -72,7 +70,8 @@
                          :ref="column.ref || ''"
                          :disabled="column.disabled"
                          @change="column.change && column.change($event)"
-                         true-label="1" false-label="0"></el-checkbox>
+                         true-label="1" false-label="0">
+            </el-checkbox>
             <el-checkbox-group v-else-if="column.widgetType === 3 && column.options"
                                v-model="formModel[column.codeCamel]"
                                :ref="column.ref || ''"
@@ -105,7 +104,7 @@
             <el-upload v-else-if="column.widgetType === 8"
                        :accept="column.accept || '*/*'"
                        :name="column.param || 'picture'"
-                       :action=" column.url || '/api/upload'"
+                       :action="column.url || '/api/upload'"
                        :on-remove="handleRemove"
                        :limit="column.limit || 3"
                        :on-change="column.change || handleChange"
@@ -142,21 +141,32 @@
                          :style="formStyle && formStyle.cascader && formStyle.cascader.style || {width: '70%'}"
                          @change="column.change && column.change($event, formModel)">
             </el-cascader>
-            <!-- 10 普通input  || {width:'65%'}-->
+            <!--10 密码框-->
+            <el-input v-else-if="column.widgetType === 11" type="password"
+                      @change="column.change && column.change($event,formModel)"
+                      :style="formStyle && formStyle.input && formStyle.input.style || {width:'70%'}"
+                      :disabled="column.disabled"
+                      :readonly="column.readonly"
+                      v-model="formModel[column.codeCamel]">
+
+            </el-input>
+            <!-- 11 普通input  || {width:'65%'}-->
             <el-input v-else-if="column.widgetType === 1 && column.rule && column.rule.type && column.rule.type === 'number'"
                       :style="formStyle && formStyle.input && formStyle.input.style || {width:'70%'}"
                       v-model.number="formModel[column.codeCamel]"
                       :disabled="column.disabled"
                       :readonly="column.readonly"
                       :ref="column.ref || ''"
-                      @change="column.change && column.change($event,formModel)"></el-input>
+                      @change="column.change && column.change($event,formModel)">
+            </el-input>
             <el-input v-else
                       :style="formStyle && formStyle.input && formStyle.input.style || {width:'70%'}"
                       v-model="formModel[column.codeCamel]"
                       :disabled="column.disabled"
                       :readonly="column.readonly"
                       :ref="column.ref || ''"
-                      @change="column.change && column.change($event,formModel)"></el-input>
+                      @change="column.change && column.change($event,formModel)">
+            </el-input>
           </el-form-item>
           <!--按钮-->
           <el-form-item v-if="buttons && buttons.length > 0" class="hm-form_btn" style="margin-top: 40px">
@@ -225,8 +235,8 @@
        * accept属性可选,当表单类型为文件类型时，可传入accept字段，限制限制上传文件类型，取值规范参考w3c
        * fileData属性可选，当表单类型为文件类型时，取值为all(表示返回路径+文件名)，取值为filePath(表示只返回路径)，取值fileName(表示只返回文件名),如果不传，默认只返回路径
        * widgetType属性可选，表示该字段要显示的表单类型(普通输入框、文本域、富文本、下拉框...)，不传默认为普通input
-       * 取值1-10(1表示普通输入框,2表示普通下拉框,3表示复选框,4表示文本域,5表示富文本,6表示日期，7表示单选框，8表示文件上传,
-       * 9表示树状控件，10表示级联下拉框)，
+       * 取值1-11(1表示普通输入框,2表示普通下拉框,3表示复选框,4表示文本域,5表示富文本,6表示日期，7表示单选框，8表示文件上传,
+       * 9表示树状控件，10表示级联下拉框，11b表示密码框)，
        * 若表单类型为下拉框/复选框/单选框，还需传入options字段，值为数组(数组元素是下拉框/复选框/单选框的选项），
        * 对于复选框，如果只有一个备选项则不必传options,
        * 若表单类型为下拉框，还可传入multiple字段，取值boolean类型，true/false，表示是否多选，默认false
@@ -664,14 +674,18 @@
                 if (response.visitName && response.saveName) {
                   // 如果fileData值为all 则存路径+名称
                   if (self.showUserColumns[i].fileData === 'all') {
-                    self.formModel[key] = response.visitName + '' + response.fileName + '_' + response.saveName
+                    // self.formModel[key] = response.visitName + '' + response.fileName + '_' + response.saveName
+                    self.formModel[key].push(response.visitName + '' + response.fileName + '_' + response.saveName)
                   } else if (self.showUserColumns[i].fileData === 'fileName') {
-                    self.formModel[key] = response.saveName
+                    // self.formModel[key] = response.saveName
+                    self.formModel[key].push(response.saveName)
                   } else {
-                    self.formModel[key] = response.visitName + '' + response.fileName
+                    // self.formModel[key] = response.visitName + '' + response.fileName
+                    self.formModel[key].push(response.visitName + '' + response.fileName)
                   }
                 } else if (response.message) {
-                  self.formModel[key] = file.name + '_' + response.message
+                  // self.formModel[key] = file.name + '_' + response.message
+                  self.formModel[key].push(file.name + '_' + response.message)
                   // self.formModel[key].push(file.name + '_' + response.message)
                 }
                 break
@@ -688,15 +702,26 @@
       handleRemove(file, fileList) {
         const self = this
         console.log('文件删除', file, fileList)
-        console.log('删除后前', self.formModel)
+        console.log('删除前', self.formModel)
         // var reg = new RegExp('^' + file.response.message + '$', 'g')
         // console.log(reg)
-        // _.each(self.formModel[self.currentFile], function(item, index) {
-        //   if (_.endsWith(item, file.response.message)) {
-        //     self.$delete(self.formModel[self.currentFile], index)
-        //   }
-        // })
-        self.formModel[self.currentFile] = ''
+        if (file.response.message) {
+          _.each(self.formModel[self.currentFile], function(item, index) {
+            if (_.endsWith(item, file.response.message)) {
+              self.$delete(self.formModel[self.currentFile], index)
+            }
+          })
+        } else if (file.response.fileName) {
+          _.each(self.formModel[self.currentFile], function(item, index) {
+            if (_.endsWith(item, file.response.fileName)) {
+              self.$delete(self.formModel[self.currentFile], index)
+            } else if (_.endsWith(item, file.response.saveName)) {
+              self.$delete(self.formModel[self.currentFile], index)
+            }
+          })
+        }
+
+        // self.formModel[self.currentFile] = ''
         console.log('删除后', self.formModel)
       },
       // 文件状态改变时的回调函数
@@ -706,7 +731,6 @@
       },
       // 树形选择器
       handleCheckChange(data, checked, indeterminate) {
-        // console.log(data, checked, indeterminate)
         const self = this
         console.log('handleCheckChange函数')
         // console.log(this.$refs.tree[0].getCheckedNodes(true))
@@ -967,8 +991,8 @@
                   }
                 })
               }
-              // 树形控件，将请求回来的字符串放数组中
-              if (item.widgetType === 9) {
+              // 树形控件、文件上传，将请求回来的字符串放数组中
+              if (item.widgetType === 9 || item.widgetType === 8 || item.widgetType === 10) {
                 _.forEach(self.formModel, function(value, key) {
                   if (item.codeCamel === key) {
                     // console.log(11111, self.formModel[key])
@@ -1053,7 +1077,6 @@
         // 提交之前对表单数据进行处理
         self.formModelDeal = processData ? processData(self.formModel, self.isCancel) : self.formModel
         console.log('表单数据经过了处理', self.formModel)
-        debugger
         // 如果在processData中禁止提交了，显示提示信息
         if (self.isCancel.cancelSubmit) {
           console.log('取消提交')
@@ -1364,7 +1387,7 @@
       cancel(callback) {
         const self = this
         if (typeof (callback) === 'function') {
-          callback(self.formModelDeal)
+          callback(self.formModel, self.formModelDeal)
         }
         // self.close()
       },

@@ -31,17 +31,17 @@
         // widgetType值 1：普通input 2：下拉框 (如果是下拉框 再传一个options表示下拉框选项)3：复选框 4：文本域 5：富文本 6：日期 7：单选框 8: 文件上传
         showUserColumns: [
           // 1普通input
-          { name: '选择类型', codeCamel: 'type', widgetType: 9, ref: 'type', options: []
-            // rule: { required: true, message: '用户名不能为空', trigger: 'blur' }
-            //  hide: true
-            //  default: '默认值',
-          },
-          // { name: '选择类型', codeCamel: 'type', widgetType: 1, disabled: false,
-          //   change: this.inputChange
+          // { name: '选择类型', codeCamel: 'type', widgetType: 9, ref: 'type', options: []
           //   // rule: { required: true, message: '用户名不能为空', trigger: 'blur' }
           //   //  hide: true
           //   //  default: '默认值',
           // },
+          { name: '选择类型', codeCamel: 'type', widgetType: 1, disabled: false,
+            change: this.inputChange,
+            rule: { required: true, message: '用户名不能为空', trigger: 'blur' }
+            //  hide: true
+            //  default: '默认值',
+          },
           // 5富文本
           { name: '电子邮件', codeCamel: 'email', widgetType: 5, disabled: false,
             change: this.inputChange, hide: false
