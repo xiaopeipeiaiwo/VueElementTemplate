@@ -120,15 +120,16 @@
             <!-- 8树形图 -->
             <!--:default-expanded-keys="[2, 3]"-->
             <!--:default-checked-keys="[5]"-->
-            <div class="hm-form_form_div" @mouseenter="currentTree = column.codeCamel;treeComponent = column.ref" v-else-if="column.widgetType === 9" :style="formStyle && formStyle.elTree && formStyle.elTree.style || {width: '70%'}">
+            <div class="hm-form_form_div" v-else-if="column.widgetType === 9" :style="formStyle && formStyle.elTree && formStyle.elTree.style || {width: '70%'}">
               <el-tree :data="column.options"
                        :ref="column.ref || 'tree'"
                        :show-checkbox="column.checkBox || false"
                        node-key="id"
                        :accordion="column.accordion || false"
                        :draggable="column.draggable || false"
+                       :check-strictly="column.checkStrictly || false"
                        @node-click="handleNodeChange"
-                       @check-change="handleCheckChange"
+                       @check-change="(data, checked, indeterminate)=>{ return handleCheckChange(data, checked, indeterminate, column.codeCamel, column.checkStrictly)}"
                        :default-checked-keys="formModel[column.codeCamel]"
                        :props="column.props || treeProps">
               </el-tree>
@@ -203,6 +204,7 @@
   import request from '@/utils/request'
   import { paramEncode } from '@/utils'
   // import commonApi from '@/api/commonApi'
+
   /**
    * 毫末科技的表单组件.
    *
@@ -239,11 +241,15 @@
        * param属性可选，当表单类型为文件类型时，可传入param字段，值为后台规定必传参数，默认值为picture
        * accept属性可选,当表单类型为文件类型时，可传入accept字段，限制限制上传文件类型，取值规范参考w3c
        * fileData属性可选，当表单类型为文件类型时，取值为all(表示返回路径+文件名)，取值为filePath(表示只返回路径)，取值fileName(表示只返回文件名),如果不传，默认只返回路径
-       * widgetType属性可选，表示该字段要显示的表单类型(普通输入框、文本域、富文本、下拉框...)，不传默认为普通input
+       * accordion属性可选，当表单类型为树形控件时，可传入accordion，值为boolean, 表示是否采用手风琴样式展开树形结构，默认为false
+       * checkBox属性可选，当表单类型为树形控件时，可传入checkBox，值为boolean, 表示是否显示勾选框，默认false
+       * checkStrictly属性可选，当表单类型为树形控件时，可传入checkStrictly，值为boolean, 表示在显示复选框的情况下，是否严格的遵循父子不互相关联的做法，默认为 false
+       * ref属性，树形控件必传，且值必须与codeCamel相同
+       * widgetType属性可选，表示该字段要显示的表单类型(普通输入框、文本域、富文本、下拉框...)，不传默认为1,普通input
        * 取值1-11(1表示普通输入框,2表示普通下拉框,3表示复选框,4表示文本域,5表示富文本,6表示日期，7表示单选框，8表示文件上传,
        * 9表示树状控件，10表示级联下拉框，11b表示密码框)，
        * 若表单类型为下拉框/复选框/单选框，还需传入options字段，值为数组(数组元素是下拉框/复选框/单选框的选项），
-       * 对于复选框，如果只有一个备选项则不必传options,
+       * 若表单类型为复选框，如果只有一个备选项则不必传options,
        * 若表单类型为下拉框，还可传入multiple字段，取值boolean类型，true/false，表示是否多选，默认false
        * 若表单类型为时间日期，可传入dateType字段，值为'date'（只显示日期）或'datetime'（显示日期和时间），如果不传，
        * 默认只显示日期; 可传入dateFormate字段，为日期格式，取值遵循elementUI DatePicker组件中的日期格式，
@@ -517,6 +523,7 @@
       //   }
       // }
       return {
+        i: 0,
         currentFile: '', // 上传文件时当前选中的codeCamel值
         currentTree: '', // 当前选中的树形菜单的codeCamel值
         treeComponent: '', // 当前的树形菜单组件
@@ -782,34 +789,49 @@
         // console.log('自己的')
       },
       // 树形选择器
-      handleCheckChange(data, checked, indeterminate, aaa) {
+      handleCheckChange(data, checked, indeterminate, code, checkStrictly) {
         const self = this
         console.log('handleCheckChange函数')
         // console.log(data)
         // console.log(checked)
         // console.log(indeterminate)
-        console.log(aaa)
         // console.log(this.$refs.tree[0].getCheckedNodes(true))
         // console.log('当前选择的codecamel:', self.currentTree)
         // console.log('当前选择的tree组件', self.treeComponent)
-        // console.log(self.$refs[self.treeComponent][0].getCheckedKeys(true))
-        for (var i = 0, len = self.showUserColumns.length; i < len; i++) {
-          // && !self.showUserColumns[i].edited
-          if (self.showUserColumns[i].widgetType === 9) {
-            // self.$set(self.showUserColumns[i], 'edited', true)
-            for (var key in self.formModel) {
-              if (key === self.currentTree && self.showUserColumns[i].codeCamel === self.currentTree) {
-                // self.formModel[key] = response.message || response.visitName
-                // 张家口
-                // self.formModel[key] = response.visitName + response.fileName
-                // org
-                self.formModel[key] = self.$refs[self.treeComponent][0].getCheckedKeys(true)
-                break
-              }
+        self.formModel[code] = self.$refs[code][0].getCheckedKeys(true)
+
+        // for (var i = 0, len = self.showUserColumns.length; i < len; i++) {
+        //   // && !self.showUserColumns[i].edited
+        //   if (self.showUserColumns[i].widgetType === 9) {
+        //     // self.$set(self.showUserColumns[i], 'edited', true)
+        //     for (var key in self.formModel) {
+        //       if (key === self.currentTree && self.showUserColumns[i].codeCamel === self.currentTree) {
+        //         // self.formModel[key] = response.message || response.visitName
+        //         // 张家口
+        //         // self.formModel[key] = response.visitName + response.fileName
+        //         // org
+        //         self.formModel[key] = self.$refs[self.treeComponent][0].getCheckedKeys(true)
+        //         break
+        //       }
+        //     }
+        //     // break
+        //   }
+        // }
+        // 处理单选
+        if (checkStrictly) {
+          self.i++
+          if (self.i % 2 === 0) {
+            if (checked) {
+              self.$refs[code][0].setCheckedNodes([])
+              self.$refs[code][0].setCheckedNodes([data])
+              // 交叉点击节点
+            } else {
+              self.$refs[code][0].setCheckedNodes([])
+              // 点击已经选中的节点，置空
             }
-            // break
           }
         }
+        console.log(self.$refs[code][0].getCheckedKeys(true), self.formModel)
       },
       // 树形选择器
       handleNodeChange(data, node, com) {
@@ -1045,12 +1067,16 @@
                   }
                 })
               }
-              // 树形控件、文件上传，将请求回来的字符串放数组中
+              // 文件上传、级联菜单将请求回来的字符串放数组中
               if (item.widgetType === 8 || item.widgetType === 10) {
                 _.forEach(self.formModel, function(value, key) {
                   if (item.codeCamel === key) {
                     // console.log(11111, self.formModel[key])
-                    self.formModel[key] = self.formModel[key].split(',')
+                    if (value === null || value === '') {
+                      self.formModel[key] = []
+                    } else {
+                      self.formModel[key] = self.formModel[key].split(',')
+                    }
                   }
                 })
               }
@@ -1058,13 +1084,13 @@
               if (item.widgetType === 9) {
                 _.forEach(self.formModel, function(value, key) {
                   if (item.codeCamel === key) {
-                    // let str1 = ''
-                    // let str2 = ''
-                    // str1 = self.formModel[key].split(',')[0]
-                    // str2 = self.formModel[key].split(',')[1]
                     // console.log(11111, self.formModel[key])
-                    self.formModel[key] = self.formModel[key].split(',')
-                    self.$refs[key][0].setCheckedKeys(self.formModel[key])
+                    if (value === null || value === '') {
+                      self.formModel[key] = []
+                    } else {
+                      self.formModel[key] = self.formModel[key].split(',')
+                      self.$refs[key][0].setCheckedKeys(self.formModel[key])
+                    }
                   }
                 })
               }
@@ -1103,9 +1129,11 @@
           // console.log('self.showUserColumns', self.showUserColumns)
           // 提取v-model绑定的变量
           _.each(self.showUserColumns, function(item) {
+            // 设置值为数组
             if (item.widgetType === 8 || item.widgetType === 10 || item.widgetType === 9 || (item.widgetType === 3 && item.options && item.options.length > 0)) {
               self.$set(self.formModel, item.codeCamel, [])
             } else {
+              // 设置默认值
               item.default ? self.$set(self.formModel, item.codeCamel, item.default) : self.$set(self.formModel, item.codeCamel, '')
             }
           })
