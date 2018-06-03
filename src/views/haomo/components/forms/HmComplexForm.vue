@@ -13,7 +13,7 @@
                  element-loading-text="加载中"
                  :label-width="formStyle && formStyle.formOptions && formStyle.formOptions.labelWidth || '163px'"
                  :model="formModel"
-                 :rules="myRules"
+                 :rules="rules || myRules"
                  :style=" formStyle && formStyle.formOptions && formStyle.formOptions.style || {width:'100%'}">
           <el-form-item v-for="column in showUserColumns"
                         v-show="!column.hide"
@@ -27,6 +27,7 @@
                             v-model="formModel[column.codeCamel]"
                             :style="formStyle && formStyle.datePicker && formStyle.datePicker.style || {width: '70%'}"
                             :ref="column.ref || ''"
+                            :placeholder="column.placeholder || ''"
                             :readonly="column.readonly"
                             :type="column.dateType || 'date'"
                             align="right" :disabled="column.disabled"
@@ -106,12 +107,14 @@
                        :name="column.param || 'picture'"
                        :action="column.url || '/api/upload'"
                        :on-remove="handleRemove"
+                       class="a"
                        :limit="column.limit || 3"
                        :on-change="column.change || handleChange"
-                       :file-list="fileList"
+                       :file-list="column.fileList"
                        ref="upload"
-                       :on-success="uploadSuccess">
-              <el-button slot="trigger" size="small" type="primary" @click="currentFile = column.codeCamel"
+                       :before-upload="column.beforeUpload || beforeUpload"
+                       :on-success="(res, file, fileList)=>{ return uploadSuccess(res, file, fileList, column.codeCamel, column.fileData)}">
+              <el-button slot="trigger" size="small" type="primary" class="b"
                          :disabled="column.disabled">选取文件</el-button>
             </el-upload>
             <!-- 8树形图 -->
@@ -120,12 +123,13 @@
             <div class="hm-form_form_div" @mouseenter="currentTree = column.codeCamel;treeComponent = column.ref" v-else-if="column.widgetType === 9" :style="formStyle && formStyle.elTree && formStyle.elTree.style || {width: '70%'}">
               <el-tree :data="column.options"
                        :ref="column.ref || 'tree'"
-                       show-checkbox
+                       :show-checkbox="column.checkBox || false"
                        node-key="id"
-                       accordion
+                       :accordion="column.accordion || false"
+                       :draggable="column.draggable || false"
                        @node-click="handleNodeChange"
                        @check-change="handleCheckChange"
-                       :default-checked-keys="defaultKeys || formModel[column.codeCamel]"
+                       :default-checked-keys="formModel[column.codeCamel]"
                        :props="column.props || treeProps">
               </el-tree>
             </div>
@@ -197,7 +201,8 @@
 <script>
   import _ from 'lodash'
   import request from '@/utils/request'
-
+  import { paramEncode } from '@/utils'
+  // import commonApi from '@/api/commonApi'
   /**
    * 毫末科技的表单组件.
    *
@@ -230,7 +235,7 @@
        * change属性可选，值为函数类型，表示input的change事件的执行方法，参数即为input输入内容
        * default属性可选(复选框不支持)，设置默认值，取值规范参考form/videoconferencing.vue
        * hide属性可选，设置该表单字段是否显示,值为boolean
-       * ref属性树形控件必传，其他可选，用来获取当前表单dom节点
+       * ref属性树形控件(值必须与codeCamel相同)必传，其他可选，用来获取当前表单dom节点
        * param属性可选，当表单类型为文件类型时，可传入param字段，值为后台规定必传参数，默认值为picture
        * accept属性可选,当表单类型为文件类型时，可传入accept字段，限制限制上传文件类型，取值规范参考w3c
        * fileData属性可选，当表单类型为文件类型时，取值为all(表示返回路径+文件名)，取值为filePath(表示只返回路径)，取值fileName(表示只返回文件名),如果不传，默认只返回路径
@@ -323,11 +328,12 @@
        * 如果需要取消提交，将cancelSubmit值改为true
        * type=2，执行组件的重置方法,如果用户传入了method，会作为重置方法的回调函数执行
        * type=3，取消，直接执行用户传入的方法
+       * 如果要自定义按钮执行方法，可以不传type
        * 示例：[
        *        {text: '确定', type: 1, method: method1, beforeSubmit: this.processData},
        *        {text: '重置', type: 2, method: method2},
        *        {text: '取消', type: 3, method: method3},
-       *        {text: '取消', type: 3, method: method3}
+       *        {text: '自定义',  method: method3}
        *      ]
        */
       buttons: {
@@ -400,14 +406,19 @@
        * 函数对象 键为固定值，值为函数
        * 属性beforeRender,编辑/修改数据时，请求数据后表单渲染前执行，可对数据进行处理,beforeRender函数接受两个参数
        * 第一个参数为请求的数据，第二个参数为表单的绑定对象formModel，该函数需要将请求的数据绑定到formModel，并返回formModel
-       * 属性uploadFun,上传文件的回调函数，第一个参数为文件上传成功的返回值response，第二个参数为表单的绑定对象formModel
+       * 属性uploadFun,上传文件的回调函数，第一个参数为文件上传成功的返回值response，第二个参数为表单的绑定对象formModel,
+       * 第三个参数为当前删除的文件的详细信息
+       * 属性removeFun,删除文件的回调函数，第一个参数为当前删除文件的信息file，第二个参数为表单的绑定对象formModel
        * 格式为: 属性beforeRender为固定键
        *  {
        *    beforeRender: function(resp.data, formModel) {
        *      do something
        *      return formModel
        *    }，
-       *    uploadFun: function(response, formModel) {
+       *    uploadFun: function(response, formModel, file) {
+       *      do something
+       *    },
+       *    removeFun: function(file, formModel) {
        *      do something
        *    }
        *  }
@@ -519,7 +530,6 @@
         relateData: {}, // 中间表数据
         Loading: true, // 加载等待
         form: null,
-        defaultKeys: [], // 默认选中项
         formModel: {}, // 双向绑定的数据对象
         formModelDeal: {}, // 新建或编辑时，提交之前用户对formModel处理之后的数据对象。原因：以级联表单为例，
         // 级联表单v-model绑定的是数组，而往数据库中存储的是数组中的某一个字符串，如果把v-model的值经processData处理之后(数组--->字符串)，仍然用formModel接收，Vue监听会报错(expected Array，got string)，此时需要用formModealDeal接收并提交，不改变表单绑定的数据对象formModel
@@ -645,73 +655,102 @@
       }
     },
     created() {
-      // this.validate()
-      // this.$set(this.defaultKeys, 0, 161)
       this.init()
       this.getData()
       this.getList()
     },
     methods: {
+      // 文件上传前的函数
+      beforeUpload(file) {
+        // console.log('组件中的文件上传前', file)
+        // return false // 如果return false 则文件上传取消
+      },
+      // 删除服务器的文件
+      deleteUploadFile(filePath) {
+        // 删除服务器上封面图片的文件
+        request('delete_file?file_path=' + filePath, {
+          headers: { 'Content-Type': 'application/json;charset=UTF-8' }
+        }).then(resp => {
+          console.log('服务器上的文件删除了', resp)
+        })
+      },
       // 上传文件成功的回调函数
-      uploadSuccess(response, file, fileList) {
+      uploadSuccess(response, file, fileList, code, fileData) {
         const self = this
-        console.log('上传成功')
-        console.log(response)
-        // console.log(self.currentFile)
-        console.log(file)
-        console.log('fileList', fileList)
+        console.log('上传成功', code, fileData, response, file, fileList)
         console.log('formModel', self.formModel)
-        for (var i = 0, len = self.showUserColumns.length; i < len; i++) {
-          // && !self.showUserColumns[i].edited
-          if (self.showUserColumns[i].widgetType === 8) {
-            // self.$set(self.showUserColumns[i], 'edited', true)
-            for (var key in self.formModel) {
-              if (key === self.currentFile && self.showUserColumns[i].codeCamel === self.currentFile) {
-                // self.formModel[key] = response.message || response.visitName
-                // 张家口
-                // self.formModel[key] = response.visitName + response.fileName
-                // 通用
-                if (response.visitName && response.saveName) {
-                  // 如果fileData值为all 则存路径+名称
-                  if (self.showUserColumns[i].fileData === 'all') {
-                    // self.formModel[key] = response.visitName + '' + response.fileName + '_' + response.saveName
-                    self.formModel[key].push(response.visitName + '' + response.fileName + '_' + response.saveName)
-                  } else if (self.showUserColumns[i].fileData === 'fileName') {
-                    // self.formModel[key] = response.saveName
-                    self.formModel[key].push(response.saveName)
-                  } else {
-                    // self.formModel[key] = response.visitName + '' + response.fileName
-                    self.formModel[key].push(response.visitName + '' + response.fileName)
-                  }
-                } else if (response.message) {
-                  // self.formModel[key] = file.name + '_' + response.message
-                  self.formModel[key].push(file.name + '_' + response.message)
-                  // self.formModel[key].push(file.name + '_' + response.message)
-                }
-                break
-              }
-            }
-            // break
+        if (response.visitName && response.saveName) {
+          // 如果fileData值为all 则存路径+名称
+          if (fileData === 'all') {
+            self.formModel[code].push(response.visitName + '' + response.fileName + '_' + response.saveName)
+          } else if (fileData === 'fileName') {
+            self.formModel[code].push(response.saveName)
+          } else {
+            self.formModel[code].push(response.visitName + '' + response.fileName)
           }
+        } else if (response.message) {
+          self.formModel[code].push(response.message + '_' + file.name)
         }
+        // for (var i = 0, len = self.showUserColumns.length; i < len; i++) {
+        //   if (self.showUserColumns[i].widgetType === 8) {
+        //     for (var key in self.formModel) {
+        //       if (key === self.currentFile && self.showUserColumns[i].codeCamel === self.currentFile) {
+        //         if (response.visitName && response.saveName) {
+        //           // 如果fileData值为all 则存路径+名称
+        //           if (self.showUserColumns[i].fileData === 'all') {
+        //             self.formModel[key].push(response.visitName + '' + response.fileName + '_' + response.saveName)
+        //           } else if (self.showUserColumns[i].fileData === 'fileName') {
+        //             self.formModel[key].push(response.saveName)
+        //           } else {
+        //             self.formModel[key].push(response.visitName + '' + response.fileName)
+        //           }
+        //         } else if (response.message) {
+        //           self.formModel[key].push(response.message + '_' + file.name)
+        //         }
+        //         break
+        //       }
+        //     }
+        //   }
+        // }
+        // 执行用户的方法
         if (self.funObject && self.funObject.uploadFun) {
-          self.funObject.uploadFun(response, self.formModel)
+          self.funObject.uploadFun(response, self.formModel, file)
         }
+      },
+      uploadClick1() {
+        console.log('upload点解十家')
+      },
+      uploadClick(codeCamel) {
+        console.log('触发了点击事件')
+        this.currentFile = codeCamel
+        console.log(this.currentFile)
       },
       // 删除文件时的回调函数
       handleRemove(file, fileList) {
         const self = this
         console.log('文件删除', file, fileList)
-        console.log('删除前', self.formModel)
-        // var reg = new RegExp('^' + file.response.message + '$', 'g')
-        // console.log(reg)
-        if (file.response.message) {
+        console.log('删除前', self.currentFile, self.formModel)
+
+        // 新建时删除服务器中的文件(通知通报的上传接口)
+        if (!self.tableId) {
+          if (file && file.response && file.response.message) {
+            self.deleteUploadFile(file.response.message)
+          } else if (file && file.response && file.response.fileName) {
+            // 新建时删除服务器中的文件(会议等其他上传接口)
+            const path = file.response.visitName + file.response.fileName
+            self.deleteUploadFile(path)
+          }
+        }
+
+        // 新建时 删除文件 (通知通报的上传接口)
+        if (file.response && file.response.message) {
           _.each(self.formModel[self.currentFile], function(item, index) {
             if (_.endsWith(item, file.response.message)) {
               self.$delete(self.formModel[self.currentFile], index)
             }
           })
-        } else if (file.response.fileName) {
+        } else if (file.response && file.response.fileName) {
+          // (会议等其他上传接口)
           _.each(self.formModel[self.currentFile], function(item, index) {
             if (_.endsWith(item, file.response.fileName)) {
               self.$delete(self.formModel[self.currentFile], index)
@@ -719,6 +758,19 @@
               self.$delete(self.formModel[self.currentFile], index)
             }
           })
+        }
+
+        // 编辑时 删除文件
+        if (file.status === 'success') {
+          _.each(self.formModel[self.currentFile], function(item, index) {
+            if (_.endsWith(item, file.name) || _.endsWith(item, file.url)) {
+              self.$delete(self.formModel[self.currentFile], index)
+            }
+          })
+        }
+        // 删除文件时 执行用户的方法
+        if (self.funObject && self.funObject.removeFun) {
+          self.funObject.removeFun(file, self.formModel)
         }
 
         // self.formModel[self.currentFile] = ''
@@ -730,14 +782,17 @@
         // console.log('自己的')
       },
       // 树形选择器
-      handleCheckChange(data, checked, indeterminate) {
+      handleCheckChange(data, checked, indeterminate, aaa) {
         const self = this
         console.log('handleCheckChange函数')
+        // console.log(data)
+        // console.log(checked)
+        // console.log(indeterminate)
+        console.log(aaa)
         // console.log(this.$refs.tree[0].getCheckedNodes(true))
         // console.log('当前选择的codecamel:', self.currentTree)
         // console.log('当前选择的tree组件', self.treeComponent)
-        console.log(self.$refs[self.treeComponent][0].getCheckedKeys(true))
-        // console.log('默认选中', self.defaultKeys)
+        // console.log(self.$refs[self.treeComponent][0].getCheckedKeys(true))
         for (var i = 0, len = self.showUserColumns.length; i < len; i++) {
           // && !self.showUserColumns[i].edited
           if (self.showUserColumns[i].widgetType === 9) {
@@ -758,7 +813,7 @@
       },
       // 树形选择器
       handleNodeChange(data, node, com) {
-        console.log(com)
+        // console.log(com)
       },
       treeCheck(data1, data2) {
         console.log(this.currentTree)
@@ -947,8 +1002,6 @@
             // 如果只是单表
           } else if (resp.data.length > 0) {
             console.log('单表查询', resp.data)
-            self.defaultKeys.push(parseInt(resp.data[0].departmentId))
-            console.log(self.defaultKeys)
             var formArray = _.keys(self.formModel) // 提取formModel的属性到数组
             if (resp.data[0].superior && !self.isEmptyObject(resp.data[0].superior)) {
               self.formModel = _.pick(resp.data[0].superior, formArray) // 根据数组中的属性提取出data中对应的数据
@@ -962,6 +1015,7 @@
             // console.log('获取到数据', self.formModel)
             // 处理返回来的数据
             console.log('getList处理多选前', self.formModel)
+
             _.each(self.columns, function(item, index) {
               // 下拉框多选时将字符串转为数组 column.widgetType === 3 && !column.options
               if (item.widgetType === 2 && item.multiple === true) {
@@ -992,7 +1046,7 @@
                 })
               }
               // 树形控件、文件上传，将请求回来的字符串放数组中
-              if (item.widgetType === 9 || item.widgetType === 8 || item.widgetType === 10) {
+              if (item.widgetType === 8 || item.widgetType === 10) {
                 _.forEach(self.formModel, function(value, key) {
                   if (item.codeCamel === key) {
                     // console.log(11111, self.formModel[key])
@@ -1000,11 +1054,25 @@
                   }
                 })
               }
+              // 树形控件、文件上传，将请求回来的字符串放数组中
+              if (item.widgetType === 9) {
+                _.forEach(self.formModel, function(value, key) {
+                  if (item.codeCamel === key) {
+                    // let str1 = ''
+                    // let str2 = ''
+                    // str1 = self.formModel[key].split(',')[0]
+                    // str2 = self.formModel[key].split(',')[1]
+                    // console.log(11111, self.formModel[key])
+                    self.formModel[key] = self.formModel[key].split(',')
+                    self.$refs[key][0].setCheckedKeys(self.formModel[key])
+                  }
+                })
+              }
             })
           }
           console.log('getList', self.formModel)
         }).catch(error => {
-          console.log(error)
+          console.error(error)
         })
       },
       // 初始化
@@ -1065,6 +1133,9 @@
        */
       onSubmit(callback, processData) {
         const self = this
+        // 提交上传文件到服务器
+        // console.log(self.$refs.upload[0])
+        // self.$refs.upload[0].submit()
         console.log('点击了提交函数', self.formModel)
         // 如果所有值都为空 禁止提交
         if (self.isEmpty(self.formModel)) {
@@ -1076,11 +1147,11 @@
         }
         // 提交之前对表单数据进行处理
         self.formModelDeal = processData ? processData(self.formModel, self.isCancel) : self.formModel
-        console.log('表单数据经过了处理', self.formModel)
+        console.log('表单数据经过了处理', self.formModelDeal)
         // 如果在processData中禁止提交了，显示提示信息
         if (self.isCancel.cancelSubmit) {
           console.log('取消提交')
-          if (self.tips && !self.isEmptyObject(self.tips) && !self.tips.hidde) {
+          if (self.tips && !self.isEmptyObject(self.tips) && !self.tips.hidde && self.tips.otherError && !self.isEmptyObject(self.tips.otherError)) {
             self.$message({
               message: self.tips.otherError.text,
               type: 'error'
@@ -1150,7 +1221,7 @@
                   callback(resp.data, self.formModelDeal)
                 }
               }).catch(err => {
-                console.log(err)
+                console.error(err)
                 if (self.tips && !self.isEmptyObject(self.tips) && !self.tips.hidde) {
                   self.$message({
                     message: self.tips.editError.text,
@@ -1230,7 +1301,7 @@
                 // console.log('部分属性', self.partPropModel)
               }
               // 发送新建请求
-              console.log('请求之前', self.formModel)
+              console.log('请求之前', self.formModelDeal)
               request(self.schema.modelUnderscorePlural + '/new', {
                 method: 'post',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
@@ -1315,13 +1386,23 @@
                   const url = _.keys(self.refers)[0] + 's' + '/create/batch'
                   // const string = self.transformRequest(self.foreignArray)
                   const string = JSON.stringify(self.foreignArray)
-                  request.post(url + '?params=' + string, {
-                    headers: { 'Content-Type': 'application/json;charset=UTF-8' }
+                  request(url, {
+                    method: 'POST',
+                    data: { params: string },
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+                    transformRequest: paramEncode
                   }).then(resp => {
                     console.log('批量创建成功', resp.data)
                   }).catch(error => {
                     console.log('批量创建失败', error)
                   })
+                  // request.post(url + '?params=' + string, {
+                  //   headers: { 'Content-Type': 'application/json;charset=UTF-8' }
+                  // }).then(resp => {
+                  //   console.log('批量创建成功', resp.data)
+                  // }).catch(error => {
+                  //   console.log('批量创建失败', error)
+                  // })
                 }
                 // 提示信息
                 if (self.tips && !self.isEmptyObject(self.tips) && !self.tips.hidde) {
@@ -1338,7 +1419,7 @@
                 self.currentFile = ''
                 self.currentTree = ''
               }).catch(err => {
-                console.log(err)
+                console.error(err)
                 if (self.tips && !self.isEmptyObject(self.tips) && !self.tips.hidde) {
                   self.$message({
                     message: self.tips.newError.text,
@@ -1388,6 +1469,23 @@
         const self = this
         if (typeof (callback) === 'function') {
           callback(self.formModel, self.formModelDeal)
+        }
+        console.log(self.formModel, self.formModelDeal)
+        // console.log('id', self.tableId)
+        // 如果是新建时点了取消 删除服务器上的文件
+        if (!self.tableId) {
+          _.each(self.showUserColumns, function(item, key) {
+            if (item.widgetType === 8) {
+              _.each(self.formModel[item.codeCamel], function(str, k) {
+                const i = str.indexOf('_')
+                let path = ''
+                if (i > 0) {
+                  path = str.slice(0, i)
+                  self.deleteUploadFile(path)
+                }
+              })
+            }
+          })
         }
         // self.close()
       },
