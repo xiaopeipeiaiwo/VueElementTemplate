@@ -1,42 +1,33 @@
 <template>
   <div class="dashboard-editor-container">
-    <github-corner></github-corner>
+    <el-tabs v-model="activeName" @tab-click="handleClick">
+      <el-tab-pane label="组织结构" name="first">
+        <el-row :gutter="18">
+          <el-col :xs="{span: 24}" :sm="{span: 24}" :md="{span: 24}" :lg="{span: 8}" :xl="{span: 8}" style="padding-right:8px;margin-bottom:30px;">
+            <panel-group @handleSetLineChartData="handleSetLineChartData"></panel-group>
+          </el-col>
+          <el-col :xs="{span: 24}" :sm="{span: 24}" :md="{span: 24}" :lg="{span: 16}" :xl="{span: 16}" style="padding-right:8px;margin-bottom:30px;">
+            <transaction-table @handleSetLineChartData="handleSetLineChartData" style="border-bottom: 1px solid #eee; padding-bottom: 6px"></transaction-table>
+            <list-info style="padding-top: 10px"></list-info>
+          </el-col>
+        </el-row>
+      </el-tab-pane>
+      <el-tab-pane label="自定义字段" name="second">
+        <el-tabs v-model="activeSecond" @tab-click="secondClick">
+          <el-tab-pane label="全部字段" name="all">
+            <all-chart></all-chart>
+          </el-tab-pane>
+          <el-tab-pane label="分部字段" name="each">
+            <part-chart></part-chart>
+          </el-tab-pane>
+          <el-tab-pane label="部门字段" name="part">
+            <part-chart></part-chart>
+          </el-tab-pane>
+        </el-tabs>
+      </el-tab-pane>
+    </el-tabs>
 
-    <panel-group @handleSetLineChartData="handleSetLineChartData"></panel-group>
 
-    <el-row style="background:#fff;padding:16px 16px 0;margin-bottom:32px;">
-      <line-chart :chart-data="lineChartData"></line-chart>
-    </el-row>
-
-    <el-row :gutter="32">
-      <el-col :xs="24" :sm="24" :lg="8">
-        <div class="chart-wrapper">
-          <raddar-chart></raddar-chart>
-        </div>
-      </el-col>
-      <el-col :xs="24" :sm="24" :lg="8">
-        <div class="chart-wrapper">
-          <pie-chart></pie-chart>
-        </div>
-      </el-col>
-      <el-col :xs="24" :sm="24" :lg="8">
-        <div class="chart-wrapper">
-          <bar-chart></bar-chart>
-        </div>
-      </el-col>
-    </el-row>
-
-    <el-row :gutter="8">
-      <el-col :xs="{span: 24}" :sm="{span: 24}" :md="{span: 24}" :lg="{span: 12}" :xl="{span: 12}" style="padding-right:8px;margin-bottom:30px;">
-        <transaction-table></transaction-table>
-      </el-col>
-      <el-col :xs="{span: 12}" :sm="{span: 12}" :md="{span: 12}" :lg="{span: 6}" :xl="{span: 5}">
-        <todo-list></todo-list>
-      </el-col>
-      <el-col :xs="{span: 12}" :sm="{span: 12}" :md="{span: 12}" :lg="{span: 6}" :xl="{span: 5}">
-        <box-card></box-card>
-      </el-col>
-    </el-row>
 
   </div>
 </template>
@@ -44,13 +35,10 @@
 <script>
 import GithubCorner from '@/components/GithubCorner'
 import PanelGroup from './components/PanelGroup'
-import LineChart from './components/LineChart'
-import RaddarChart from './components/RaddarChart'
-import PieChart from './components/PieChart'
-import BarChart from './components/BarChart'
 import TransactionTable from './components/TransactionTable'
-import TodoList from './components/TodoList'
-import BoxCard from './components/BoxCard'
+import ListInfo from './components/ListInfo'
+import AllChart from './components/AllChart'
+import PartChart from './components/PartChart'
 
 const lineChartData = {
   newVisitis: {
@@ -74,24 +62,28 @@ const lineChartData = {
 export default {
   name: 'dashboard-admin',
   components: {
+    PartChart,
+    AllChart,
+    ListInfo,
     GithubCorner,
     PanelGroup,
-    LineChart,
-    RaddarChart,
-    PieChart,
-    BarChart,
-    TransactionTable,
-    TodoList,
-    BoxCard
+    TransactionTable
   },
   data() {
     return {
-      lineChartData: lineChartData.newVisitis
+      activeName: 'first',
+      activeSecond: 'all'
     }
   },
   methods: {
     handleSetLineChartData(type) {
       this.lineChartData = lineChartData[type]
+    },
+    handleClick(tab, event) {
+      console.log(tab, event)
+    },
+    secondClick(tab, event) {
+      console.log(tab, event)
     }
   }
 }
@@ -100,7 +92,7 @@ export default {
 <style rel="stylesheet/scss" lang="scss" scoped>
 .dashboard-editor-container {
   padding: 32px;
-  background-color: rgb(240, 242, 245);
+  background-color: #fff;
   .chart-wrapper {
     background: #fff;
     padding: 16px 16px 0;
