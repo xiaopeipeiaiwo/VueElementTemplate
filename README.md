@@ -1,22 +1,4 @@
-# 毫末科技VueElementTemplate
 
-#### 作者：毫末科技
-
-## 概述
-
-本模板基于[vue-element-admin](https://github.com/PanJiaChen/vue-element-admin)，
-
-官方说明见[官方中文说明](./README.zh-CN.md)
-
-接口使用 http://api.haomo-studio.com/org/swagger-ui.html
-
-毫末科技所有定制的模块，全部放到以下目录里：
-
-    src/views/haomo
-
-除了vue-element-admin，还引入了其他重要的模块：
-
-* [Vue-Awesome](https://github.com/Justineo/vue-awesome)
 
 ## 使用
 
@@ -50,7 +32,7 @@ npm install --registry=https://registry.npm.taobao.org
 # 启动服务
 npm run dev
 ```
-浏览器访问 http://localhost:9527
+浏览器访问 http://localhost:9529
 
 ### 发布
 ```bash
